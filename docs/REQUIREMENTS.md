@@ -9,8 +9,8 @@ alignment, relationship and conductivity analysis moved to research (§5.19–5.
 with per-module acceptance (P-14, [ARCHITECTURE.md](ARCHITECTURE.md), [MODULES.md](MODULES.md)).
 
 **How to read decisions in this document:** a requirement that implements a decision marked
-"proposed" in [DECISIONS.md](DECISIONS.md) (for example the Linux production host, D-020; pull-based
-releases, D-021; books, taxpayers and country packs, D-027) is itself a proposal until the owner confirms
+"proposed" in [DECISIONS.md](DECISIONS.md) (for example pull-based releases, D-021; instance roles,
+D-022; books, taxpayers and country packs, D-027) is itself a proposal until the owner confirms
 that decision.
 
 Sources: an inventory of the private v1 (code v3.87.3, ~47k lines, 96 MCP tools, ~60 tables), its usage
@@ -382,7 +382,7 @@ model only phrases results. There are no composite scores, no model-written goal
 | GOL-2 | **Import first:** existing documents are split into sections without rewriting a word; the owner assigns type, precedence and stability; version 1 is created | R2 | Imported text is byte-identical to the source; nothing changes without an owner edit |
 | GOL-3 | **Rule objects** that control runs on: typed fields the owner fills or edits — priority order of directions with time and money envelopes, caps on active goals and hypotheses, allowed calendar-block types, opportunity-filter questions, backlog return conditions, metrics with what they do not capture, horizon targets, review cadence. Any free text in a rule is an exact quote of a centre section stored as a reference; a model may only point to the section, never rephrase it. Control never runs on prose | R2 | Each rule links to its source section; a planted model paraphrase in a rule candidate cannot be confirmed; free text in a confirmed rule equals a centre span byte for byte |
 | GOL-4 | **Formation sessions**, as versioned protocols: values (a public-domain card sort, then importance and consistency per life domain); life vision (writing at a horizon the owner picks, plus three alternative paths before converging); directions (boundaries, what is out of scope, quality criteria in the owner's words, envelopes); period goals (GOL-6). On request or at quarterly and yearly reviews, labelled as reflection aids. Session transcripts and unapproved drafts are journal class (PRV-1) | R2 | A session pauses and resumes; each session records its protocol version; session duration is logged and its median reported as a usage signal |
-| GOL-5 | **Authorship:** the assistant asks questions, reflects back and gives feedback on the owner's drafts against fixed criteria (clarity, fit to the goal type, conflicts with other goals, links up the hierarchy, feasibility against the owner's own planned-vs-actual history). It never proposes value, vision or goal wording (proposed; the owner decides whether the assistant may offer draft wording clearly marked as a suggestion — §8); examples come only from a fixed, published, generic list. Drafts become immutable versions only through an approval card with a diff in an owner-typed channel (the bot or a local command); drafts arriving over MCP are marked "origin: MCP client" and treated as non-owner text | R2 | Provenance test: every sentence of an approved version traces to an owner message or edit; a sentence that nearly matches a model output of the session fails unless the owner marks it "adopted from reflection"; a planted model sentence pasted back or arriving through MCP never enters an approved version silently |
+| GOL-5 | **Authorship:** the assistant asks questions, reflects back and gives feedback on the owner's drafts against fixed criteria (clarity, fit to the goal type, conflicts with other goals, links up the hierarchy, feasibility against the owner's own planned-vs-actual history). When the owner asks or agrees, it may offer draft wording for values, vision or goals, always clearly marked as a suggestion and never inserted into a draft by itself; a sentence the owner adopts from a suggestion is recorded as "adopted from suggestion" in the version history (owner's decision, 4 October 2026); generic examples come from a fixed, published list. Drafts become immutable versions only through an approval card with a diff in an owner-typed channel (the bot or a local command); drafts arriving over MCP are marked "origin: MCP client" and treated as non-owner text | R2 | Provenance test: every sentence of an approved version traces to an owner message or edit; a sentence that nearly matches a model output of the session fails unless it is recorded as "adopted from suggestion" or "adopted from reflection" by an owner action; the share of adopted sentences is reported as an ownership signal (GOL-12); a planted model sentence pasted back or arriving through MCP never enters an approved version silently |
 | GOL-6 | **Goal card:** period; type (outcome / learning / behaviour / open); a reasons rating recorded before selection and the "why" in the owner's words linked to a centre item; measurable criteria where they fit (attainment levels −2…+2 written in advance; a metric with "what this number does not capture" and an optional counter-metric; a money target, FIN-1); the main obstacle and one if-then plan that becomes a dated task, a calendar block or a reminder; review date; links to a direction and a centre item | R2 | Activation is refused without a direction link and a review date; an if-then plan creates exactly one checkable item |
 | GOL-7 | **Hierarchy, states, caps:** centre → vision → directions → period goals → hypotheses or projects → tasks, commitments, decisions, meetings, money and time. Goal states: draft, active, paused, dropped, superseded, achieved, closed; pause, drop and supersede need a reason and happen only in a deliberation review (GOL-10) or through a decision record; dropping is a valid, logged outcome. Caps on active goals and hypotheses are configurable; activating over a cap requires pausing one in the same action | R2 | The cap test passes; no goal leaves "active" without a reason; no active goal lacks a parent link |
 | GOL-8 | **Weekly control**, computed by algorithms: it cites the control view's task-level items (WRK-6) and adds declaration-level checks — active goals without direction or centre links; share of hours and money not linked to any goal; neglect (directions or life domains with zero time or money in the period); allocation against declared priorities and envelopes (hours from the calendar and activity spans, money from the ledger, meetings and commitments per direction); caps and focus rules. Items are worded at task level, never as a judgement of the person; each names its coverage, and a layer below the coverage threshold gives "can't judge" | R2 | Same data gives the same list and order; on a synthetic year with planted problems, recall is measured and published, and the false-alarm rate stays under a published ceiling |
@@ -399,21 +399,22 @@ model only phrases results. There are no composite scores, no model-written goal
 | TML-2 | The whole personal archive in the timeline: old recordings, chat and mail exports, documents and media as dated items; device clocks corrected (original time kept); deduplicated by content; a cost estimate before any model processing (SIG-11) | R2 | Re-import changes nothing |
 | TML-3 | Change over time (research): how the owner's position on a topic evolved (quotes per period), how communication with a person or in general changed (REL-1 measures per period), recurring chains of thought; every finding cites its evidence; the journal only under PRV-9 | Later | — |
 
-### 5.19 Alignment research (ALN)
+### 5.19 Inconsistency findings and alignment research (ALN)
 
-A research layer. It compares what the owner thinks (journal, under PRV-9), says (conversations) and does
-(tasks, time, commitments, money) with the versioned centre (GOL-1). v1 built engines for this and they
+Inconsistency findings are a stage-8 module right after the goals module (owner's decision, 4 October
+2026): they compare what the owner thinks (journal, under PRV-9), says (conversations) and does (tasks,
+time, commitments, money) with the versioned centre (GOL-1). v1 built engines for this and they
 died: a judge that never returned "violation", inputs that went stale, a reference partly seeded by code
-(LESSONS_FROM_V1 §7). Formulas of alignment are a research model on top of well-built core data, not a
-product feature; the near-term, deterministic part of self-control lives in the goals module (GOL-8,
-LRN-6).
+(LESSONS_FROM_V1 §7). The findings below therefore rest on evidence, "can't judge" and a planted
+evaluation set. Alignment formulas and scores stay research on top of well-built core data (D-029); the
+deterministic part of self-control lives in the goals module (GOL-8, LRN-6).
 
 | ID | Requirement | Pri | Acceptance |
 |---|---|---|---|
-| ALN-2 | Inconsistency findings: "the centre says … — the stream shows …", with a quote or a fact and its source on both sides; verdicts: consistent, inconsistent, can't judge; scope by period, direction, person or topic | Later | No finding without evidence on both sides; "can't judge" when evidence is missing |
-| ALN-3 | Against the echo: each check searches for disconfirming evidence on purpose and sees its whole input; it is evaluated on a synthetic set with planted inconsistencies before any finding is shown; the owner marks findings useful or not, and a check with fewer than 30 % useful findings over its last 20 switches itself off | Later | Recall on the planted set is measured and published with the check |
-| ALN-4 | The journal in alignment analysis: read only by analysis modules enabled under PRV-9, for a period the owner chooses; sealed entries are excluded; findings derived from the journal are journal class and shown only in the owner's own channel | Later | The PRV-9 canaries pass for this module |
-| ALN-5 | The owner's communication against the centre: their own moves in conversations — promises made and kept, frames held or dropped, pressure, avoidance — with quotes | Later | — |
+| ALN-2 | Inconsistency findings: "the centre says … — the stream shows …", with a quote or a fact and its source on both sides; verdicts: consistent, inconsistent, can't judge; scope by period, direction, person or topic | R2 | No finding without evidence on both sides; "can't judge" when evidence is missing |
+| ALN-3 | Against the echo: each check searches for disconfirming evidence on purpose and sees its whole input; it is evaluated on a synthetic set with planted inconsistencies before any finding is shown; the owner marks findings useful or not, and a check with fewer than 30 % useful findings over its last 20 switches itself off | R2 | Recall on the planted set is measured and published with the check |
+| ALN-4 | The journal in alignment analysis: read only by analysis modules enabled under PRV-9, for a period the owner chooses; sealed entries are excluded; findings derived from the journal are journal class and shown only in the owner's own channel | R2 | The PRV-9 canaries pass for this module |
+| ALN-5 | The owner's communication against the centre: their own moves in conversations — promises made and kept, frames held or dropped, pressure, avoidance — with quotes | R2 | Every finding quotes the conversation segment it rests on (SIG-14) |
 
 ALN-1 (the centre) became GOL-1.
 
@@ -499,7 +500,7 @@ Details, recipes and drills: [DEPLOYMENT.md](DEPLOYMENT.md).
 | Issuing invoices, invoice numbering, e-invoice generation, filing tax returns, statutory company accounting; plugins that issue, modify or transmit invoices | Likely obligations and sanctions for software producers under Spain's invoicing-software rules (to be confirmed by a legal opinion); a certified invoicing program and an advisor own these (D-026) |
 | Bank connections and aggregators | Credentials and data go to third parties; statement files suffice (proposed, D-018) |
 | A built-in local-model-only mode for the journal | Not needed by the author; the provider interface (EXT-2) lets others add it |
-| Composite alignment scores, model-written goals, cascading OKRs, goal dashboards | Unfalsifiable numbers; goals written by a model are not the owner's; one owner, chat-first (method proposed, D-028) |
+| Composite alignment scores, goals written by a model without the owner adopting them, cascading OKRs, goal dashboards | Unfalsifiable numbers; goals must be the owner's own (GOL-5); one owner, chat-first (D-028) |
 | Network microservices | They would break one writer and one numbering tap; modules are logical boundaries (D-030) |
 | Self-hosted CI runners attached to the public repository | Code from fork pull requests would run next to private data (D-021) |
 
@@ -516,10 +517,11 @@ Details, recipes and drills: [DEPLOYMENT.md](DEPLOYMENT.md).
 5. **Language packs:** Spanish as the third locale?
 6. **Approved email sending** (draft → approval → send through the outbox): ever, or never? v1 never
    sends mail, and a test checks it.
-7. **Production host:** Debian or Ubuntu; which hardware; full-disk encryption yes or no; which overlay
+7. **Production host:** the author's existing desktop (a gaming PC, currently on Windows) becomes the
+   host and moves to Linux (D-020); still open: Debian or Ubuntu, and whether its hardware needs changes; full-disk encryption yes or no; which overlay
    VPN provider; which object storage for backups ([DEPLOYMENT.md](DEPLOYMENT.md) §14).
 8. **Money fixtures** — resolved on 4 October 2026: the first synthetic fixture covers one taxpayer with
-   two books (household and a sole-trader practice), accounts in EUR, USD and a third currency; the
+   two books (household and a sole-trader practice), accounts in EUR, USD and a spare third currency that exercises multi-currency handling; the
    advisor export defaults to spreadsheet registers plus a ZIP of PDFs (FIN-15). A company stays an
    optional fixture. Still open: which invoicing-program export formats come first (FIN-16).
 9. **Statement import timing:** pull Norma 43 and one CSV profile into the first money module so that the
@@ -537,18 +539,19 @@ Details, recipes and drills: [DEPLOYMENT.md](DEPLOYMENT.md).
     author's protocol move into CoFlow as an open research plugin, and may its codebook be published?
 13. **Invoices** — resolved on 4 October 2026: invoices are issued in a certified invoicing program and
     CoFlow registers them (D-026).
-14. **Inconsistency findings** between what the owner thinks, says and does (ALN-2, ALN-5): a stage-8
-    module after the centre module, or research (proposed, D-029)?
-15. **External systems' MCP access:** internet-facing MCP only at stage 8.6 (proposed, D-023), or an
-    earlier opt-in recipe for selected external apps?
-16. **Draft wording in goal formation** (GOL-5): may the assistant offer draft wording for values,
-    vision or goals, clearly marked as a suggestion, or does it only ask questions and give feedback
-    (proposed, D-028)?
+14. **Inconsistency findings** — resolved on 4 October 2026: a stage-8 module right after the goals
+    module (ALN-2…5, D-029).
+15. **External systems' MCP access** — resolved on 4 October 2026: no need before stage 8;
+    internet-facing MCP stays a stage-8 module (MCP-5, D-023).
+16. **Draft wording in goal formation** — resolved on 4 October 2026: the assistant may offer wording
+    clearly marked as a suggestion; adopted sentences are recorded as such (GOL-5, D-028).
 
 Resolved on 4 October 2026: the journal in analysis (D-025; the switch design is proposed), the
 research status of alignment and conductivity formulas (D-029), invoices registered from a certified
 program with no invoicing or filing in CoFlow (D-026), the modular monolith (D-030) and the position of
-the goals module (D-031). Proposed and awaiting the owner: money from files and entries only, never from
+the goals module (D-031), inconsistency findings as the module after goals (D-029), suggested wording in
+goal formation (D-028), no internet-facing MCP before stage 8 (D-023) and the author's existing desktop
+moving to Linux as the production host (D-020). Proposed and awaiting the owner: money from files and entries only, never from
 bank connections (D-018); books, taxpayers and country packs (D-027).
 
 ## 9. Glossary

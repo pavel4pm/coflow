@@ -18,7 +18,7 @@ details are in [DEPLOYMENT.md](DEPLOYMENT.md), the module structure in [ARCHITEC
 | Stage 2 | The separate home production machine is set up and runs CoFlow in the staging role |
 | Target: end of December 2026 | **R1** — stages 0–5, tag `v2.0.0` (re-planned after stage 0 with measured speed) |
 | January 2027 | Stages 6–7: the author's data moves to the home production machine; learning loop |
-| 2027 | Stage 8 modules one by one, in the confirmed order: money, centre and goals, send material, negotiation, the whole archive, remote MCP, statement import, week plan and the rest; research after that |
+| 2027 | Stage 8 modules one by one, in the confirmed order: money, centre and goals, inconsistency findings, send material, negotiation, the whole archive, remote MCP, statement import, week plan and the rest; research after that |
 
 ## Stages
 
@@ -248,6 +248,7 @@ the split of money into two parts is a proposal.
 | 1a | Money core: books and taxpayers, money between books, ledger, invoice register, document archive, financial goals, reports | FIN-1, FIN-2, FIN-4…9, FIN-14, FIN-16 (file adapter) | L, 2 rounds | 7–10M | 13–19 | Planning and evidence; invoices registered from a certified invoicing program, never issued (D-026). Proposed: Norma 43 and one CSV profile pulled in here (+1–2M, +2–4 h) so the ledger reconciles from day one. Without that pull-in, balances are entry-based and are not reconciled with the bank until module 7 — owner to decide (REQUIREMENTS §8 q.9); a short legal opinion before publishing (covers 1a and 1b) |
 | 1b | Country pack: the interface and the Spain reference pack — calendar, reserves, advisor export, thresholds, rules-watch | FIN-10…13, FIN-15, FIN-17, FIN-18 | L, 2 rounds | 5–8M | 12–17 | Golden tests per tax year; a short legal opinion before publishing |
 | 2 | Centre and goals: import, formation sessions, versions, rule objects, control, reviews, weekly reflection | GOL-1…12, LRN-6, RHY-4 link | L | 6–8M | 12–16 | Position confirmed (D-031); provenance test; planted-problem evaluation year |
+| 2b | Inconsistency findings: what the owner thinks, says and does against the centre | ALN-2…5 | L | 4–6M | 8–12 | By the owner's decision, right after goals; evidence on both sides, "can't judge", a planted evaluation set before any finding is shown; the journal under PRV-9 |
 | 3 | "Send material" commitment | CMT-3 | M | 2–3M | 4–6 | — |
 | 4 | Negotiation through the owner's messenger account | MTG-8 | L, 2 rounds | 6–9M | 14–19 | Starts with a spike: account requirements, 24-hour window, how messages look to the counterpart |
 | 5 | The whole personal archive in the timeline | TML-2 | L | 4–6M | 8–12 | Plus a one-off model cost, estimated on a sample first |
@@ -263,7 +264,6 @@ evaluation set.
 | # | Research | Requirements | Size | Agent tokens | Workflow hours |
 |---|---|---|---|---|---|
 | R-a | Relationship balance | REL-1…3 | M | 2–4M | 4–8 |
-| R-b | Alignment findings and the journal in analysis | ALN-2…5 | L | 4–6M | 8–12 |
 | R-c | Conductivity protocol and predicting G(t+1) — after a planned experiment gate (November 2026) | REL-4, REL-5 | L | 4–6M | 8–12 |
 | R-d | Change over time | TML-3 | M | 2–4M | 4–8 |
 
@@ -285,7 +285,7 @@ recalculated after stage 0.
 |---|---|---|---|---|
 | 0 Foundations and delivery skeleton | L | 7–10M | 13–20 | 2–3 |
 | 1 Memory core, timeline and MCP | L | 9–14M | 18–27 | 1–2 |
-| 2 Bot, rhythm, control view and the home host | L | 7–10M | 13–20 | 11–17 (incl. buying and setting up the host) |
+| 2 Bot, rhythm, control view and the home host | L | 7–10M | 13–20 | 11–17 (incl. moving the existing desktop to Linux and setting it up as the host) |
 | 3 Decisions and commitments | M | 3–5M | 6–10 | 1 |
 | 4 Sources | L | 6–9M | 12–18 | 2–3 |
 | 5 Meetings, reliable execution, rollback | L, 2 rounds | 7–11M | 14–22 | 2–4 |
@@ -293,8 +293,8 @@ recalculated after stage 0.
 | 6 Import, switch-over, device agents, rebuild drill | L | 8–12M | 15–23 | 4–6 |
 | 7 Learning loop | L | 5–7M | 10–14 | 1–2 |
 | **Stages 6–7** | | **13–19M** | **25–37** | **5–8** |
-| 8 Modules 1a–8 | per module | 37–55M | 77–111 | 1–3 per module |
-| Research R-a…R-d | indicative | 12–20M | 24–40 | per protocol |
+| 8 Modules 1a–8 (incl. 2b) | per module | 41–61M | 85–123 | 1–3 per module |
+| Research R-a, R-c, R-d | indicative | 8–14M | 16–28 | per protocol |
 
 Model API cost while developing (evaluation runs with a live model, behind an explicit flag): on the order
 of $30–60 for R1. Running costs of the home host (electricity, object storage for backups, the dead-man

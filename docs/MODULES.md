@@ -116,7 +116,7 @@ What v1 built but nobody used is not ported (REQUIREMENTS §7).
 | IMP, INV, ESP | New | — |
 | NEG | New (planned in v1) | — |
 | WPL | The week plan applied to the calendar with one approval | §5 |
-| ALN | Not ported: v1's compliance, convergence and corridor engines; the ideas return as research | §7 |
+| ALN | Not ported: v1's compliance, convergence and corridor engines; the idea returns as module 2b with evidence rules | §7 |
 | REL, CND, EVO | New; v1's knowledge graph is not ported | §1 |
 
 ---
@@ -797,9 +797,10 @@ warning is an estimate for planning, not tax advice, and carries that label with
 ### GOL — Centre and goals (stage 8, module 2)
 
 Helps the owner form their centre (values, manifest, life vision, directions, period goals) and checks
-whether time, money, commitments and decisions follow it. The owner writes every sentence; the system
-asks, structures, gives feedback against fixed criteria and versions what the owner approves. Control is
-computed by code; a model only phrases. No composite score, no model-written goals.
+whether time, money, commitments and decisions follow it. The owner writes or adopts every sentence; the
+system asks, structures, gives feedback against fixed criteria, offers wording only as marked suggestions
+and versions what the owner approves. Control is computed by code; a model only phrases. No composite
+score.
 
 | Field | Value |
 |---|---|
@@ -818,7 +819,7 @@ computed by code; a model only phrases. No composite score, no model-written goa
 
 | Quality attribute | Metric | Acceptance threshold |
 |---|---|---|
-| Safety (authorship) | Approved sentences not traced to owner-typed text; sentences with normalised 5-gram overlap ≥ 0.6 with a model output of the session, not marked "adopted from reflection"; versions approved outside the bot or local CLI | 0; 0; 0 |
+| Safety (authorship) | Approved sentences not traced to owner-typed text; sentences with normalised 5-gram overlap ≥ 0.6 with a model output of the session, not recorded by an owner action as "adopted from suggestion" or "adopted from reflection"; versions approved outside the bot or local CLI | 0; 0; 0 |
 | Safety (rule objects) | Free text in a confirmed rule not byte-equal to a centre span; planted model paraphrases that can be confirmed | 0; 0 |
 | Functional correctness (import) | Imported text vs. source; centre content in a fresh install | Byte-identical; 0 |
 | Functional correctness (control) | Same data → same list; recall on the synthetic year; false alarms among raised items; items raised where layer coverage < 70 % instead of "can't judge"; time checks without a time source | Identical; ≥ 90 %; ≤ 10 %; 0; 100 % "can't judge (no time source)" |
@@ -830,6 +831,39 @@ GOL's control list cites WRK's control-view items and adds only declaration-leve
 of time and money per direction, period goals and neglect. Envelopes are shares and caps; money amounts
 tied to a goal are FIN targets. Time comes from CAL and RHY's activity spans; where no spans exist (before
 stage 6, or without the activity agent) the time checks answer "can't judge (no time source)".
+
+---
+
+### ALN — Inconsistency findings (stage 8, module 2b)
+
+Compares what the owner thinks (journal, under PRV-9), says (conversations) and does (tasks, time,
+commitments, money) with the versioned centre from GOL. Every finding is a pair of evidence — "the centre
+says … — the stream shows …" — with the verdict consistent, inconsistent or can't judge. Built right after
+the goals module by the owner's decision of 4 October 2026; alignment formulas and scores stay research.
+
+| Field | Value |
+|---|---|
+| Release · stage | R2 · 8.2b |
+| Runs in | `core` |
+| Owns | `aln_checks` (versioned check definitions), `aln_runs` (period, scope, centre version, coverage per layer), `aln_findings` (work class; evidence references on both sides), `aln_findings_j` (journal class, when journal input was used), `aln_marks` (useful / not useful), `aln_eval_runs` (results on the planted sets) |
+| Commands | `run_check(scope, period)`, `mark_finding`, `enable_check`, `disable_check` |
+| Queries | `findings(period, scope)` (journal-class findings only in owner channels), `check_status`, `eval_results` |
+| Emits · consumes | `coflow.aln.run.completed`, `coflow.aln.check.switched_off` · none (reads through `api` at run time) |
+| Depends on | GOL (centre versions, rule objects), WRK, CMT, FIN, CAL, RHY, SIG, JRN (through MDL under PRV-9); MDL; CFG |
+| Requirements | ALN-2…ALN-5, PRV-9, LRN-6 (adds findings to the weekly reflection when enabled), SIG-14, REL-6; D-017, D-029 |
+| Data classes · DATA_FLOWS | work (findings from work data), journal (findings that used journal input) · centre spans and stream excerpts to `provider` per check; journal input only with the switch on for ALN; journal-class findings never to `mcp:<client>`, search, the timeline or the status page |
+| Acceptance suite | A synthetic quarter with planted inconsistencies and planted consistent cases across think, say and do; journal canaries under both switch settings; evidence-integrity fixtures (every quote equals a stored segment or record) |
+| Usage signal | Findings marked useful per month; checks switched off; weekly-reflection lines that cite a finding |
+| Approval | **Owner** |
+
+| Quality attribute | Metric | Acceptance threshold |
+|---|---|---|
+| Functional correctness (evidence) | Findings without evidence on both sides; quotes not equal to a stored segment or record | 0; 0 |
+| Functional correctness (detection) | Recall on the planted set before a check is shown; findings raised on planted consistent cases | ≥ 70 %; ≤ 15 % |
+| Honesty | Findings raised where evidence coverage is below 70 % instead of "can't judge" | 0 |
+| Safety (journal) | Journal-derived findings reaching MCP, search, the timeline or the status page; journal text in any call with the switch off | 0; 0 |
+| Usefulness | Checks with fewer than 30 % of their last 20 findings marked useful that stay on | 0 |
+| Cost | Cost of a weekly run on the synthetic quarter | ≤ $0.50 by default |
 
 ---
 
@@ -1267,7 +1301,7 @@ The week plan as calendar windows and slots, applied with one card. Ships only a
 
 ## Research
 
-Research modules (D-029) live in the `coflow_research` plugin, after the stage-8 modules, and start only
+Research modules (D-029) — relationship measures, conductivity and evolution — live in the `coflow_research` plugin, after the stage-8 modules, and start only
 on core data that R1 already stores (REL-6), each with a pre-registered protocol. They own `px_<code>_*`
 tables, read through the host's facade (declared `pub_` views), reach the journal only through MDL under
 PRV-9, and store journal-derived findings in journal-class tables shown only in owner channels. No core
@@ -1275,10 +1309,9 @@ module imports them, and removing them needs no core migration. Each gets a full
 
 | Code | Module | Requirements | Reads | Key acceptance thresholds |
 |---|---|---|---|---|
-| ALN | Alignment findings: "the centre says … — the stream shows …", verdicts consistent, inconsistent or can't judge; disconfirming search | ALN-2…ALN-5 | GOL centre versions and rules; WRK, CMT, FIN, CAL, SIG; the journal under PRV-9 | Findings without evidence on both sides: 0. Recall on the planted set below 70 %: the check is not shown. Under 30 % marked useful over 20 findings: the check switches itself off |
 | REL | Relationship measures E(t) and balance alerts; stated positions only | REL-1…REL-3 | SIG, MTG, CMT, PPL | Same data → same series; values without links to their events: 0; recall of planted balance shifts in a synthetic quarter ≥ 90 %; schema fields for inferred emotions or diagnoses: 0 |
 | CND | Conductivity protocol and prediction of G(t+1), specified after a planned experiment gate (November 2026) | REL-4, REL-5 | REL measures, SIG, MTG | Corpus cases without a prediction locked before the outcome: 0; predictive models shown before beating the pre-registered baselines: 0 |
 | EVO | Evolution over time: positions per period, communication change, recurring chains of thought | TML-3 | TML, REL; the journal under PRV-9 | Findings without per-period evidence: 0; same data → identical series |
 
-Common to all four: core changes needed to remove the module — none; any alignment or conductivity
+Common to all three: core changes needed to remove the module — none; any alignment or conductivity
 formula stays an experiment inside the plugin and is never a product score.

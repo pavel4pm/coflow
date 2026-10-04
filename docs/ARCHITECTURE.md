@@ -138,6 +138,7 @@ plugins use `px_<id>_*`. The authorizer checks the table registry, not the prefi
 | Domain | FIN | Money core | `fin_*` | R2 · 8.1a | `core`; extraction in a worker |
 | Domain | TAX | Country packs and tax planning | `tax_*` | R2 · 8.1b | `core` |
 | Domain | GOL | Centre and goals | `gol_*` | R2 · 8.2 | `core` |
+| Domain | ALN | Inconsistency findings (think / say / do against the centre) | `aln_*` | R2 · 8.2b | `core` |
 | Interfaces | BOT | Messenger bot | `bot_*` | R1 · 2 | `core` |
 | Interfaces | MCP | MCP server | `mcp_*` | R1 · 1; R2 · 8.6 (remote) | `core` |
 | Interfaces | STS | Status page | — | R1 · 4 | `core` |
@@ -155,7 +156,7 @@ plugins use `px_<id>_*`. The authorizer checks the table registry, not the prefi
 | Plugins | ESP | Spain reference pack | pack data loaded by TAX | Plugin · 8.1b | data only |
 | Plugins | NEG | Negotiation through the owner's messenger | `px_neg_*` | Plugin · 8.4 | `core`, in process |
 | Plugins | WPL | Week plan | `px_wpl_*` | Plugin · 8.8 | `core`, in process |
-| Research | ALN, REL, CND, EVO | Alignment, relationship measures, conductivity, evolution | `px_aln_*`, `px_rel_*`, `px_cnd_*`, `px_evo_*` | Research, after stage 8 | `coflow_research` plugin |
+| Research | REL, CND, EVO | Relationship measures, conductivity, evolution | `px_rel_*`, `px_cnd_*`, `px_evo_*` | Research, after stage 8 | `coflow_research` plugin |
 
 ## 5. Dependencies
 
@@ -516,10 +517,11 @@ R1 is stages 0–5, R2 stages 6–8. Deployment items follow DEPLOYMENT.md.
 | 8.1a Money core | FIN: books, taxpayers, transfers, ledger, invoice register (file adapter), archive, targets (migrated from WRK), reports; `extract` jobs. Proposed: IMP's Norma 43 parser and one CSV profile pulled in, so the ledger reconciles | Legal opinion before public release (covers 8.1a and 8.1b) |
 | 8.1b Country pack | TAX: pack interface, taxpayer-scoped calendar, reserve estimates, advisor export, warnings, rules-watch; ESP | Legal opinion before public release |
 | 8.2 Centre and goals | GOL, with directions and goals transferred from WRK; LRN-6 reflection, the first consumer of the journal switch (position 2 confirmed, D-031) | — |
+| 8.2b Inconsistency findings | ALN: think / say / do against the centre with evidence on both sides, "can't judge", planted evaluation set; the journal under PRV-9 | — |
 | 8.3–8.6 | Send material (CMT-3); negotiation (NEG, after a spike); whole archive (TML-2); remote MCP (MCP-5) | Edge recipe with 8.6 |
 | 8.7 Statement import | IMP: camt.053, OFX, further CSV profiles; out-of-process plugin host | — |
 | 8.8 Week plan and the rest | WPL; PPL-5, PPL-7; WRK-4 hypotheses (in GOL). INV adapters ship per tool at any time after 8.1a | — |
-| Research | ALN, REL, CND (after a planned experiment gate, November 2026), EVO in `coflow_research`, on core data (REL-6), each with a pre-registered protocol | — |
+| Research | REL, CND (after a planned experiment gate, November 2026), EVO in `coflow_research`, on core data (REL-6), each with a pre-registered protocol | — |
 
 ## 11. What stays open
 

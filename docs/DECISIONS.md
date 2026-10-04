@@ -16,9 +16,10 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Decision (accepted):** the relative order of the remaining modules — money, send material,
   negotiation, the whole archive, internet-facing MCP, statement import, week plan and the rest; research
   afterwards; one episode per week with per-module acceptance results.
-- **Accepted later the same day:** the centre and goals module at position 2, before "send material".
+- **Accepted later the same day:** the centre and goals module at position 2, before "send material",
+  followed directly by the inconsistency-findings module (2b, D-029).
 - **Proposed:** money split into a core module and a country-pack module.
-- **Consequences:** ROADMAP stage 8; REQUIREMENTS §8 question 11.
+- **Consequences:** ROADMAP stage 8; REQUIREMENTS §8 questions 11 and 14.
 
 ## D-030 · A modular monolith with contracts, not network microservices — accepted (4 Oct 2026)
 
@@ -39,7 +40,7 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Consequences:** the module map and card template are stage-0 deliverables; a module can be extracted
   along its contract later if a real need appears.
 
-## D-029 · Alignment, relationship, conductivity and evolution analysis are research — accepted (4 Oct 2026); one part proposed
+## D-029 · Formulas are research; inconsistency findings are a module after goals — accepted (4 Oct 2026)
 
 - **Context:** the author: the formulas of alignment and conductivity must be treated very carefully; they
   are a research model on top of a well-built data structure, for research and self-control, and not a
@@ -48,12 +49,13 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   (REL-1…5, any alignment score, TML-3) are research, not a priority: Later, after the stage-8 modules,
   each specified and pre-registered when started. The core keeps the data they need from R1 (REL-6). The
   deterministic, near-term part of self-control lives in the goals module (GOL-8, LRN-6).
-- **Proposed:** the evidence-based inconsistency findings ALN-2…5 also wait until after stage 8
-  (REQUIREMENTS §8 question 14).
+- **Decision (accepted later the same day):** the evidence-based inconsistency findings between what the
+  owner thinks, says and does (ALN-2…5) are a stage-8 module right after the goals module (module 2b),
+  built under D-017's evidence rules; formulas and scores stay research.
 - **Consequences:** D-017 stays as the method for this research; the research table in ROADMAP is
   indicative.
 
-## D-028 · A centre and goals module, authored by the owner — accepted (4 Oct 2026) as a module; the method is proposed
+## D-028 · A centre and goals module, authored by the owner — accepted (4 Oct 2026) as a module; the method is proposed except where marked
 
 - **Context:** the author wants the system to help a person formulate their goals — manifest, goals,
   directions, quality criteria, a vision of their future life — and to control that they act in line with
@@ -64,6 +66,8 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   deterministic weekly control with "can't judge" where coverage is low; three verdicts per goal (output,
   outcome, path); review cadences where the goal choice is reopened only in deliberation slots; the
   module measures its own usefulness. R1 adds only the data hooks (WRK-1, WRK-8).
+- **Owner's decision (4 Oct 2026):** the assistant may offer draft wording, clearly marked as a
+  suggestion; sentences the owner adopts are recorded as "adopted from suggestion" (GOL-5).
 - **Alternatives:** templates only (no help with formation); an assistant that drafts the goals (the goals
   stop being the owner's); an OKR dashboard (weak evidence, conflicts with chat-first).
 - **Consequences:** ALN-1 became GOL-1; LRN-6 and the goal part of RHY-4 depend on this module.
@@ -184,6 +188,7 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Alternatives:** an edge tunnel as the default (a third party decrypts; regional blocking); all of
   MCP-5 in R1 (OAuth work before any user needs it); loopback only (unusable when CoFlow runs on another
   machine).
+- **Owner's confirmation (4 Oct 2026):** external systems need no MCP access before stage 8.
 
 ## D-022 · Instance roles and one production writer — proposed
 
@@ -213,7 +218,7 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   deploy over the private network as the default (CI holds a path into the home network — possible later
   as an option, DEP-21); generic auto-updaters (no approval, no snapshot).
 
-## D-020 · Linux with Docker Engine on the production host — proposed
+## D-020 · Linux with Docker Engine on the production host — accepted (4 Oct 2026)
 
 - **Context:** in the configurations tried in v1, Docker Desktop on Windows required an interactive user
   session and its WSL VM stopped when idle, and v1's Windows home server had no remote administration
@@ -222,6 +227,9 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   sleep, power-on after power loss; full-disk encryption and a UPS are recommended. Hardware guidance:
   minimum 4 x86-64 cores and 16 GB RAM; reference 8 cores and 32 GB with a 1–2 TB NVMe disk; measure
   transcription speed with `coflow bench stt` before buying (DEP-14, NFR-4, NFR-11).
+- **Owner's decision:** the author's existing gaming desktop, currently on Windows, becomes the
+  production host and moves to Linux for it (at stage 2 at the latest); the machine's old v1 instance is
+  retired in the process.
 - **Alternatives:** Windows with Docker Desktop or WSL2 (the configuration that failed in v1); a
   hypervisor with a Linux VM (more layers); a low-power mini-PC (fine for daily load, slow for the
   archive).

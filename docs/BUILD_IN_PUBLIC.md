@@ -37,16 +37,17 @@ Numbers are measured. An estimate is marked as an estimate.
 
 | # | Episode | Source |
 |---|---|---|
-| 0.1 | Why CoFlow 2.0 is open source and not a product | [DECISIONS.md](DECISIONS.md) D-001, D-005 |
-| 0.2 | Twenty web pages, one used: why the interfaces are a bot and MCP | [LESSONS_FROM_V1.md](LESSONS_FROM_V1.md) §1 |
-| 0.3 | 1,785 suggestions, 10 decisions: why background queues die | §1 |
-| 0.4 | Where does a message go? Routing between work and the private journal | §4 |
-| 0.5 | 233k rows under one lock: SQLite with nine writers | §2 |
-| 0.6 | Where $54.78 went, and why the prompt prefix sets the price | §7 |
-| 0.7 | Agents reviewing agents: when to stop polishing | §8 |
-| 0.8 | The system that always agreed with me: why an alignment check must be able to say "can't judge" | §7; [DECISIONS.md](DECISIONS.md) D-017 |
-| 0.9 | ∫G = V × E: what can be measured between people, and what must be pre-registered | [REQUIREMENTS.md](REQUIREMENTS.md) §5.20 |
-| 0.10 | Microservices or a modular monolith? Why one writer wins for a personal system | [DECISIONS.md](DECISIONS.md) D-030 |
+| 0.1 | How the plan was made: from v1, its usage data and its development history to the CoFlow 2.0 requirements — agents researching, critics reviewing, the owner deciding | [REQUIREMENTS.md](REQUIREMENTS.md), [DECISIONS.md](DECISIONS.md), [LESSONS_FROM_V1.md](LESSONS_FROM_V1.md) |
+| 0.2 | Why CoFlow 2.0 is open source and not a product | [DECISIONS.md](DECISIONS.md) D-001, D-005 |
+| 0.3 | Twenty web pages, one used: why the interfaces are a bot and MCP | [LESSONS_FROM_V1.md](LESSONS_FROM_V1.md) §1 |
+| 0.4 | 1,785 suggestions, 10 decisions: why background queues die | §1 |
+| 0.5 | Where does a message go? Routing between work and the private journal | §4 |
+| 0.6 | 233k rows under one lock: SQLite with nine writers | §2 |
+| 0.7 | Where $54.78 went, and why the prompt prefix sets the price | §7 |
+| 0.8 | Agents reviewing agents: when to stop polishing | §8 |
+| 0.9 | The system that always agreed with me: why an alignment check must be able to say "can't judge" | §7; [DECISIONS.md](DECISIONS.md) D-017 |
+| 0.10 | ∫G = V × E: what can be measured between people, and what must be pre-registered | [REQUIREMENTS.md](REQUIREMENTS.md) §5.20 |
+| 0.11 | Microservices or a modular monolith? Why one writer wins for a personal system | [DECISIONS.md](DECISIONS.md) D-030 |
 
 ## Season 1 — the build (stages 0–7: the R1 release episode after stage 5, then the switch-over and the learning loop)
 

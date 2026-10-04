@@ -603,10 +603,14 @@ MCP-5 (internet-facing MCP, R2, §8.1), OPS-5 (backups, §10), OPS-6 (health, of
 
 ## 14. Open questions for the owner
 
+Resolved on 4 October 2026: the author's existing gaming desktop becomes the production host and moves
+from Windows to Linux (D-020); its old v1 instance is retired in the process.
+
 1. **Operating system.** Debian 13 or Ubuntu 24.04 LTS? The docs test one recipe (encryption, baseline,
    reboots) end to end. Recommendation: Debian 13, unless Ubuntu is more familiar.
-2. **Hardware.** Minimum class (4 cores, 16 GB), the reference (8 cores, 32 GB), or 64 GB for a local
-   model? Decide after `coflow bench stt` on the candidate CPU class.
+2. **Hardware.** Does the existing desktop meet the reference class (8 cores, 32 GB, NVMe), and is its GPU
+   worth using for transcription or a local model (the GPU image variant is R2, DEP-20)? Decide after
+   `coflow bench stt` on that machine.
 3. **Overlay VPN provider and tailnet lock.** A hosted coordinator (e.g. Tailscale), a self-hosted one, or
    plain WireGuard? Recommendation: hosted, with tailnet lock and 2FA, plus a WireGuard port forward as
    the second remote path.
