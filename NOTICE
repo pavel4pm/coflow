@@ -1,0 +1,10 @@
+CoFlow 2.0
+Copyright 2026 Pavel Mihutski
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party models and libraries keep their own licences. Models are downloaded
+at runtime and are not part of this repository or of the container images.
+Container images include third-party components that will be listed in their
+SBOM. Attributions required by third-party licences will be listed here as each
+component is added.

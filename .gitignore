@@ -1,0 +1,61 @@
+# CoFlow 2.0 — never commit personal data, secrets or recordings.
+# Rule of thumb: the repository holds code, docs and synthetic fixtures only.
+
+# --- personal data and runtime state ---
+data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+backups/
+logs/
+*.log
+
+# --- secrets ---
+.env
+.env.*
+!.env.example
+*.session
+*.session-journal
+secrets/
+**/secrets.toml
+token*.json
+credentials*.json
+client_secret*.json
+*.pem
+*.key
+
+# --- recordings and media (never in git) ---
+*.wav
+*.mp3
+*.m4a
+*.ogg
+*.oga
+*.opus
+*.flac
+*.mp4
+*.mov
+*.webm
+*.mkv
+
+# --- models downloaded at runtime ---
+models/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# --- editors / OS / local agent settings ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
