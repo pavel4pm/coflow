@@ -11,12 +11,12 @@ Signal → Decision → Commitment → Action → Outcome → Learning
 ## The rubric
 
 - **Working name (proposed):** "Decision system at work" (English) / «Decision system в работе» (Russian).
-- **Format (accepted by the author, 4 October 2026): the machine drives, the author decides.** Coding
+- **Format (accepted by the author, 4 October 2026, D-032): the machine drives, the author decides.** Coding
   agents follow the roadmap week by week — they build, test, release and draft the episodes; the author
   tests, tells what it was like to use, makes the decisions and publishes.
-- **Cadence:** a main episode every Monday (video and posts) and a short lesson post on Thursdays — at
-  most two touches a week.
-- **Review:** on 9 November 2026, after the fourth main episode (see "Review gate").
+- **Cadence (accepted, D-032):** a main episode every Monday (video and posts) and a short lesson post
+  on Thursdays — at most two touches a week.
+- **Review (accepted, D-032):** on 9 November 2026, after the fourth main episode (see "Review gate").
 
 ## The weekly cycle
 

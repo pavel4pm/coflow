@@ -7,6 +7,27 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-032 · Building in public: the machine drives, the author decides — accepted (4 Oct 2026); the rubric name and automatic merges are proposed
+
+- **Context:** with CoFlow 2.0 developed in the open (D-001), the open question was who does what, at what
+  pace, and where the author stays in the loop. v1 was built without any public record, and its decisions
+  survive only in chat logs.
+- **Decision (accepted):** the machine drives and the author decides. Coding agents follow the roadmap
+  week by week — they build, test, release and draft the episodes; the author tests the result, says what
+  using it was like, answers the decisions marked "proposed", approves deploys that touch real data,
+  approves every publication, and publishes. A main episode every Monday (video and posts) and a short
+  lesson post on Thursdays — at most two touches a week — with the episode calendar and the review gate
+  on 9 November 2026 as recorded in [BUILD_IN_PUBLIC.md](BUILD_IN_PUBLIC.md). Episode 0.1 publishes on
+  6 October 2026; the canonical text of every episode goes into [DEVLOG.md](../DEVLOG.md).
+- **Proposed:** the rubric's working name ("Decision system at work"); merging code automatically once CI
+  and the independent review pass, so the author is never the bottleneck of the build.
+- **Alternatives:** publishing only finished releases (no evidence of how decisions were made, which is
+  the point of the series); the author writing the episodes (the time is not there); no public record at
+  all (v1's outcome).
+- **Consequences:** [BUILD_IN_PUBLIC.md](BUILD_IN_PUBLIC.md) holds the cycle, the calendar and the
+  publication rules; the scheduled weekly driver is set up when stage 0 starts; the dates shift with the
+  v1 acceptance period and are targets, not promises.
+
 ## D-031 · Stage-8 order and the weekly episode — accepted (4 Oct 2026); the money split is proposed
 
 - **Context:** the author confirmed the order of the modules after the switch-over, at the pace available,
@@ -361,7 +382,7 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   author decided that production runs on a separate machine delivered by CI/CD, and that the project must
   be easy to install with Docker or on an external server (D-019).
 - **Decision:** Python, cross-platform, with two install paths from one codebase: a container image with
-  Docker Compose is the reference production install (on a Linux host — proposed, D-020; the same image
+  Docker Compose is the reference production install (on a Linux host — accepted, D-020; the same image
   runs on any Docker host or rented server); native Python on Windows and Linux is the development and contributor install,
   both tested in CI. macOS is best effort by the community. One supervisor process replaces OS scheduler
   jobs. Desktop-bound features (activity tracking, recorder folders, input devices) run as device agents

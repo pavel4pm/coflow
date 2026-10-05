@@ -61,7 +61,7 @@ pushes to it, and no release runs on production without the owner's approval (§
 One codebase and one universal lockfile; CI tests both paths (§6); Docker is never the only way. Docker
 Desktop on the dev machine is optional, for prod-like runs with synthetic data, with the database in a
 named volume, never on a Windows-drive bind mount (WAL locking through the VM file share is unreliable). A
-Windows production host is unsupported (proposed, D-020): in the configurations tried in v1, Docker
+Windows production host is unsupported (accepted, D-020): in the configurations tried in v1, Docker
 Desktop on Windows required an interactive user session and its WSL VM stopped when idle.
 
 ## 3. Environments, roles and the one production writer (DEP-2, DEP-3, DEP-4)
