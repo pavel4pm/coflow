@@ -890,7 +890,7 @@ notifications with caps and quiet hours, sources and a "wrong" button.
 | Queries | None public (state on the status page) |
 | Emits · consumes | `coflow.bot.message.routed` (journal routes carry no text) · `coflow.act.card.proposed`, `coflow.rhy.plan.delivered`, `coflow.mtg.brief.ready`, `coflow.sig.transcript.ready`, `coflow.cmt.commitment.due`, `coflow.tax.obligation.due`, `coflow.obs.health.degraded` |
 | Depends on | Module `api`s; ACT, JRN, LRN, POL, MDL, CFG; STT through jobs; messenger port (one reference adapter and a fake) |
-| Requirements | BOT-1…BOT-7, P-5, P-10 |
+| Requirements | BOT-1…BOT-7, BOT-8…BOT-10, LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10 |
 | Data classes · DATA_FLOWS | all classes pass its renderer · `messenger` rows per class; journal outputs only when the journal × messenger row is on (otherwise the local CLI) |
 | Acceptance suite | Fake messenger with text, voice, captions, replies, commands and forwards; double taps and restarts; quiet-hour clock tests |
 | Usage signal | Owner messages per active day; cards decided per week |
@@ -904,6 +904,10 @@ notifications with caps and quiet hours, sources and a "wrong" button.
 | Safety | Card executions under double taps and restarts | Exactly 1 |
 | Performance efficiency | Answer latency; answers without the cost shown | Median ≤ 15 s; 0 |
 | Interaction capability | Notifications breaking the daily cap or quiet hours | 0 |
+| Interaction capability (asking) | Turns asking more than one question, or asking again about something already resolved in the same command (BOT-10) | 0 and 0 |
+| Functional correctness (scenarios) | Scenarios without a covering test; prompts or tool descriptions drifted from their scenario (BOT-9) | 0 and 0 |
+| Interaction capability (gaps) | Refusals that end without a named gap and a proposed scenario change (LRN-7) | 0 |
+| Transparency (provider errors) | Raw provider payloads reaching the owner; balance alerts beyond one a day (OPS-14) | 0 and 0 |
 
 ### MCP — MCP server
 

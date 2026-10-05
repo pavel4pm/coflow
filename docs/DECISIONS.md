@@ -7,6 +7,24 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-034 · The bot's behaviour lives in scenario files, and a gap becomes a scenario change approved in the chat — proposed (relayed as the author's wish of 5 October 2026)
+
+- **Context:** in v1 the bot's behaviour lived in prompts and tool descriptions. Asked to create a meeting
+  from a forwarded conversation, it asked for the link to work twice, asked whose email it was on every
+  message, showed a raw provider error about an exhausted balance, and ended with "people can only be
+  created in the interface" — no meeting. Each of those is a missing or unwritten scenario, and nothing
+  in the system turned the gap into work.
+- **Proposed decision (relayed from the author on 5 October 2026; it becomes accepted when the author
+  confirms it here):** the rules for handling a request type live in owner-readable scenario files with
+  tests (BOT-9); the bot never answers "I can't" — it names the gap and proposes a scenario change the
+  owner approves in the chat, which becomes a scenario version plus a development task (LRN-7).
+- **Alternatives:** behaviour in prompts only (v1's answer: it drifts and nobody can read it); a
+  rules engine the owner edits directly (a second language to learn); collecting gaps silently for the
+  maintainer (the owner stays blocked in the moment).
+- **Consequences:** BOT-9, BOT-10, LRN-7, MTG-17 and OPS-14; scenario files are part of the repository and
+  of each module's acceptance suite (NFR-10); a scenario change proposed by the machine is a proposal
+  until the owner approves it (P-3).
+
 ## D-033 · The owner picks the model tier per function, with the monthly cost in front of them — accepted (5 October 2026)
 
 - **Context:** v1 ran every model-backed function on one small tier. Its meeting outcomes were weak for

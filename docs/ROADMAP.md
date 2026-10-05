@@ -102,6 +102,10 @@ Scope:
   "this was journal" blanks derived records (BOT-2, BOT-3, P-5).
 - Answers through read tools in compact mode; approval cards executed once by the owner only, showing the
   effective value of every option they apply; cost under each answer (BOT-4, BOT-8, P-3, P-4).
+- Behaviour written down as owner-readable scenario files with their own tests, prompts and tool
+  descriptions checked against them (BOT-9); one question per turn and only about what is missing
+  (BOT-10); provider errors, including an exhausted balance, explained to the owner once a day instead of
+  raw payloads (OPS-14).
 - The owner picks the model tier per function group and sees the monthly cost forecast of each tier next to
   its measured quality (OPS-11).
 - Speech-to-text as a stateless worker with job leases; voice messages transcribed on the host before
@@ -169,7 +173,8 @@ Exit criteria:
 
 Scope:
 
-- Meeting intent with participants and a required link to work (MTG-1); brief before the meeting with
+- Meeting intent with participants and a required link to work (MTG-1); a meeting creates the people it
+  needs on one approval card instead of sending the owner to another interface (MTG-17); brief before the meeting with
   sources and named gaps (MTG-2); recording to meeting by time overlap or label (MTG-3); outcome to
   commitment and task proposals (MTG-4), with quotes extracted per chunk from segments (MTG-12), honest
   outcome messages (MTG-13), context assembled by rules (MTG-14), the record and analysis modes (MTG-15)
@@ -234,6 +239,8 @@ Scope:
   `/problem`; one-off exceptions with expiry; `/rules` (LRN-1…4).
 - Incidents packaged with a synthetic fixture and redacted infrastructure identifiers, ready to become a
   public issue (LRN-5).
+- A capability gap becomes a proposed scenario change the owner approves in the chat, never a bare "I
+  can't" (LRN-7).
 - Sources under answers and a "wrong" button (BOT-6).
 - Supply-chain extras: published SBOM and provenance attestations, arm64 image, repository-policy checks
   (DEP-20).
