@@ -253,7 +253,7 @@ the cost ledger and daily budget, and the offline evaluation harness.
 | Queries | `cost_by_day`, `cost_by_month`, `budget_state`, `provenance(output_ref)`, `eval_report(set)` |
 | Emits · consumes | `coflow.mdl.call.completed` (no content), `coflow.mdl.budget.exhausted` · `coflow.pol.flow.changed` |
 | Depends on | STO, POL, CFG (templates, locale); provider port |
-| Requirements | P-6, P-7, EXT-2, OPS-7, OPS-8, PRV-2, PRV-3, PRV-9, FIN-5 (mechanism), NFR-3 |
+| Requirements | P-6, P-7, EXT-2, OPS-7, OPS-8, OPS-11, OPS-12, PRV-2, PRV-3, PRV-9, FIN-5 (mechanism), NFR-3 |
 | Data classes · DATA_FLOWS | system rows; prompts kept ≤ 30 days, never when they held journal text · one row per model function: classes it may receive, destination (`provider` or `local_llm`), purpose |
 | Acceptance suite | Every suite runs on the fake provider, which asserts the policy and the transaction rule; the shared port contract suite runs on the fake and, behind the live flag, on the real adapter |
 | Usage signal | Calls and cost per function per day; functions without a call in 90 days are reviewed |
@@ -268,6 +268,8 @@ the cost ledger and daily budget, and the offline evaluation harness.
 | Performance efficiency (cost) | Cost per active day with default settings over 28 days; calls past the budget | ≤ $1; never more than 1 |
 | Maintainability (provenance) | Outputs without model, prompt version and input hash; repeated calls on unchanged input | 0 and 0 |
 | Compatibility | Shared port contract suite on the fake and the real adapter | Both pass |
+| Functional correctness (truncation) | Structured calls stored as complete although the provider reported a truncated answer (OPS-12) | 0 |
+| Transparency (cost forecast) | Deviation of the monthly forecast of the chosen tier from the actual cost after a month (OPS-11) | ≤ 20 % |
 
 ### ACT — Approvals, external-action outbox and undo
 
@@ -599,7 +601,7 @@ linking, and outcomes that become commitment and task proposals through the outc
 | Queries | `meeting_brief`, `upcoming`, `meeting_chain`, `link_options` |
 | Emits · consumes | `coflow.mtg.meeting.planned` / `changed` / `held`, `coflow.mtg.brief.ready`, `coflow.mtg.outcome.recorded`, `coflow.mtg.recording.linked` · `coflow.sig.transcript.ready`, `coflow.sig.session.created`, `coflow.cal.event.synced`, `coflow.cal.write.verified` |
 | Depends on | PPL, SIG, CAL, DEC, CMT, WRK; `GoalDirectory`; ACT, MDL, IDS (labels) |
-| Requirements | MTG-1…MTG-4, REL-6 (initiator); MTG-9 Later |
+| Requirements | MTG-1…MTG-4, MTG-12…MTG-16, OPS-11 (the tier for the analysis mode), OPS-13, NFR-12, REL-6 (initiator); MTG-9 Later |
 | Data classes · DATA_FLOWS | work · briefs to `provider` (phrasing), `mcp:<client>`, `messenger` |
 | Acceptance suite | 30 consecutive synthetic meetings with recordings; outcome fixtures with planted agreements; fake clock for brief times |
 | Usage signal | Meetings planned and held per week; briefs opened |
@@ -611,6 +613,10 @@ linking, and outcomes that become commitment and task proposals through the outc
 | Functional correctness (evidence) | Outcome quotes that are exact substrings of a segment; brief facts with sources | 100 %; 100 %, gaps named |
 | Reliability (brief SLO) | Briefs delivered at the configured time over 28 days | ≥ 26 of 28 days |
 | Functional correctness (link to work) | Meetings accepted without a link to work and without "no link" | 0 |
+| Functional correctness (outcome recall) | Planted agreements reaching the outcome card on the fixture set; recall on the owner's private set for the chosen tier (OPS-13) | 100 %; ≥ 80 % |
+| Transparency (honest outcomes) | "Nothing found" messages produced by a run that was truncated or dropped items (MTG-13) | 0 |
+| Timeliness (time to outcome) | Median time from the arrival of the recording to the outcome message (NFR-12) | ≤ 30 min |
+| Functional correctness (online meetings) | Approval cards for a meeting write without the "with video link / in person" line; events left without the requested conference and without a message saying so (MTG-16) | 0 and 0 |
 
 ### RHY — Rhythm and activity time
 

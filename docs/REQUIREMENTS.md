@@ -1,6 +1,15 @@
 # CoFlow 2.0 — Requirements
 
-Version 0.4 · 4 October 2026 · **status: draft for owner review** (after the final check)
+Version 0.5 · 5 October 2026 · **status: draft for owner review**
+
+Changes since 0.4, from what the private v1 showed on 5 October (a meeting whose outcome lost every
+agreement, and conference links that were never created): the owner picks the model tier per function
+group with the monthly cost of each tier in front of them (OPS-11, D-033); no silent truncation
+of a model answer (OPS-12); private evaluation sets from the owner's own recordings (OPS-13); quotes
+extracted where the segments are visible (MTG-12); honest outcome messages (MTG-13); context assembled
+by rules (MTG-14); a record mode and an owner-facing analysis mode (MTG-15); online meetings that carry
+their conference link (MTG-16); import of an external transcript with speaker labels (SIG-16); effective
+option values on approval cards (BOT-8); time to outcome measured (NFR-12).
 
 Changes since 0.3: self-hosted deployment on a separate production machine with CI/CD and Docker
 (§5.21, [DEPLOYMENT.md](DEPLOYMENT.md)); the journal under the owner's control (P-2, PRV-9); money for a
@@ -191,6 +200,7 @@ synthetic data.
 | SIG-13 | Google Meet recordings and transcripts as a source | Later | — |
 | SIG-14 | **Transcript segments:** transcripts are stored as segments with offsets and absolute time (recording start + offset, corrected by the recorder profile's time zone and clock drift, originals kept); quotes, facts and commitments point to a segment | R1 | Every quote resolves to a segment and a playable offset |
 | SIG-15 | **Quick log and notes:** the owner logs a call, a meeting or a note in one sentence (bot or MCP); it becomes a session or a note with resolved participants and a link to work, without a model call for the record itself | R1 | A one-line log creates exactly one session and no new person without approval |
+| SIG-16 | **External transcript import:** the owner may attach a transcript produced elsewhere to a recording; when it carries speaker labels it is preferred for attribution over the local transcription, both are kept, and the flow is listed in `DATA_FLOWS.md` as the owner's own choice (PRV-2). Segments, offsets and quotes follow SIG-14 | R1 | An imported labelled transcript yields segments with speakers and keeps the local one; every quote resolves to a segment |
 
 ### 5.5 Decisions (DEC)
 
@@ -226,6 +236,11 @@ synthetic data.
 | MTG-9 | Reschedule and cancel policy for created meetings | Later | — |
 | MTG-10 | Week plan as calendar windows and slots, approved with one card | Plugin | Shipped in v1 but unused; ships only after use is proven |
 | MTG-11 | **Calendar write safety:** CoFlow moves or cancels only its own events (label, organizer, not recurring, id equal to the computed one); on other people's events it can only answer an invitation; an event the owner moved by hand is never moved back; invitation emails are sent only when the card says so (default: none); writes use their own token with minimal scopes | R1 | A foreign or recurring event is never changed (test with a recording fake calendar) |
+| MTG-12 | **Quotes come from the stage that sees the source:** agreements and commitments are extracted per transcript chunk with verbatim quotes from segments (SIG-14); a merge stage only de-duplicates and ranks and never writes a new quote; the quote check runs against segments, and a quote that fails it is reported as dropped (OPS-12), not silently removed | R1 | On a fixture with planted agreements in every chunk, including the last, each one reaches the outcome card with its quote |
+| MTG-13 | **Honest outcome messages** (P-9): "nothing found" appears only when the pipeline ran whole and found nothing; otherwise the message says how many items were dropped and why, or that the analysis was truncated or failed, and offers a retry. The owner receives the decisions and commitments themselves, not only a context line, and a long outcome is delivered in full | R1 | A truncated or filtered run never produces a "nothing found" message (a fixture for each case) |
+| MTG-14 | **Outcome analysis gets context:** a deterministic context within a budget - the meeting plan and agenda, the linked goal with its numbers, earlier meetings in the chain, open commitments with these people, the owner's profile - assembled by rules, not by a model (SRC-1) | R1 | The same meeting and history produce the same context; the context is in the trace (OPS-10) |
+| MTG-15 | **Two outcome modes:** a record mode (neutral - what each side said, agreements, next steps) and an owner-facing analysis mode (risks with numbers against the owner's own plan, each side's position, options and what to change), the second on the tier the owner chose for it (OPS-11). Every claim cites its segment, and "can't judge" is a valid answer | R1 | Analysis-mode claims without a segment reference: 0; the mode used is recorded on the outcome |
+| MTG-16 | **Online meetings carry their link:** a meeting with other people is online unless the owner says in person or gives an address; the calendar write then asks for a conference with a request id derived from the operation key (MTG-5), the approval card always states "with video link" or "in person", and the join link is stored on the meeting and shown in the confirmation, the brief and the meetings view. When the provider created no conference, the result says so; adding a link to an existing event is a separate approved action | R1 | A repeated write leaves one event with one conference; no card omits the online-or-in-person line (test over the card catalogue) |
 
 ### 5.8 Work: directions, goals, tasks (WRK)
 
@@ -273,6 +288,7 @@ WRK-7 is not used; the number is retired and will not be reissued.
 | BOT-5 | Notifications (brief, recording state, evening, weekly) once each, with a daily cap and quiet hours; critical health alerts bypass quiet hours | R1 | — |
 | BOT-6 | Sources under answers and a "wrong" button | R2 | — |
 | BOT-7 | Voice messages to the bot are transcribed by the speech-to-text worker on the CoFlow host before routing; the journal marker may be the first spoken word; the audio is never sent to the model provider or a cloud transcription service by default; the transcript of a voice journal entry follows PRV-9 | R1 | Switch off: a voice journal entry reaches no model call; switch on: it reaches no routing or work call (canary) |
+| BOT-8 | **Effective values on cards:** behaviour that changes the outside world never depends on a model setting an optional flag - defaults live in code, and every approval card shows the effective value of each option it will apply (MCP-4, P-4) | R1 | A model answer that omits every optional field still produces the documented default behaviour and the card states it (test over the card catalogue) |
 | MCP-1 | MCP server over the same service layer: context-oriented tools, an explicit read-only list (a new tool is "write" by default). Streamable HTTP inside the container network or on loopback; owner devices reach it through an access recipe (DEP-12) or a stdio bridge over SSH with a forced-command key (DEP-11). Per-client tokens with a scope (read or read-write) and revocation; tokens for coding-capable clients are read-only on production by default; a token on every request; Host and Origin allow-list (DNS-rebinding protection on); every call logged with its client; every response states the instance role | R1 | No token → 401; a foreign Host header is refused; a read-only token cannot call a write tool |
 | MCP-2 | No journal tools; rule writes not exposed; the docs tell owners not to auto-approve write tools in their clients — CoFlow cannot enforce client settings, so external writes never rely on them (MCP-4) | R1 | — |
 | MCP-3 | A tool catalogue generated from code and checked in CI | R1 | — |
@@ -319,6 +335,9 @@ WRK-7 is not used; the number is retired and will not be reissued.
 | OPS-7 | Cost ledger: every model call with cost; daily budget with deferral of background work; monthly report | R1 | — |
 | OPS-8 | Evaluation harness: offline by default (fake model, fake Google and Telegram, no network, temp data folder); live model only with an explicit flag and a budget; it refuses to run against a production data root, production tokens or the production bot | R1 | A run changes no file outside its temp folder; a run pointed at a production data root refuses |
 | OPS-10 | **Interaction trace:** every request (bot, MCP, worker, device agent) carries an interaction id, a channel and a source reference; model calls store a step trace (tools, normalized arguments and results, truncation flags, rules applied, sources, input data classes) and the behaviour version (in production the image digest and release version; in native dev the commit with a dirty flag), model id, mode, tool schema version and rule versions; traces follow PRV-3 and are blanked by BOT-3 | R1 | Any bot answer can be traced to its steps and to the image digest that produced it |
+| OPS-11 | **Model tier per function group, chosen by the owner, with a cost forecast:** for each model-backed function group (bot answers, conversation summaries, meeting outcomes, analysis modules) the owner picks a tier of the configured provider (small / medium / large). `coflow init`, the status page and a bot command show the expected monthly cost of each tier, computed from the owner's own measured volumes in the cost ledger (OPS-7) and the provider's price table, next to the measured quality of that tier on the evaluation set for that function (OPS-8). A tier never changes by itself | R1 | Changing a tier changes the forecast immediately; after a month the forecast is within 20 % of the actual cost; the evaluation result per tier is shown next to its price |
+| OPS-12 | **No silent truncation:** every structured model call checks the provider's stop reason; a truncated answer is logged as an error, retried once with a larger output budget, and if it truncates again is surfaced as "incomplete" together with what was parsed - never stored as an empty or partial result that reads as complete. The rule holds at every stage of a multi-step pipeline, chunk summaries included, and a stage that drops items records how many and why | R1 | A fake provider that truncates on command yields an "incomplete" result with one retry, never an empty list; the number of dropped items and the reason are in the trace (OPS-10) |
+| OPS-13 | **Private evaluation sets from the owner's own material:** the owner may label commitments, dates and decisions in a few real recordings and keep that set inside the instance's data root - never in the repository - to measure recall of the outcome pipeline per model tier before a change ships. The set that ships publicly is synthetic | R1 | A tier or prompt change that drops recall below the configured target (default 80 %) fails the evaluation gate; the private set never leaves the data root (canary) |
 
 OPS-9 (update procedure) moved to the deployment requirements DEP-8…DEP-10 and is now R1.
 
@@ -481,6 +500,7 @@ Details, recipes and drills: [DEPLOYMENT.md](DEPLOYMENT.md).
 | NFR-9 | Every feature has a user doc, a `DATA_FLOWS` entry and a usage signal | R1 |
 | NFR-10 | Every module ships a module card (P-14, [MODULES.md](MODULES.md)) with quality parameters and an acceptance suite that runs in isolation with fakes; contracts between modules have contract tests; a module is accepted only when its own suite and the cross-module canaries pass, and the weekly episode of the week its stage closes publishes the results | R1 |
 | NFR-11 | Speech-to-text throughput is measured, not assumed: `coflow bench stt` reports the real-time factor and peak memory on the host. Targets on reference hardware: a 1-minute voice note in ≤ 20 s, a 1-hour recording in ≤ 30 min | R1 |
+| NFR-12 | Time to outcome is measured, not assumed: from the end of a meeting to the outcome message, per meeting and as a monthly median; while the recording has not arrived the owner is told exactly that. Target: <= 30 minutes after the recording arrives | R1 |
 
 ## 7. Out of scope and dropped from v1
 

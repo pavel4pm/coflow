@@ -1,6 +1,7 @@
 # CoFlow 2.0 — Roadmap
 
-Version 0.4 · 4 October 2026 · **status: draft for owner review** (after the final check)
+Version 0.5 · 5 October 2026 · **status: draft for owner review** (stage 0, 2, 4 and 5 scopes extended
+by the 5 October requirements, [REQUIREMENTS.md](REQUIREMENTS.md) 0.5)
 
 The roadmap turns [REQUIREMENTS.md](REQUIREMENTS.md) into stages. Each stage ends with something that works
 end to end, a tagged pre-release deployed through CI/CD and per-module acceptance results
@@ -37,8 +38,8 @@ Scope:
 - The minimal kernel: storage with the SQLite write discipline (OPS-3) and numbered migrations (OPS-4);
   one numbering tap and the prefix registry (IDN-1, IDN-2); a minimal event and outbox layer; data
   classes and the canary framework (PRV-1, NFR-6); the journal switch (PRV-9); `DATA_FLOWS.md` generated
-  from code declarations (PRV-2); the model gateway with a fake provider and the cost ledger (EXT-2,
-  OPS-7); the interaction trace skeleton (OPS-10); the offline evaluation harness that refuses production
+  from code declarations (PRV-2); the model gateway with a fake provider, the cost ledger and the
+  no-silent-truncation rule (EXT-2, OPS-7, OPS-12); the interaction trace skeleton (OPS-10); the offline evaluation harness that refuses production
   data (OPS-8).
 - Instance and data root (CFG-4), owner profile and locale skeleton (CFG-1…5), `coflow init` with roles
   and `coflow doctor` (OPS-1, DEP-2), one supervisor (OPS-2).
@@ -99,8 +100,10 @@ Scope:
 - Private bot that talks only to the owner; one token per instance; fenced mode on a 409 (BOT-1).
 - Routing: work by default, journal by explicit marker, buttons when in doubt, replies keep their route;
   "this was journal" blanks derived records (BOT-2, BOT-3, P-5).
-- Answers through read tools in compact mode; approval cards executed once by the owner only; cost under
-  each answer (BOT-4, P-3, P-4).
+- Answers through read tools in compact mode; approval cards executed once by the owner only, showing the
+  effective value of every option they apply; cost under each answer (BOT-4, BOT-8, P-3, P-4).
+- The owner picks the model tier per function group and sees the monthly cost forecast of each tier next to
+  its measured quality (OPS-11).
 - Speech-to-text as a stateless worker with job leases; voice messages transcribed on the host before
   routing (BOT-7); `coflow bench stt` (NFR-11).
 - Morning plan with a deterministic ranking, evening plan vs. fact, close the day (RHY-1…3); the control
@@ -145,7 +148,8 @@ Scope:
 
 - Recorder pipeline: a watched inbox fed by an encrypted folder sync and by bot voice notes, registration
   after complete arrival, transcription into segments in the worker with its own limits, summaries,
-  resilience, recorder profile, archive budget (SIG-2…4, SIG-11, SIG-14).
+  resilience, recorder profile, archive budget (SIG-2…4, SIG-11, SIG-14); import of an external transcript, preferred
+  for attribution when it carries speaker labels (SIG-16).
 - Calendar copy, read-only, with freshness flags, per-purpose tokens and a headless login (SIG-9, EXT-3).
 - Host plugins, off by default: Telegram user-session collector with voice notes (SIG-7, SIG-8), Gmail
   read (SIG-10) (EXT-1).
@@ -167,7 +171,10 @@ Scope:
 
 - Meeting intent with participants and a required link to work (MTG-1); brief before the meeting with
   sources and named gaps (MTG-2); recording to meeting by time overlap or label (MTG-3); outcome to
-  commitment and task proposals (MTG-4).
+  commitment and task proposals (MTG-4), with quotes extracted per chunk from segments (MTG-12), honest
+  outcome messages (MTG-13), context assembled by rules (MTG-14), the record and analysis modes (MTG-15)
+  and the conference link on online meetings (MTG-16); outcome recall measured against the owner's private
+  evaluation set before a change ships (OPS-13); time to outcome measured and reported (NFR-12).
 - One outbox for external writes, executed only by the production role: states, deterministic external
   ids, read-back before retry, read-back verification (MTG-5, P-8); calendar write safety (MTG-11).
 - Fresh preflight: calendar freshness, busy time, booking hours, buffers between meetings with people

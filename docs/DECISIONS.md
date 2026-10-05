@@ -7,6 +7,25 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-033 · The owner picks the model tier per function, with the monthly cost in front of them — accepted (5 October 2026)
+
+- **Context:** v1 ran every model-backed function on one small tier. Its meeting outcomes were weak for
+  two reasons at once — a pipeline that summarised the transcript away and hid truncation (OPS-12, MTG-12,
+  MTG-13) and a tier too small for the job — while a manual pass on a large tier, with the full transcript
+  and context, produced an outcome the author could act on. The other half of the choice is the bill: the
+  difference between tiers is the owner's monthly cost, and v1 measured that cost only after the fact.
+- **Decision:** the
+  tier is the owner's choice per function group, never the machine's, and the choice is offered with the
+  expected monthly cost of each tier computed from the owner's own volumes, next to the measured quality of
+  that tier on the evaluation set for that function (OPS-11).
+- **Alternatives:** one tier everywhere (v1's answer: cheap, and wrong where quality decides); the machine
+  choosing per call (an opaque bill and no budget the owner can hold); choosing on quality alone (the bill
+  is the owner's, not the machine's).
+- **Consequences:** OPS-11; the cost ledger (OPS-7) and the evaluation harness (OPS-8) report per tier;
+  the analysis mode of a meeting outcome runs on the tier chosen for it (MTG-15); private evaluation sets
+  measure recall per tier before a change ships (OPS-13); NFR-3's "≤ $1 per active day" is a target for
+  the default tiers, not a cap on the owner's choice.
+
 ## D-032 · Building in public: the machine drives, the author decides — accepted (4 Oct 2026); the rubric name and automatic merges are proposed
 
 - **Context:** with CoFlow 2.0 developed in the open (D-001), the open question was who does what, at what
