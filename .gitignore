@@ -53,6 +53,9 @@ venv/
 build/
 dist/
 
+# --- local working files (drafts, media texts, notes; never published) ---
+local/
+
 # --- editors / OS / local agent settings ---
 .idea/
 .vscode/

@@ -83,8 +83,9 @@ Signal → Decision → Commitment → Action → Outcome → Learning
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Install paths, the production host, CI/CD, access, backups, drills |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Stages, exit criteria, estimates, switch-over from v1 |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log (why open source, why this architecture and deployment) |
-| [docs/LESSONS_FROM_V1.md](docs/LESSONS_FROM_V1.md) | What half a year of the private v1 taught — incidents, numbers, fixes |
+| [docs/LESSONS_FROM_V1.md](docs/LESSONS_FROM_V1.md) | What the private v1 taught in its first months — incidents, numbers, fixes |
 | [docs/BUILD_IN_PUBLIC.md](docs/BUILD_IN_PUBLIC.md) | How the development is documented in public |
+| [DEVLOG.md](DEVLOG.md) | The development log: one entry per episode, with the numbers behind it |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to take part at this stage |
 | [SECURITY.md](SECURITY.md) | How to report a vulnerability; what CoFlow protects |
 
