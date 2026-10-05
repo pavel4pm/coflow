@@ -401,7 +401,7 @@ deterministic dossiers, merge and undo, forgetting a person, birthdays and the c
 | Queries | `person_profile`, `dossier(person, size budget)`, `search_persons` (script variants from CFG), `company_context`, `client_view`, `birthdays_due` |
 | Emits · consumes | `coflow.ppl.person.created` / `updated` / `merged` / `forgotten`, `coflow.ppl.fact.added` · `coflow.pol.erasure.completed` |
 | Depends on | Kernel only (IDS, CFG, POL) |
-| Requirements | IDN-3, IDN-4, IDN-5, PPL-1…PPL-7 (PPL-3 acceptance writes), REL-3 (stated positions only) |
+| Requirements | IDN-3, IDN-4, IDN-5, IDN-8, PPL-1…PPL-7 (PPL-3 acceptance writes), REL-3 (stated positions only) |
 | Data classes · DATA_FLOWS | work · dossiers to `provider` (answers, briefs), `mcp:<client>`, `messenger` |
 | Acceptance suite | Synthetic identity set (namesakes, strong keys, transliterations); dossier golden files; merge and undo round trips |
 | Usage signal | Resolutions and dossiers served per week |
@@ -410,6 +410,8 @@ deterministic dossiers, merge and undo, forgetting a person, birthdays and the c
 | Quality attribute | Metric | Acceptance threshold |
 |---|---|---|
 | Functional correctness (no silent duplicates) | Duplicates on the synthetic identity set; rows written on an ambiguous match | 0; 0 (candidates returned) |
+| Functional correctness (read-only lookup) | Bytes changed in any table by a lookup, including fields filled in on a person it found (IDN-8) | 0 |
+| Functional correctness (name is not a key) | Contact keys written to a person matched on name or alias alone; duplicates created when the same person was added between a card and its approval (IDN-8) | 0 and 0 |
 | Safety (pipelines) | People created by background pipelines on unknown senders | 0 |
 | Functional correctness (dossier) | Byte equality for the same input; budget overruns; journal content | Identical; 0; 0 |
 | Functional correctness (cross-script) | Recall of cross-script name matching on the labelled set | ≥ 95 % |
@@ -890,7 +892,7 @@ notifications with caps and quiet hours, sources and a "wrong" button.
 | Queries | None public (state on the status page) |
 | Emits · consumes | `coflow.bot.message.routed` (journal routes carry no text) · `coflow.act.card.proposed`, `coflow.rhy.plan.delivered`, `coflow.mtg.brief.ready`, `coflow.sig.transcript.ready`, `coflow.cmt.commitment.due`, `coflow.tax.obligation.due`, `coflow.obs.health.degraded` |
 | Depends on | Module `api`s; ACT, JRN, LRN, POL, MDL, CFG; STT through jobs; messenger port (one reference adapter and a fake) |
-| Requirements | BOT-1…BOT-7, BOT-8…BOT-10, LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10 |
+| Requirements | BOT-1…BOT-7, BOT-8…BOT-10, LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10; threads follow BOT-2 routing |
 | Data classes · DATA_FLOWS | all classes pass its renderer · `messenger` rows per class; journal outputs only when the journal × messenger row is on (otherwise the local CLI) |
 | Acceptance suite | Fake messenger with text, voice, captions, replies, commands and forwards; double taps and restarts; quiet-hour clock tests |
 | Usage signal | Owner messages per active day; cards decided per week |

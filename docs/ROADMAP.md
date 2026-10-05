@@ -68,7 +68,7 @@ Exit criteria:
 Scope:
 
 - People and companies: `resolve_or_create_person`, temporal facts with source and quote, deterministic
-  dossier (IDN-3, IDN-4, IDN-6, IDN-7, PPL-1, PPL-2, PPL-4).
+  dossier (IDN-3, IDN-4, IDN-6, IDN-7, IDN-8, PPL-1, PPL-2, PPL-4).
 - Conversations as sessions and messages; transcript segments in the schema from the start (SIG-1,
   SIG-14); quick log and notes (SIG-15); research-ready signals (REL-6).
 - Work registry: directions with ranks and envelopes, goals with their R1 fields, tasks, status log, ball
