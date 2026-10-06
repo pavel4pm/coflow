@@ -52,10 +52,13 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Decision (accepted):** the machine drives and the author decides. Coding agents follow the roadmap
   week by week — they build, test, release and draft the episodes; the author tests the result, says what
   using it was like, answers the decisions marked "proposed", approves deploys that touch real data,
-  approves every publication, and publishes. A main episode every Monday (video and posts) and a short
-  lesson post on Thursdays — at most two touches a week — with the episode calendar and the review gate
-  on 9 November 2026 as recorded in [BUILD_IN_PUBLIC.md](BUILD_IN_PUBLIC.md). Episode 0.1 publishes on
+  approves every publication, and publishes. A main episode every Tuesday (a post, and a video in the
+  weeks that allow one) and a short lesson post on Thursdays — at most two touches a week — with the episode calendar and the review gate
+  on 10 November 2026 as recorded in [BUILD_IN_PUBLIC.md](BUILD_IN_PUBLIC.md). Episode 0.1 published on
   6 October 2026; the canonical text of every episode goes into [DEVLOG.md](../DEVLOG.md).
+- **Changed 6 October 2026 (accepted):** the main episode moves from Monday to Tuesday, the day the
+  series actually launched, and a video is part of an episode only in the weeks that allow one — episode
+  0.1 went out as a post alone. The review gate moves with it, to 10 November 2026.
 - **Proposed:** the rubric's working name ("Decision system at work"); merging code automatically once CI
   and the independent review pass, so the author is never the bottleneck of the build.
 - **Alternatives:** publishing only finished releases (no evidence of how decisions were made, which is
