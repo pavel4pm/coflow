@@ -33,7 +33,8 @@ per feature. Install time (NFR-2), running cost (NFR-3), responsiveness (NFR-4) 
 
 Scope:
 
-- Repository layout, Python package, standard test runner, linter, CI on Windows and Linux (DEP-7: GitHub-
+- Repository layout, Python package, uv for dependencies and environments with a committed `uv.lock`,
+  ruff as linter and formatter, standard test runner, CI on Windows and Linux (DEP-7, DEP-22: GitHub-
   hosted runners only, pinned actions, read-only default token, DCO, secret scanning, tag rules).
 - The minimal kernel: storage with the SQLite write discipline (OPS-3) and numbered migrations (OPS-4);
   one numbering tap and the prefix registry (IDN-1, IDN-2); a minimal event and outbox layer; data

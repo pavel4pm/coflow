@@ -7,6 +7,26 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-035 · uv for dependencies and environments, ruff for linting and formatting — accepted (6 October 2026)
+
+- **Context:** v1 had no linter at all and its environment was a `requirements.txt` with no lock, so the
+  machine, the server and the tests never resolved to provably the same versions. Stage 0 already called
+  for a test runner, a linter and CI on Windows and Linux without naming the tools, and naming them before
+  the first line of code is cheaper than migrating later. A contributor's first interaction with the
+  project is the setup, so it has to be two commands. The suggestion to adopt both from the first day
+  came from outside the project, from a reader of the launch episode.
+- **Decision:** `uv` is the package and environment manager — dependencies in `pyproject.toml`, `uv.lock`
+  committed, `uv sync --frozen` the single install path for development, CI and the image. `ruff` is the
+  linter and formatter, configured in the same `pyproject.toml`, with `ruff check` and
+  `ruff format --check` as required CI checks (DEP-22).
+- **Alternatives:** pip with `requirements.txt` and pip-tools (what v1 did; slower, and the lock is a
+  second tool); Poetry or PDM (another resolver and lock format, slower installs); flake8 with black and
+  isort instead of ruff (three tools and their plugins where one does the work).
+- **Consequences:** DEP-22 and stage 0; the Dockerfile installs from the lock (DEP-1); CONTRIBUTING gives
+  the two setup commands. Both tools come from one young vendor, which is the risk taken knowingly: the
+  configuration is portable — ruff maps back to flake8 and black, and uv back to pip with a lock file —
+  so the exit stays cheap.
+
 ## D-034 · The bot's behaviour lives in scenario files, and a gap becomes a scenario change approved in the chat — proposed (relayed as the author's wish of 5 October 2026)
 
 - **Context:** in v1 the bot's behaviour lived in prompts and tool descriptions. Asked to create a meeting

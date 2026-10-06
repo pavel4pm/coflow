@@ -16,6 +16,19 @@ useful contributions right now are about what the system should do and why.
 Code contributions open with stage 0 of the [roadmap](docs/ROADMAP.md), when the repository gets its
 skeleton, test runner and CI. Until then, please do not send code pull requests.
 
+From stage 0 the toolchain is [uv](https://docs.astral.sh/uv/) for dependencies and environments and
+[ruff](https://docs.astral.sh/ruff/) for linting and formatting (D-035), so the whole setup is two
+commands:
+
+```
+uv sync --frozen
+uv run pytest
+```
+
+Before you open a pull request, `uv run ruff check` and `uv run ruff format --check` must pass; CI runs
+both on Windows and Linux. Dependency changes go in `pyproject.toml` with `uv.lock` committed in the
+same commit.
+
 ## Rules for every contribution
 
 - **Never post real personal data.** No real conversations, chat exports, recordings, names, phone numbers,
@@ -46,6 +59,7 @@ licence (see https://developercertificate.org/).
 ## What will be expected from code (from stage 0)
 
 - Tests run offline: temp data folder, fake model provider, fake calendar and messenger, no network.
+- The lock file matches `pyproject.toml`, and `ruff check` and `ruff format --check` are clean (DEP-22).
 - No owner-specific literals in code, prompts, fixtures or deployment files; a test gate checks this.
 - Every new data flow is declared in code and appears in `DATA_FLOWS.md`.
 - Every module change keeps its module card ([docs/MODULES.md](docs/MODULES.md)) and acceptance suite green;

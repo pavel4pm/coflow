@@ -493,6 +493,7 @@ Details, recipes and drills: [DEPLOYMENT.md](DEPLOYMENT.md).
 | DEP-19 | Disaster recovery targets: data loss ≤ 24 h, recovery ≤ 4 h onto another Linux machine or a rented server (a rented server holds the journal at rest with a provider — an explicit owner switch in `DATA_FLOWS.md`) | R2 | A yearly drill meets both targets with one production writer throughout |
 | DEP-20 | Supply-chain extras: published SBOM and provenance attestations, arm64 and GPU image variants, automated repository-policy checks | R2 | — |
 | DEP-21 | Optional push deploy from CI over the private network with workload identity and an environment approval, calling the same updater | Later | The CI node can reach nothing but the update command |
+| DEP-22 | **Toolchain and reproducible installs:** dependencies are declared in `pyproject.toml` and locked in `uv.lock`, which is committed; `uv sync --frozen` is the one install path for development, CI and the image, so the three environments resolve to the same versions; a lock that does not match `pyproject.toml` fails CI. `ruff check` and `ruff format --check` are required checks on Windows and Linux, configured in `pyproject.toml`, and the same versions are pinned for local runs through the lock | R1 | A clean machine reaches a working dev environment with two commands; CI fails on an out-of-date lock, a lint finding or unformatted code; the image installs from the lock, not from a resolver |
 
 ## 6. Non-functional requirements (NFR)
 
