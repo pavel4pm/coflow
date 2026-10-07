@@ -361,7 +361,7 @@ through ADM; the updater (UPD) runs outside the stack.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (init, doctor, backup, restore, image, Compose); 2 (staging host, promote, retire, fencing); 5 (holds, rollback support); R2 · 6 (export, import, move and rebuild drill) |
+| Release · stage | R1 · 0 (init, doctor, backup, restore, image, Compose); 1 (the validation snapshot of the owner's existing system, OPS-15); 2 (staging host, promote, retire, fencing); 5 (holds, rollback support); R2 · 6 (export, import, move and rebuild drill) |
 | Runs in | `core` (supervisor); CLI through ADM; `migrate`, `restore`, `drill` without a live `core` in their target instance |
 | Owns | `sys_instance` (instance id, role, epoch, host id, volume id), `sys_backups`, `sys_deploys`, `sys_holds`, `sys_exports` |
 | Commands | `init`, `doctor`, `backup`, `restore`, `drill`, `migrate`, `promote`, `retire`, `hold` / `release`, `export`, `import` |
@@ -802,7 +802,7 @@ warning is an estimate for planning, not tax advice, and carries that label with
 | Functional correctness (estimates) | Quarterly estimate vs. the filed amount after two quarters; figures from an unverified pack year; VAT figures that depend on "manual, outside register" records | Within 10 % of the filed amount until the owner sets a tolerance; 100 % marked "unverified"; 100 % marked "incomplete: invoices outside a compliant invoicing system" |
 | Functional correctness (export) | Export pack content for the same data (timestamps aside); manual issued invoices in the official issued-register layout, a per-form figure or a box mapping | Byte-identical; 0 |
 
-### GOL — Centre and goals (stage 8, module 2)
+### GOL — Centre and goals (stage 8, module 2; a thin slice in R1, stage 3)
 
 Helps the owner form their centre (values, manifest, life vision, directions, period goals) and checks
 whether time, money, commitments and decisions follow it. The owner writes or adopts every sentence; the
@@ -812,7 +812,7 @@ score.
 
 | Field | Value |
 |---|---|
-| Release · stage | R2 · 8.2; WRK-4 hypotheses in 8.8 |
+| Release · stage | R2 · 8.2; WRK-4 hypotheses in 8.8. **R1 · 3 for the slice (D-036):** importing, keeping and versioning the owner's existing centre documents and citing them (GOL-13), and the one computed link check (GOL-14) — no sessions, no goal cards, no model wording |
 | Runs in | `core` |
 | Owns | `gol_centre_documents`, `gol_centre_versions` (immutable, with diffs), `gol_spans`, `gol_rules` (typed fields; free text only as a span reference), `gol_directions` and `gol_goals` (transferred from WRK, ids unchanged), `gol_goal_versions`, `gol_hypotheses`, `gol_if_then_plans`, `gol_sessions` and `gol_drafts` (journal class; origin owner or MCP client), `gol_reviews`, `gol_verdicts` (output, outcome, path), `gol_check_marks`, `gol_reflections` (journal class when journal input was used) |
 | Commands | `import_centre_documents`, `classify_section`, `start_session(protocol)`, `submit_draft`, `propose_version` (approval card with diff), `approve_version` (bot or local CLI only), `set_rule_field`, `create_direction`, `create_goal`, `activate_goal`, `set_goal_state` (pause, drop, supersede only in a deliberation review or by a DEC record), `park_for_deliberation`, `record_verdict`, `set_cap`, `mark_check` |

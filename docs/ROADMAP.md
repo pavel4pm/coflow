@@ -29,6 +29,13 @@ English code and localized texts, a module card with an acceptance suite, a user
 per feature. Install time (NFR-2), running cost (NFR-3), responsiveness (NFR-4) and transcription speed
 (NFR-11) are measured for the R1 release.
 
+**Real cases gate a stage.** Before a stage starts, the author names 3-5 cases from their own last 30
+days that the stage must carry end to end. The cases go into that stage's exit criteria and run against
+the snapshot of the author's real history (OPS-15), not only against synthetic fixtures. A stage closes
+when its cases pass; a case that cannot pass becomes either a named gap in that week's episode or the
+next stage's scope. This is how a staged build stays joined to real use while the author keeps living
+in the system they have until the switch-over at stage 6.
+
 ### Stage 0 — Foundations
 
 Scope:
@@ -81,6 +88,8 @@ Scope:
 - Timeline: "what happened on this day / around this event" over every stored layer, with coverage per
   layer; it grows as later stages add layers (TML-1).
 - Connector contract and the first adapter, Telegram Desktop export (SIG-5, SIG-6).
+- A one-way snapshot of the system the author runs today, imported into a dev instance and never
+  written back, so every later stage is tried on real history and not only on fixtures (OPS-15).
 - MCP: context-oriented tools, explicit read-only list, Streamable HTTP plus the SSH bridge, scoped
   per-client tokens, Host and Origin checks, generated catalogue, approval model and undo handlers
   (MCP-1…4).
@@ -140,12 +149,21 @@ Scope:
 - Commitments with quotes and history (CMT-1).
 - Inline, capped commitment proposals from conversations, with the decision rate measured per proposal
   type; a type below its threshold switches itself off (CMT-2, P-13).
+- Morning surfacing of the decisions that need the author today, with the reason (DEC-5).
+- The centre kept and versioned: the author's existing documents imported unchanged, with decisions and
+  directions able to cite them (GOL-13).
+- One computed check: what carries no link to a goal or a direction, with the items behind the number
+  (GOL-14). The formation protocols and the goal cards stay at stage 8.
 
 Exit criteria:
 
 - A decision goes from creation through monitored assumptions to closing with an outcome.
 - A proposal that is not decided does not pile up in a queue; the decision rate per proposal type is
   available through an MCP read tool.
+- The author's own centre documents are in the instance byte-identical to their files, and a decision
+  cites one of them.
+- The link check names what carries no link to a goal or a direction, computed on the snapshot of real
+  history, and the author recognises the list.
 
 ### Stage 4 — Sources
 
@@ -235,7 +253,6 @@ Exit criteria:
 Scope:
 
 - Weekly review as a structured debrief (RHY-4).
-- Morning surfacing of decisions that need the owner (DEC-5).
 - Owner corrections become typed, versioned rules through approval cards; explicit `/remember` and
   `/problem`; one-off exceptions with expiry; `/rules` (LRN-1…4).
 - Incidents packaged with a synthetic fixture and redacted infrastructure identifiers, ready to become a

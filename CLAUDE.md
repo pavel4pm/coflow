@@ -33,6 +33,9 @@ and starts with stage 0.
 - **IDs are permanent.** Add new requirement IDs at the end of their table; never reuse a retired ID
   (OPS-9, ALN-1, WRK-7). Every ID you reference must exist; place every non-"Later" requirement in a
   roadmap stage.
+- **Real cases gate a stage.** Before a stage starts, the owner names 3-5 cases from their own last 30
+  days; they become part of that stage's exit criteria and run against the snapshot of real history
+  (OPS-15), not only against synthetic fixtures.
 - **Review rhythm:** one independent review round per stage; two when the stage writes to the outside world
   or builds a money module. Leftovers become issues, not more polishing rounds.
 - **Outward actions need the owner's explicit yes:** pushing, publishing posts, changing repository or

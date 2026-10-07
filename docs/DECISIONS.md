@@ -7,6 +7,32 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-036 · A thin slice of the centre in R1, real history from stage 1, and real cases as the stage gate — accepted (7 October 2026)
+
+- **Context:** the decision layer is the one v1 proved — 17 decision records with 102 facts and assumptions
+  in 30 days — while its strategy and manifest screens were used zero times in the same period. In the plan
+  as written, the centre, the goal control and the inconsistency findings all sit at stage 8, in 2027. That
+  leaves the project's own claim — that the system makes its owner's decisions more conscious — untested
+  for a year, and it leaves every stage before the switch-over tested on synthetic fixtures alone.
+- **Decision (three changes, taken together):**
+  1. A thin slice of the centre enters R1: the owner's existing documents are imported, kept and versioned,
+     and decisions and directions can cite them (GOL-13); one computed check reports what carries no link to
+     a goal or a direction (GOL-14); the morning surfacing of decisions that need the owner moves from R2 to
+     R1 (DEC-5). The formation protocols, the goal cards and the full control stay at stage 8.
+  2. From stage 1, a one-way snapshot of the system the owner runs today is imported into a dev instance,
+     read-only toward the source, so every stage is exercised on real history (OPS-15). The documented
+     format and the real switch-over stay at stage 6.
+  3. Before each stage the owner names 3–5 real cases from their own last 30 days; they become part of that
+     stage's exit criteria and must pass on the snapshot.
+- **Alternatives:** keep the centre entirely at stage 8 (the core claim stays unmeasured until 2027); build
+  the goals module early and in full (expensive, and built on the one part of v1 that proved zero use);
+  validate on synthetic fixtures until stage 6 (cheap, but the gap between a fixture and real history is
+  exactly where v1's defects lived).
+- **Consequences:** GOL-13, GOL-14, OPS-15 and DEC-5 enter stages 1 and 3; the R1 target absorbs a few days
+  inside stages 3 and 5 rather than a new stage; GOL-14's usage signal becomes evidence for or against the
+  stage-8 goals module — if the owner does not open the list, that is a finding, not a failure, and the
+  module is re-scoped before it is built.
+
 ## D-035 · uv for dependencies and environments, ruff for linting and formatting — accepted (6 October 2026)
 
 - **Context:** v1 had no linter at all and its environment was a `requirements.txt` with no lock, so the
