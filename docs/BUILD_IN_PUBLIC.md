@@ -44,31 +44,35 @@ moves to Linux (stage 2).
 
 Each main episode reports the week's commitment against what actually happened. When work slips, the
 dates move and the scope does not grow. Development starts only after the private v1's acceptance period
-closes; if it closes later, the Season 1 dates shift by the same amount.
+closes; if it closes later, the Season 1 dates shift by the same amount — they did once already, on
+14 October, when the acceptance was still open and the episode reported the harness in use today
+instead of a stage that had not started. An episode number identifies its content, not its place in
+the order.
 
 | Date (2026) | Slot | Episode | The work behind it |
 |---|---|---|---|
 | Tue 6 Oct | Launch | 0.1 How the plan was made (published as a post; no video that week) | Requirements published; v1 under acceptance |
-| Tue 13 Oct | Main | 0.2 Why CoFlow 2.0 is open source and not a product — and how this series works | v1 acceptance; no code yet |
+| Wed 14 Oct | Main | 0.2 The harness today: where the grounds for one real decision come from (video) | v1 acceptance still open; no code yet |
 | Thu 15 Oct | Lesson | 0.3 Twenty web pages, one used | — |
-| Tue 20 Oct | Main | 1.0 Stage 0 starts: the commitments of the week; the machine takes the wheel | Stage 0 (after the v1 acceptance closes) |
+| Tue 20 Oct | Main | 0.12 Why CoFlow 2.0 is open source and not a product — and how this series works | — |
 | Thu 22 Oct | Lesson | 0.4 1,785 suggestions, 10 decisions | — |
-| Tue 27 Oct | Main | 1.1 Stage 0: foundations and the delivery skeleton | Stage 1 starts |
+| Tue 27 Oct | Main | 1.0 Stage 0 starts: the commitments of the week; the machine takes the wheel | Stage 0 (after the v1 acceptance closes) |
 | Thu 29 Oct | Lesson | 0.5 Where does a message go? | — |
-| Tue 3 Nov | Main | 1.2 Stage 1: memory core, timeline and MCP | Stage 2 starts; the home host moves to Linux |
+| Tue 3 Nov | Main | 1.1 Stage 0: foundations and the delivery skeleton | Stage 1 starts |
 | Thu 5 Nov | Lesson | 0.6 233k rows under one lock | — |
-| Tue 10 Nov | Main + review gate | 1.3 Stage 2: the bot, the daily rhythm and the home host | Stage 3 starts |
+| Tue 10 Nov | Main + review gate | 1.2 Stage 1: memory core, timeline and MCP | Stage 2 starts; the home host moves to Linux |
 | Thu 12 Nov | Lesson | 0.7 Where $54.78 went | — |
-| Tue 17 Nov | Main | 1.4 Stage 3: decisions and commitments | Stage 4 starts |
+| Tue 17 Nov | Main | 1.3 Stage 2: the bot, the daily rhythm and the home host | Stage 3 starts |
 | Thu 19 Nov | Lesson | 0.8 Agents reviewing agents | — |
-| Tue 24 Nov | Main | 1.5 Stage 4: sources | Stage 5 starts (two review rounds) |
+| Tue 24 Nov | Main | 1.4 Stage 3: decisions and commitments | Stage 4 starts |
 | Thu 26 Nov | Lesson | 0.9 The system that always agreed with me | — |
-| Tue 1 Dec | Main | 1.6 Stage 5 in progress: reliable execution | — |
+| Tue 1 Dec | Main | 1.5 Stage 4: sources | Stage 5 starts (two review rounds) |
 | Thu 3 Dec | Lesson | 0.10 ∫G = V × E | — |
-| Tue 8 Dec | Main | 1.7 Stage 5: meetings, the outbox and automatic rollback | Pre-releases run on the home host |
+| Tue 8 Dec | Main | 1.6 Stage 5 in progress: reliable execution | — |
 | Thu 10 Dec | Lesson | 0.11 Microservices or a modular monolith? | — |
-| Tue 15 Dec | Main | 1.8 Two weeks on the home host: drills, what broke | Restore and rollback drills |
-| Tue 22 Dec | Main | 1.9 The R1 release (target) | Tag `v2.0.0` |
+| Tue 15 Dec | Main | 1.7 Stage 5: meetings, the outbox and automatic rollback | Pre-releases run on the home host |
+| Tue 22 Dec | Main | 1.8 Two weeks on the home host: drills, what broke | Restore and rollback drills |
+| Tue 29 Dec | Main | 1.9 The R1 release (target) | Tag `v2.0.0` |
 
 ## Episode template
 
@@ -93,7 +97,7 @@ Numbers are measured. An estimate is marked as an estimate.
 | # | Episode | Source |
 |---|---|---|
 | 0.1 | How the plan was made: from v1, its usage data and its development history to the CoFlow 2.0 requirements — agents researching, critics reviewing, the owner deciding | [REQUIREMENTS.md](REQUIREMENTS.md), [DECISIONS.md](DECISIONS.md), [LESSONS_FROM_V1.md](LESSONS_FROM_V1.md) |
-| 0.2 | Why CoFlow 2.0 is open source and not a product | [DECISIONS.md](DECISIONS.md) D-001, D-005 |
+| 0.2 | The harness today: one real decision, and where its grounds came from — recordings, chats, calendar, hours and money, held together by one id per person, topic and task | the author's own working system; synthetic data on screen |
 | 0.3 | Twenty web pages, one used: why the interfaces are a bot and MCP | [LESSONS_FROM_V1.md](LESSONS_FROM_V1.md) §1 |
 | 0.4 | 1,785 suggestions, 10 decisions: why background queues die | §1 |
 | 0.5 | Where does a message go? Routing between work and the private journal | §4 |
@@ -103,6 +107,7 @@ Numbers are measured. An estimate is marked as an estimate.
 | 0.9 | The system that always agreed with me: why an alignment check must be able to say "can't judge" | §7; [DECISIONS.md](DECISIONS.md) D-017 |
 | 0.10 | ∫G = V × E: what can be measured between people, and what must be pre-registered | [REQUIREMENTS.md](REQUIREMENTS.md) §5.20 |
 | 0.11 | Microservices or a modular monolith? Why one writer wins for a personal system | [DECISIONS.md](DECISIONS.md) D-030 |
+| 0.12 | Why CoFlow 2.0 is open source and not a product — and how this series works | [DECISIONS.md](DECISIONS.md) D-001, D-005, D-032 |
 
 ## Season 1 — the build (stages 0–7: the R1 release episode after stage 5, then the switch-over and the learning loop)
 
