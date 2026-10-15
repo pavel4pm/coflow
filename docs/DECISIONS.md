@@ -132,6 +132,11 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Changed 6 October 2026 (accepted):** the main episode moves from Monday to Tuesday, the day the
   series actually launched, and a video is part of an episode only in the weeks that allow one — episode
   0.1 went out as a post alone. The review gate moves with it, to 10 November 2026.
+- **Changed 15 October 2026 (accepted):** the Thursday lesson post becomes a Friday lesson video of
+  4–6 minutes on how one thing is made, after the author found the format cheap to produce — with a
+  cost guard: a Friday video that would take more than about 45 minutes end to end does not ship that
+  week. The series also gets its description: everything the author spent years putting into other
+  people's companies, now built for themselves and shown as it goes.
 - **Proposed:** the rubric's working name ("Decision system at work"); merging code automatically once CI
   and the independent review pass, so the author is never the bottleneck of the build.
 - **Alternatives:** publishing only finished releases (no evidence of how decisions were made, which is
