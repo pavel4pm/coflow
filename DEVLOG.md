@@ -11,6 +11,22 @@ author's private data beyond what the author selects for the episode — see the
 
 ---
 
+## Episode 0.2 — The harness today
+
+*Season 0 · 15 October 2026 · video: <https://youtu.be/HC-rAElrr7k> (11:31)*
+
+| Part | Content |
+|---|---|
+| Signal | The calendar had this week's episode announcing the start of stage 0. The private v1's acceptance period was still open, so stage 0 had not started and there was nothing built to report. Publishing a stage report with no stage behind it would have broken the one rule this series is about |
+| Decision | Publish the episode anyway and report what is true: the system the author runs today, shown through one real decision instead of a tour of the tools. The weekly slot moves to Tuesday, where the series actually launched, and a video belongs to an episode only in the weeks that allow one (D-032) |
+| Commitment | One episode a week; Season 1 dates shift by the week this cost, R1 target to 29 December |
+| Action | Recorded in one take as a screen share with a camera inset, over a deck built for this episode, switching once to a second scene where photographs and clips from the fair played live rather than being cut in afterwards. Eleven and a half minutes of recording became an 11:31 video, with no editing pass. The episode walks one hypothesis end to end — "an exhibitor will buy the app on their stand, cold" — and then the four mechanisms that carried it: one id per person, topic and task across every system; a bot that prepares the context of a meeting before it starts; a meeting run from that brief, with the outcome returning to memory; and the record of the decision itself |
+| Tested | The hypothesis was tested in the field at a trade fair, with the disproof criterion written down before the test. More than 100 conversations with exhibitors, by two people, every one of them recorded against the topic rather than a folder. Ten installs of the app came out of it; none of those ten used it even once, and reminders changed nothing — and that is after the app's entry flow was fixed in the field so that people could launch it at all |
+| Outcome | The hypothesis is disproved and closed as disproved, from quotes rather than impressions, at the cost of two days at a fair instead of a quarter of building. What it leaves is uneven and the episode says so: the problem is real and confirmed, the moment is wrong (an exhibitor decides long before the fair, not on the floor), and the method is missing — getting the app installed is solved, getting it used is not. That is the next thing to test, not a conclusion |
+| Learning | Write what counts as disproof before the test; afterwards there is always an explanation for why it nearly worked. An install is not a metric — use is. And an episode with nothing built is still an episode: reporting the gap honestly costs one week of dates and keeps the series worth reading |
+| Numbers | More than 100 conversations in two days; 10 installs, 0 of them used; 20 slides; 11 minutes 31 seconds; no code in the repository yet |
+| Artifacts | The video above · [BUILD_IN_PUBLIC](docs/BUILD_IN_PUBLIC.md) (the calendar after the shift) · [DECISIONS](docs/DECISIONS.md) D-032 |
+
 ## Episode 0.1 — How the plan was made
 
 *Season 0 · 6 October 2026 · reports the work of 4 October 2026*
