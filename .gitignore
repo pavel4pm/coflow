@@ -62,3 +62,6 @@ local/
 .DS_Store
 Thumbs.db
 .claude/settings.local.json
+
+# --- dropped-in material that must never be published ---
+Inbox/

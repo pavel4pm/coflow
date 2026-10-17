@@ -57,11 +57,11 @@ the order.
 |---|---|---|---|
 | Tue 6 Oct | Launch | 0.1 How the plan was made (published as a post; no video that week) | Requirements published; v1 under acceptance |
 | Wed 14 Oct | Main | 0.2 The harness today: where the grounds for one real decision come from (video) | v1 acceptance still open; no code yet |
-| Fri 17 Oct | Lesson | 0.13 A link that counts: measuring a channel before publishing, not after | — |
+| Fri 17 Oct | Lesson | 0.3 Twenty web pages, one used | — |
 | Tue 20 Oct | Main | 0.12 Why CoFlow 2.0 is open source and not a product — and how this series works | — |
-| Fri 24 Oct | Lesson | 0.3 Twenty web pages, one used | — |
+| Fri 24 Oct | Lesson | 0.4 1,785 suggestions, 10 decisions | — |
 | Tue 27 Oct | Main | 1.0 Stage 0 starts: the commitments of the week; the machine takes the wheel | Stage 0 (after the v1 acceptance closes) |
-| Fri 31 Oct | Lesson | 0.4 1,785 suggestions, 10 decisions | — |
+| Fri 31 Oct | Lesson | 0.13 A link that counts: measuring a channel before publishing, not after | Two weeks of real numbers behind it, not one experiment |
 | Tue 3 Nov | Main | 1.1 Stage 0: foundations and the delivery skeleton | Stage 1 starts |
 | Fri 7 Nov | Lesson | 0.5 Where does a message go? | — |
 | Tue 10 Nov | Main + review gate | 1.2 Stage 1: memory core, timeline and MCP | Stage 2 starts; the home host moves to Linux |
