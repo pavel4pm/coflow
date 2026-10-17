@@ -511,19 +511,20 @@ control view. In R1 it also holds directions and goals (with an optional money t
 ### DEC — Decisions
 
 Decision records: statement, context, alternatives, stake; grounds and monitored assumptions; health
-computed from assumption states; explicit closing with an outcome; morning surfacing.
+computed from assumption states; explicit closing with an outcome; morning surfacing; check dates, a
+"waiting" list and reviews answered in the chat behind approval (D-037).
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 3; R2 · 7 (DEC-5 surfacing) |
+| Release · stage | R1 · 3 (DEC-1…7, DEC-9; placement of DEC-6, DEC-7 and DEC-9 proposed, D-037); Later: DEC-8 (view, behind UI-2), DEC-10 (research) |
 | Runs in | `core` |
 | Owns | `dec_decisions`, `dec_facts` (grounds, monitoring), `dec_assumptions` (metric, threshold, source, frequency), `dec_checks`, `dec_outcomes` |
-| Commands | `create_decision`, `add_fact`, `add_assumption`, `set_assumption_state`, `close_decision` (needs an outcome), `cancel`, `supersede` |
-| Queries | `decision_context`, `decisions_due`, `health(decision)`, `list_decisions` |
+| Commands | `create_decision`, `update_decision` (versioned fields), `add_fact`, `add_assumption`, `set_assumption_state` (moves the next check), `postpone_check`, `review_decision` (keep / adjust / revise with a next date), `close_decision` (needs an outcome), `cancel`, `supersede` |
+| Queries | `decision_context`, `decisions_due`, `waiting(today)` (reasons and due dates), `assumption_due(assumption)`, `health(decision)`, `list_decisions` |
 | Emits · consumes | `coflow.dec.decision.created` / `closed` / `health_changed`, `coflow.dec.assumption.state_changed` · none |
-| Depends on | PPL; `GoalDirectory`; ACT (cards for model-proposed decisions) |
-| Requirements | DEC-1…DEC-5 |
-| Data classes · DATA_FLOWS | work · to `provider` (phrasing), `mcp:<client>`, `messenger` |
+| Depends on | PPL; `GoalDirectory`; ACT (cards for model-proposed decisions and review answers); MDL (splitting a review answer, DEC-7); WRK (tasks proposed for a decision, DEC-9) |
+| Requirements | DEC-1…DEC-10 |
+| Data classes · DATA_FLOWS | work · to `provider` (phrasing; splitting the owner's review answer with the decision's context into card items, DEC-7, DEC-9), `mcp:<client>`, `messenger` |
 | Acceptance suite | Table test of every assumption-state combination; a synthetic month of assumption checks |
 | Usage signal | Decisions opened and closed per month; assumption checks answered on their due day |
 | Approval | CI scorecard |

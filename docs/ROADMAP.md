@@ -1,7 +1,8 @@
 # CoFlow 2.0 — Roadmap
 
-Version 0.5 · 5 October 2026 · **status: draft for owner review** (stage 0, 2, 4 and 5 scopes extended
-by the 5 October requirements, [REQUIREMENTS.md](REQUIREMENTS.md) 0.5)
+Version 0.6 · 17 October 2026 · **status: draft for owner review** (stage 3 scope extended by the decision
+loop, D-037, [REQUIREMENTS.md](REQUIREMENTS.md) 0.6; stage 0, 2, 4 and 5 scopes extended by the 5 October
+requirements, 0.5)
 
 The roadmap turns [REQUIREMENTS.md](REQUIREMENTS.md) into stages. Each stage ends with something that works
 end to end, a tagged pre-release deployed through CI/CD and per-module acceptance results
@@ -13,7 +14,7 @@ details are in [DEPLOYMENT.md](DEPLOYMENT.md), the module structure in [ARCHITEC
 
 | When | What |
 |---|---|
-| October 2026 | Requirements (this package). The private v1 runs under acceptance testing; its features are frozen |
+| October 2026 | Requirements (this package). The private v1 runs under acceptance testing; its features are frozen, except the decision loop (D-037) |
 | From mid-October 2026 | Stage 0 starts after the v1 acceptance period ends |
 | One stage per week where possible | A sustainable pace that matches the weekly episode |
 | Stage 2 | The separate home production machine is set up and runs CoFlow in the staging role |
@@ -150,6 +151,10 @@ Scope:
 - Inline, capped commitment proposals from conversations, with the decision rate measured per proposal
   type; a type below its threshold switches itself off (CMT-2, P-13).
 - Morning surfacing of the decisions that need the author today, with the reason (DEC-5).
+- The decision loop (D-037; placement proposed): a computed check date for every assumption, moved by each check, and one
+  "waiting" list with reasons (DEC-6); a review asked in the chat one question at a time, a free-text
+  answer split into validated items on one approval card (DEC-7); a context change recorded as fact,
+  adjustment and next task on one card (DEC-9).
 - The centre kept and versioned: the author's existing documents imported unchanged, with decisions and
   directions able to cite them (GOL-13).
 - One computed check: what carries no link to a goal or a direction, with the items behind the number
@@ -158,6 +163,8 @@ Scope:
 Exit criteria:
 
 - A decision goes from creation through monitored assumptions to closing with an outcome.
+- On the snapshot of real history every waiting decision names its reason and due date, and an answer in
+  the chat goes from the question to an approved card to the record, with no write before approval.
 - A proposal that is not decided does not pile up in a queue; the decision rate per proposal type is
   available through an MCP read tool.
 - The author's own centre documents are in the instance byte-identical to their files, and a decision
@@ -298,6 +305,7 @@ evaluation set.
 | R-a | Relationship balance | REL-1…3 | M | 2–4M | 4–8 |
 | R-c | Conductivity protocol and predicting G(t+1) — after a planned experiment gate (November 2026) | REL-4, REL-5 | L | 4–6M | 8–12 |
 | R-d | Change over time | TML-3 | M | 2–4M | 4–8 |
+| R-e | Calibration: weekly sealed forecasts by the author and a model, scored against base rates — after the v1 pilot ends (30 November 2026) | DEC-10 | S | 1–2M | 2–4 |
 
 ## Estimates
 
@@ -318,7 +326,7 @@ recalculated after stage 0.
 | 0 Foundations and delivery skeleton | L | 7–10M | 13–20 | 2–3 |
 | 1 Memory core, timeline and MCP | L | 9–14M | 18–27 | 1–2 |
 | 2 Bot, rhythm, control view and the home host | L | 7–10M | 13–20 | 11–17 (incl. moving the existing desktop to Linux and setting it up as the host) |
-| 3 Decisions and commitments | M | 3–5M | 6–10 | 1 |
+| 3 Decisions and commitments | M (re-estimate at the stage start for the decision loop, D-037; v1 code exists to port) | 3–5M | 6–10 | 1 |
 | 4 Sources | L | 6–9M | 12–18 | 2–3 |
 | 5 Meetings, reliable execution, rollback | L, 2 rounds | 7–11M | 14–22 | 2–4 |
 | **R1 (stages 0–5)** | | **39–59M** | **76–117** | **19–30** |
@@ -326,7 +334,7 @@ recalculated after stage 0.
 | 7 Learning loop | L | 5–7M | 10–14 | 1–2 |
 | **Stages 6–7** | | **13–19M** | **25–37** | **5–8** |
 | 8 Modules 1a–8 (incl. 2b) | per module | 41–61M | 85–123 | 1–3 per module |
-| Research R-a, R-c, R-d | indicative | 8–14M | 16–28 | per protocol |
+| Research R-a, R-c, R-d, R-e | indicative | 9–16M | 18–32 | per protocol |
 
 Model API cost while developing (evaluation runs with a live model, behind an explicit flag): on the order
 of $30–60 for R1. Running costs of the home host (electricity, object storage for backups, the dead-man
@@ -354,7 +362,7 @@ hardware choice (§14).
 ## Rules while v2 is built
 
 - **The private v1 is frozen** since 4 October 2026: acceptance fixes and dangerous bugs only. Everything
-  else becomes a v2 issue.
+  else becomes a v2 issue. One exception since 17 October 2026: the decision loop (D-006, D-037).
 - **Nothing for growth.** A requirement without a usage signal or an explicit decision of the author waits.
 - **Synthetic data only** in the repository, issues, screenshots and episodes; no identifiers of the
   author's infrastructure (host names, addresses, domains, VPN or tunnel ids, SSH users).
@@ -365,7 +373,7 @@ hardware choice (§14).
 |---|---|
 | The second-system trap: the rewrite grows beyond R1 | R1 scope is fixed by requirement IDs; additions need a usage signal and an owner decision; deployment extras are R2 or Later |
 | Delivery work swallows stage 0 | Stage 0 builds only a skeleton against any Linux host; the physical host comes in stage 2, rollback in stage 5 |
-| v1 needs change during the rewrite | Feature freeze; acceptance fixes only; v2 issues instead |
+| v1 needs change during the rewrite | Feature freeze; acceptance fixes only (one exception, the decision loop, D-037); v2 issues instead |
 | Development competes with paid work | One stage per week at most; a stage can slip, the scope cannot grow |
 | The production host is unreachable while the owner is away | Remote administration is a precondition; an off-host heartbeat; power-on after power loss; a second remote path; a travel runbook |
 | A second writer appears across dev, drills and production (the v1 collision) | Instance roles, promote/retire with credential rotation, fenced mode, one-way data flow, no sync |

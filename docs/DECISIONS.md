@@ -7,6 +7,33 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-037 · Close the decision loop: check dates, one question in the chat, every write behind approval — accepted (17 October 2026); the priorities of DEC-6…DEC-10 are proposed
+
+- **Context:** a retrospective study on the private v1 (17 October 2026) found the decision record filled
+  but its loop open: 0 of 89 assumptions had ever been checked, none of the 6 decisions past their review
+  date had been reviewed, and a change agreed in a conversation (an agreement extended by a month on new
+  terms) had reached the record only as a stale date. The v1 decision screens were barely opened. The same
+  study had a memory-free model guess the author's choice at a recorded fork in 13 of 15 cases, but none of
+  the decisions that actually came up: the agenda follows new outside facts, not stated intentions.
+- **Decision:** the author decided to build the loop in v1 now, as the one exception to its feature freeze
+  (D-006) — check dates and the "waiting" list, a decisions screen, and review questions in the chat whose
+  answers are written only after approval — and to carry the same part into these requirements: computed
+  check dates and one "waiting" list (DEC-6); a review asked in the chat, one question at a time, with every
+  write behind one approval card (DEC-7); a context change recorded as fact, adjustment and next task on one
+  card (DEC-9); a decisions view with the reason each decision waits (DEC-8); weekly sealed forecasts as
+  research (DEC-10). In v1 the bot may change decisions from the chat, but only through approval — the rule
+  of P-4 and BOT-4. The author also started a pilot of weekly sealed forecasts on v1's data, run outside
+  v1's code until 30 November 2026.
+- **Alternatives:** keep the loop for 2.0 alone (the freeze stays clean, but the core claim stays untested
+  until 2027 and the record keeps drifting); let the bot set assumption states straight from a free-text
+  answer (faster, but a model would decide what the author meant); a bigger web UI first (v1's usage data
+  says the work does not happen in its screens).
+- **Consequences (placement proposed):** DEC-6, DEC-7 and DEC-9 join stage 3 next to DEC-5 (proposed: R1,
+  stage 3); DEC-8 waits behind UI-2 and the measured use of v1's new screen (proposed: Later); DEC-10 is a
+  research module with a pre-registered protocol (proposed: Later, research, D-029). The v1 implementation —
+  a scenario file, tests and a process document — is the reference for the 2.0 scenario (BOT-9). The pilot's
+  result goes to the author, who decides whether DEC-10 moves up.
+
 ## D-036 · A thin slice of the centre in R1, real history from stage 1, and real cases as the stage gate — accepted (7 October 2026)
 
 - **Context:** the decision layer is the one v1 proved — 17 decision records with 102 facts and assumptions
@@ -494,6 +521,9 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   the work if built twice.
 - **Decision:** from 4 October 2026, v1 gets only acceptance fixes and fixes of dangerous bugs. All planned
   stages move to v2.
+- **Changed 17 October 2026 (accepted):** one exception — the decision loop is built in v1 now (check dates
+  and the "waiting" list, a decisions screen, review questions in the chat written only after approval), and
+  the same part is specified for 2.0 (D-037). The forecast pilot of the same day runs outside v1's code.
 
 ## D-005 · The core is a personal decision system — accepted (4 Oct 2026)
 

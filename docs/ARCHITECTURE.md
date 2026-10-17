@@ -127,7 +127,7 @@ plugins use `px_<id>_*`. The authorizer checks the table registry, not the prefi
 | Domain | SIG | Signals: sessions, messages, recordings | `sig_*` | R1 · 1, 4 | `core`; audio in `stt` |
 | Domain | JRN | Journal | `jrn_entries` | R1 · 1 | `core` |
 | Domain | WRK | Work: tasks; directions and goals until 8.2 | `wrk_*` | R1 · 1, 2 | `core` |
-| Domain | DEC | Decisions | `dec_*` | R1 · 3; R2 · 7 | `core` |
+| Domain | DEC | Decisions | `dec_*` | R1 · 3; Later (DEC-8, DEC-10) | `core` |
 | Domain | CMT | Commitments | `cmt_*` | R1 · 3; R2 · 8.3 | `core` |
 | Domain | CAL | Calendar | `cal_*` | R1 · 4 (copy), 5 (writes) | `core` |
 | Domain | MTG | Meetings | `mtg_*` | R1 · 5 | `core` |
@@ -509,11 +509,11 @@ R1 is stages 0–5, R2 stages 6–8. Deployment items follow DEPLOYMENT.md.
 | 0 Minimal kernel | STO, IDS, EVT (outbox, in-process dispatch, scheduler for kernel jobs), POL (data classes, flow switches with the journal switch, canary framework, literal gate), MDL (fake provider, cost ledger, budget, taint), CFG, OBS (trace skeleton), `kernel.context`, OPS and ADM (`init`, `doctor`, backup, restore), import contracts, module map, card template, CI scorecard generator | Dockerfile, Compose, CI image build, suite in the image, Compose smoke test, tag → image by digest, a manual `coflow update <digest>` over SSH to any Linux Docker host (a VM is fine) |
 | 1 Memory core | PPL; SIG sessions, messages, segments, quick log, connector contract, messenger export; WRK tasks, directions and goals (WRK-1…3, WRK-8); JRN storage and local entry; SRC; TML-1; POL derivation graph and erasers; OBS traces; MCP over HTTP and BRG with scoped tokens; real provider adapter behind the live flag | Deployed to the same Linux Docker host |
 | 2 Bot and rhythm | BOT; ACT approval cards; RHY-1…3; WRK-6; EVT job leases; STT worker for voice | Physical home host in the staging role; off-host heartbeat; overlay-VPN recipe; signature verification |
-| 3 Decisions, commitments | DEC-1…4; CMT-1, CMT-2 | — |
+| 3 Decisions, commitments | DEC-1…7, DEC-9; CMT-1, CMT-2 | — |
 | 4 Sources | SIG recorder pipeline (folder sync) and contact proposals; CAL copy; PLG in process with TGC and MLR; STS; OBS health, SLIs and runtime scorecards | Disk-space policy (DEP-13); outage behaviour (DEP-15) |
 | 5 Meetings, execution | MTG; ACT outbox executor; CAL writes. **R1 complete** | Automatic rollback with write holds; bot approval card bound to the image digest |
 | 6 Switch-over | OPS export and import; INT; AGT uploader and activity agent; RHY activity spans and rules; PPL merge, undo, forget | Import, switch-over and promote on the home host; rebuild drill |
-| 7 Learning loop | LRN-1…5; RHY-4; DEC-5; BOT-6 | SBOM and provenance attestations, arm64 image, repository-policy checks (DEP-20) |
+| 7 Learning loop | LRN-1…5; RHY-4; BOT-6 | SBOM and provenance attestations, arm64 image, repository-policy checks (DEP-20) |
 | 8.1a Money core | FIN: books, taxpayers, transfers, ledger, invoice register (file adapter), archive, targets (migrated from WRK), reports; `extract` jobs. Proposed: IMP's Norma 43 parser and one CSV profile pulled in, so the ledger reconciles | Legal opinion before public release (covers 8.1a and 8.1b) |
 | 8.1b Country pack | TAX: pack interface, taxpayer-scoped calendar, reserve estimates, advisor export, warnings, rules-watch; ESP | Legal opinion before public release |
 | 8.2 Centre and goals | GOL, with directions and goals transferred from WRK; LRN-6 reflection, the first consumer of the journal switch (position 2 confirmed, D-031) | — |
