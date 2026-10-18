@@ -47,11 +47,10 @@ moves to Linux (stage 2).
 ## Calendar (targets, not promises)
 
 Each main episode reports the week's commitment against what actually happened. When work slips, the
-dates move and the scope does not grow. Development starts only after the private v1's acceptance period
-closes; if it closes later, the Season 1 dates shift by the same amount — they did once already, on
-14 October, when the acceptance was still open and the episode reported the harness in use today
-instead of a stage that had not started. An episode number identifies its content, not its place in
-the order.
+dates move and the scope does not grow. Development started on 17 October 2026 with stage 0A, while the
+private v1's acceptance period was still open (D-038); the Season 1 dates had shifted once before, on
+14 October, when the episode reported the harness in use today instead of a stage that had not started.
+An episode number identifies its content, not its place in the order.
 
 | Date (2026) | Slot | Episode | The work behind it |
 |---|---|---|---|
@@ -60,24 +59,27 @@ the order.
 | Fri 17 Oct | Lesson | 0.3 Twenty web pages, one used | — |
 | Tue 20 Oct | Main | 0.12 Why CoFlow 2.0 is open source and not a product — and how this series works | — |
 | Fri 24 Oct | Lesson | 0.4 1,785 suggestions, 10 decisions | — |
-| Tue 27 Oct | Main | 1.0 Stage 0 starts: the commitments of the week; the machine takes the wheel | Stage 0 (after the v1 acceptance closes) |
+| Tue 27 Oct | Main | 1.0 Stage 0A under way: the commitments of the week; the machine takes the wheel | Stage 0A started on 17 October 2026 (D-038) |
 | Fri 31 Oct | Lesson | 0.13 A link that counts: measuring a channel before publishing, not after | Two weeks of real numbers behind it, not one experiment |
-| Tue 3 Nov | Main | 1.1 Stage 0: foundations and the delivery skeleton | Stage 1 starts |
+| Tue 3 Nov | Main | 1.1 Stage 0: the kernel, the decision core and the delivery skeleton | Stage 1 starts |
 | Fri 7 Nov | Lesson | 0.5 Where does a message go? | — |
 | Tue 10 Nov | Main + review gate | 1.2 Stage 1: memory core, timeline and MCP | Stage 2 starts; the home host moves to Linux |
 | Fri 14 Nov | Lesson | 0.6 233k rows under one lock | — |
 | Tue 17 Nov | Main | 1.3 Stage 2: the bot, the daily rhythm and the home host | Stage 3 starts |
 | Fri 21 Nov | Lesson | 0.7 Where $54.78 went | — |
-| Tue 24 Nov | Main | 1.4 Stage 3: decisions and commitments | Stage 4 starts |
+| Tue 24 Nov | Main | 1.4 Stage 3: capture and commitment proposals | Stage 4 starts |
 | Fri 28 Nov | Lesson | 0.8 Agents reviewing agents | — |
 | Tue 1 Dec | Main | 1.5 Stage 4: sources | Stage 5 starts (two review rounds) |
 | Fri 5 Dec | Lesson | 0.9 The system that always agreed with me | — |
 | Tue 8 Dec | Main | 1.6 Stage 5 in progress: reliable execution | — |
 | Fri 12 Dec | Lesson | 0.10 ∫G = V × E | — |
-| Tue 15 Dec | Main | 1.7 Stage 5: meetings, the outbox and automatic rollback | Pre-releases run on the home host |
+| Tue 15 Dec | Main | 1.7 Stage 5: meetings, the outbox and automatic rollback | Pre-releases through the full deploy path on the home host (staging since stage 2) |
 | Fri 19 Dec | Lesson | 0.11 Microservices or a modular monolith? | — |
-| Tue 22 Dec | Main | 1.8 Two weeks on the home host: drills, what broke | Restore and rollback drills |
+| Tue 22 Dec | Main | 1.8 Five weeks on the home host: the gate's drills, what broke | Restore and rollback drills; the 30-day gate closes (DEP-27) |
 | Tue 29 Dec | Main | 1.9 The R1 release (target) | Tag `v2.0.0` |
+
+The decision adoption gate (not before 1 December 2026; in practice when the host gate passes) gets its
+own main episode.
 
 ## Episode template
 
@@ -123,9 +125,12 @@ closes. After stage 5 comes the R1 release episode: what a new user can install,
 what is still missing. Running through the season:
 
 - **From a laptop to a home server.** CI/CD and Docker for a personal system: the delivery skeleton
-  (stage 0), the home host and remote administration (stage 2), signed releases, approvals and automatic
+  (stage 0B), the home host and remote administration (stage 2), signed releases, approvals and automatic
   rollback (stage 5), the move of real data (stage 6) — as a path others can repeat
   ([DEPLOYMENT.md](DEPLOYMENT.md)).
+- **The project's own decisions as records.** From stage 0A the series may show entries of the
+  project's decision log as CoFlow 2.0 decision records, since they are public (PRV-10; proposed,
+  D-046).
 - **Module cards in practice.** How each module is specified, measured and accepted
   ([MODULES.md](MODULES.md)).
 
