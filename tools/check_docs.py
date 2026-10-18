@@ -7,6 +7,7 @@ gendered pronouns describe the owner. Exits non-zero on any problem.
 
 Run from the repository root:  python tools/check_docs.py
 """
+
 from __future__ import annotations
 
 import pathlib
@@ -18,12 +19,14 @@ PREFIXES = "CFG|IDN|PPL|SIG|DEC|CMT|MTG|WRK|RHY|LRN|BOT|MCP|UI|SRC|PRV|OPS|EXT|N
 RETIRED = {"OPS-9", "ALN-1", "WRK-7"}  # explained in REQUIREMENTS.md, never reissued
 ROW_ID = re.compile(r"^\| ((?:[A-Z]{2,3})-\d+|P-\d+) \|", re.M)
 ROW_PRIORITY = re.compile(r"^\| ((?:[A-Z]{2,3})-\d+) \| .*?\| (R1|R2|Plugin|Later) \|", re.M)
-PRONOUNS = re.compile(r"\b(he|his|him|she|her)\b", re.I)
+PRONOUNS = re.compile(r"\b(he|his|him|himself|she|her|hers|herself)\b", re.I)
+SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".ruff_cache"}
+SKIP_TOP = {"Inbox", "local"}  # git-ignored owner folders, never published
 
 
 def refs(text: str) -> set[str]:
     found = set(re.findall(rf"\b((?:{PREFIXES})-\d+)\b", text))
-    for prefix, first, last in re.findall(r"\b([A-Z]{1,3})-(\d+)…(\d+)", text):
+    for prefix, first, last in re.findall(rf"\b({PREFIXES})-(\d+)…(\d+)", text):
         found |= {f"{prefix}-{i}" for i in range(int(first), int(last) + 1)}
     return found
 
@@ -41,10 +44,10 @@ def main() -> int:
         problems.append(f"duplicate requirement ID {dup}")
 
     for path in sorted(ROOT.rglob("*.md")):
-        if ".git" in path.parts:
+        rel = path.relative_to(ROOT)
+        if SKIP_DIRS & set(rel.parts) or rel.parts[0] in SKIP_TOP:
             continue
         text = path.read_text(encoding="utf-8")
-        rel = path.relative_to(ROOT)
         for match in re.finditer(r"\]\(([^)#]+)(#[^)]*)?\)", text):
             target = match.group(1)
             if not target.startswith("http") and not (path.parent / target).exists():

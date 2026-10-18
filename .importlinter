@@ -1,0 +1,68 @@
+# Import contracts (ARCHITECTURE §5.2; decision-core design §4.1, §12.1). Run: uv run lint-imports
+# The custom "api-only" contract (from outside a module only its api and events) is a pytest check:
+# tests/architecture/test_boundaries.py. Layers in parentheses are optional: they do not exist yet.
+# The top contract is exhaustive (review finding): a new top-level package must be placed in it.
+
+[importlinter]
+root_package = coflow
+include_external_packages = True
+
+[importlinter:contract:top]
+name = top: app > interfaces | adapters | plugin_host > modules > kernel > contracts
+type = layers
+containers =
+    coflow
+layers =
+    app
+    interfaces | adapters | (plugin_host)
+    modules
+    kernel
+    contracts
+exhaustive = True
+
+[importlinter:contract:kernel]
+name = kernel: ops > obs > models | actions > policy > events > ids | config > store | ports > context | errors
+type = layers
+containers =
+    coflow.kernel
+layers =
+    ops
+    obs
+    (models) | (actions)
+    policy
+    events
+    ids | config
+    store | ports
+    context | errors
+exhaustive = True
+
+[importlinter:contract:domain]
+name = domain: tiers 8 (aln) to 1; DEC never imports above tier 2
+type = layers
+containers =
+    coflow.modules
+layers =
+    aln
+    (gol)
+    (rhy) | (src) | (tml) | (lrn)
+    (mtg)
+    (wrk) | (tax)
+    cmt | (fin)
+    (sig) | dec
+    (ppl) | (jrn) | (cal)
+exhaustive = True
+
+[importlinter:contract:adapters]
+name = adapters, provider SDKs and HTTP clients are wired only by coflow.app
+type = forbidden
+source_modules =
+    coflow.kernel
+    coflow.modules
+    coflow.interfaces
+    coflow.contracts
+forbidden_modules =
+    coflow.adapters
+    httpx
+    requests
+    aiohttp
+    urllib3

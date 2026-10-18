@@ -1,29 +1,30 @@
 # CoFlow
 
 **An open-source personal decision system.** CoFlow runs on a computer you control — your desktop, a home
-server or any Docker host — collects the signals you already have — conversations, recordings, messages,
-your calendar — and keeps the chain from a signal to a decision, a commitment, an action, an outcome and
-what you learned. You work with it through a Telegram bot and through AI clients (Claude and others) over
-MCP. It proposes; you decide. Nothing changes the outside world without your explicit approval, and
-everything that leaves the CoFlow host or travels between your devices and it — text for the model
-provider, for example — is listed in one data-flow document, with a switch.
+server, a dedicated laptop or any Docker host — collects the signals you already have — conversations,
+recordings, messages, your calendar — and keeps the chain from a signal to a decision, a commitment, an
+action, an outcome and what you learned. You work with it through a Telegram bot and through AI clients
+(Claude and others) over MCP. It proposes; you decide. Nothing changes the outside world without your
+explicit approval, and everything that leaves the CoFlow host or travels between your devices and it —
+text for the model provider, for example — is listed in one data-flow document, with a switch.
 
 ```
 Signal → Decision → Commitment → Action → Outcome → Learning
 ```
 
-> **Status: requirements stage (October 2026).** No code yet. CoFlow 2.0 is a clean rewrite of a private
-> system (v1) its author has used daily since spring 2026. The requirements, the architecture, the
-> deployment design, the plan and the lessons from v1 are in `docs/`. Development starts after the v1
-> acceptance period ends (planned mid-October 2026) and happens in public, with a weekly episode on what
-> was built and tested.
+> **Status: stage 0A in progress since 17 October 2026: the decision core** (D-038). Development has
+> started and the first code is in progress; there is no release yet. CoFlow 2.0 is a clean rewrite of a
+> private system (v1) its author has used daily since spring 2026. The requirements, the architecture,
+> the deployment design, the plan and the lessons from v1 are in `docs/`. It is built in public, with a
+> weekly episode on what was built and tested.
 
 ## What it is
 
 - **Memory of people and conversations.** Who someone is, what you discussed, what each side promised —
   every fact with its source and a quote.
-- **Decisions and commitments as first-class records.** A decision keeps its grounds and the assumptions to
-  watch; a commitment knows who owes what to whom and by when.
+- **The decision as the hub.** A decision keeps its grounds, the assumptions to watch and when to check
+  them, sealed before the result is known; commitments, tasks and meetings say which decision they serve,
+  or that they serve none. A commitment knows who owes what to whom and by when.
 - **Meetings end to end.** Plan, brief, record, outcome — the recording finds its meeting, the outcome turns
   into proposed commitments you confirm with one tap.
 - **A daily and weekly rhythm.** A morning plan computed by an algorithm (not invented by a model), an
@@ -55,12 +56,14 @@ Signal → Decision → Commitment → Action → Outcome → Learning
 
 ## How it runs
 
-- **Production:** one Docker Compose stack — proposed: on a Linux host (D-020), a home server or a rented
-  one — with exactly one writing instance. Releases are built and signed by CI on GitHub; the host pulls
-  and verifies them itself, and you approve each deploy.
+- **Production:** one Docker Compose stack on a dedicated always-on Linux machine — a home server, a laptop
+  under its own profile, or a rented one (the author's: a home laptop with a GPU, after a 30-day gate,
+  D-050) — with exactly one writing instance. Releases are built and signed by CI on GitHub; the host
+  pulls and verifies them itself, and you approve each deploy.
 - **Development:** native Python on Windows or Linux, with fakes and synthetic data.
 - **Your devices** reach the host through a private network (an overlay VPN plus SSH); nothing listens on a
-  public interface by default.
+  public interface by default. Cloud AI clients come later, through the owner's own relay that never
+  decrypts (D-052, D-053).
 
 ## Principles in one screen
 
@@ -78,6 +81,7 @@ Signal → Decision → Commitment → Action → Outcome → Learning
 | Document | What is inside |
 |---|---|
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Product thesis, principles, functional and non-functional requirements, scope and non-goals |
+| [docs/SPEC_DECISION_CORE.md](docs/SPEC_DECISION_CORE.md) | The decision core in detail: data model, states, health, the waiting list, import and shadow, acceptance tests |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The modular monolith: modules, contracts, data classes, process view |
 | [docs/MODULES.md](docs/MODULES.md) | One card per module: owned data, contracts, quality parameters, acceptance |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Install paths, the production host, CI/CD, access, backups, drills |

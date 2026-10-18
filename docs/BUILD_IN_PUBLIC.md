@@ -10,13 +10,16 @@ Signal → Decision → Commitment → Action → Outcome → Learning
 
 ## The rubric
 
+- **What it is (accepted by the author, 15 October 2026):** everything the author spent years putting
+  into other people's companies, now built for themselves and shown as it goes.
 - **Working name (proposed):** "Decision system at work" (English) / «Decision system в работе» (Russian).
 - **Format (accepted by the author, 4 October 2026, D-032): the machine drives, the author decides.** Coding
   agents follow the roadmap week by week — they build, test, release and draft the episodes; the author
   tests, tells what it was like to use, makes the decisions and publishes.
-- **Cadence (accepted, D-032; the day changed to Tuesday on 6 October 2026):** a main episode every
-  Tuesday — a post, with a video when the week allows one — and a short lesson post on Thursdays; at most
-  two touches a week.
+- **Cadence (accepted, D-032; Tuesday since 6 October, Friday lessons since 15 October 2026):** a main
+  episode every Tuesday — what was built, tested and worked through — and on Friday a short video on how
+  one thing is made, 4–6 minutes. At most two touches a week, and a Friday video that would take more
+  than about 45 minutes end to end does not ship that week.
 - **Review (accepted, D-032):** on 10 November 2026, after the fourth main episode (see "Review gate").
 
 ## The weekly cycle
@@ -25,8 +28,9 @@ Signal → Decision → Commitment → Action → Outcome → Learning
 |---|---|---|
 | Tuesday | Starts the week's work from the roadmap (a scheduled run that reads the stage and its exit criteria) | Publishes the episode prepared on Monday (≈ 15 min) |
 | Tuesday–Thursday | Builds, runs the independent review, opens pull requests, runs CI, tags a pre-release, deploys it (from stage 2 to the home host in the staging role) | Answers decisions marked "proposed", if any |
-| Thursday | Sends a "what to test this week" list to the author's bot; prepares the lesson post | Publishes the lesson post (≈ 5 min) |
-| Friday–Sunday | — | Tests on the deployed instance (≈ 1–2 h) and sends voice notes with impressions to the bot |
+| Thursday | Sends a "what to test this week" list to the author's bot; drafts the Friday lesson | Answers what the lesson should cover |
+| Friday | — | Records and publishes the lesson video (≈ 30–45 min) |
+| Saturday–Sunday | — | Tests on the deployed instance (≈ 1–2 h) and sends voice notes with impressions to the bot |
 | Monday | Drafts the Tuesday episode — texts, numbers and, when there is a video, its talking points — from the week's work and the author's notes | Records a 5–10 minute video in the weeks that allow it (≈ 30–45 min) |
 
 **Where the author decides — always a human:**
@@ -43,36 +47,39 @@ moves to Linux (stage 2).
 ## Calendar (targets, not promises)
 
 Each main episode reports the week's commitment against what actually happened. When work slips, the
-dates move and the scope does not grow. Development starts only after the private v1's acceptance period
-closes; if it closes later, the Season 1 dates shift by the same amount — they did once already, on
-14 October, when the acceptance was still open and the episode reported the harness in use today
-instead of a stage that had not started. An episode number identifies its content, not its place in
-the order.
+dates move and the scope does not grow. Development started on 17 October 2026 with stage 0A, while the
+private v1's acceptance period was still open (D-038); the Season 1 dates had shifted once before, on
+14 October, when the episode reported the harness in use today instead of a stage that had not started.
+An episode number identifies its content, not its place in the order.
 
 | Date (2026) | Slot | Episode | The work behind it |
 |---|---|---|---|
 | Tue 6 Oct | Launch | 0.1 How the plan was made (published as a post; no video that week) | Requirements published; v1 under acceptance |
 | Wed 14 Oct | Main | 0.2 The harness today: where the grounds for one real decision come from (video) | v1 acceptance still open; no code yet |
-| Thu 15 Oct | Lesson | 0.3 Twenty web pages, one used | — |
+| Fri 17 Oct | Lesson | 0.3 Twenty web pages, one used | — |
 | Tue 20 Oct | Main | 0.12 Why CoFlow 2.0 is open source and not a product — and how this series works | — |
-| Thu 22 Oct | Lesson | 0.4 1,785 suggestions, 10 decisions | — |
-| Tue 27 Oct | Main | 1.0 Stage 0 starts: the commitments of the week; the machine takes the wheel | Stage 0 (after the v1 acceptance closes) |
-| Thu 29 Oct | Lesson | 0.5 Where does a message go? | — |
-| Tue 3 Nov | Main | 1.1 Stage 0: foundations and the delivery skeleton | Stage 1 starts |
-| Thu 5 Nov | Lesson | 0.6 233k rows under one lock | — |
+| Fri 24 Oct | Lesson | 0.4 1,785 suggestions, 10 decisions | — |
+| Tue 27 Oct | Main | 1.0 Stage 0A under way: the commitments of the week; the machine takes the wheel | Stage 0A started on 17 October 2026 (D-038) |
+| Fri 31 Oct | Lesson | 0.13 A link that counts: measuring a channel before publishing, not after | Two weeks of real numbers behind it, not one experiment |
+| Tue 3 Nov | Main | 1.1 Stage 0: the kernel, the decision core and the delivery skeleton | Stage 1 starts |
+| Fri 7 Nov | Lesson | 0.5 Where does a message go? | — |
 | Tue 10 Nov | Main + review gate | 1.2 Stage 1: memory core, timeline and MCP | Stage 2 starts; the home host moves to Linux |
-| Thu 12 Nov | Lesson | 0.7 Where $54.78 went | — |
+| Fri 14 Nov | Lesson | 0.6 233k rows under one lock | — |
 | Tue 17 Nov | Main | 1.3 Stage 2: the bot, the daily rhythm and the home host | Stage 3 starts |
-| Thu 19 Nov | Lesson | 0.8 Agents reviewing agents | — |
-| Tue 24 Nov | Main | 1.4 Stage 3: decisions and commitments | Stage 4 starts |
-| Thu 26 Nov | Lesson | 0.9 The system that always agreed with me | — |
+| Fri 21 Nov | Lesson | 0.7 Where $54.78 went | — |
+| Tue 24 Nov | Main | 1.4 Stage 3: capture and commitment proposals | Stage 4 starts |
+| Fri 28 Nov | Lesson | 0.8 Agents reviewing agents | — |
 | Tue 1 Dec | Main | 1.5 Stage 4: sources | Stage 5 starts (two review rounds) |
-| Thu 3 Dec | Lesson | 0.10 ∫G = V × E | — |
+| Fri 5 Dec | Lesson | 0.9 The system that always agreed with me | — |
 | Tue 8 Dec | Main | 1.6 Stage 5 in progress: reliable execution | — |
-| Thu 10 Dec | Lesson | 0.11 Microservices or a modular monolith? | — |
-| Tue 15 Dec | Main | 1.7 Stage 5: meetings, the outbox and automatic rollback | Pre-releases run on the home host |
-| Tue 22 Dec | Main | 1.8 Two weeks on the home host: drills, what broke | Restore and rollback drills |
+| Fri 12 Dec | Lesson | 0.10 ∫G = V × E | — |
+| Tue 15 Dec | Main | 1.7 Stage 5: meetings, the outbox and automatic rollback | Pre-releases through the full deploy path on the home host (staging since stage 2) |
+| Fri 19 Dec | Lesson | 0.11 Microservices or a modular monolith? | — |
+| Tue 22 Dec | Main | 1.8 Five weeks on the home host: the gate's drills, what broke | Restore and rollback drills; the 30-day gate closes (DEP-27) |
 | Tue 29 Dec | Main | 1.9 The R1 release (target) | Tag `v2.0.0` |
+
+The decision adoption gate (not before 1 December 2026; in practice when the host gate passes) gets its
+own main episode.
 
 ## Episode template
 
@@ -108,6 +115,7 @@ Numbers are measured. An estimate is marked as an estimate.
 | 0.10 | ∫G = V × E: what can be measured between people, and what must be pre-registered | [REQUIREMENTS.md](REQUIREMENTS.md) §5.20 |
 | 0.11 | Microservices or a modular monolith? Why one writer wins for a personal system | [DECISIONS.md](DECISIONS.md) D-030 |
 | 0.12 | Why CoFlow 2.0 is open source and not a product — and how this series works | [DECISIONS.md](DECISIONS.md) D-001, D-005, D-032 |
+| 0.13 | A link that counts: why a channel is measured before publishing, and why the code belongs to the source rather than the destination | the author's own short-link service; the episode opens on the author breaking that rule the same week |
 
 ## Season 1 — the build (stages 0–7: the R1 release episode after stage 5, then the switch-over and the learning loop)
 
@@ -117,9 +125,12 @@ closes. After stage 5 comes the R1 release episode: what a new user can install,
 what is still missing. Running through the season:
 
 - **From a laptop to a home server.** CI/CD and Docker for a personal system: the delivery skeleton
-  (stage 0), the home host and remote administration (stage 2), signed releases, approvals and automatic
+  (stage 0B), the home host and remote administration (stage 2), signed releases, approvals and automatic
   rollback (stage 5), the move of real data (stage 6) — as a path others can repeat
   ([DEPLOYMENT.md](DEPLOYMENT.md)).
+- **The project's own decisions as records.** From stage 0A the series may show entries of the
+  project's decision log as CoFlow 2.0 decision records, since they are public (PRV-10; proposed,
+  D-046).
 - **Module cards in practice.** How each module is specified, measured and accepted
   ([MODULES.md](MODULES.md)).
 

@@ -1,0 +1,110 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "coflow"
+version = "0.1.0.dev0"
+description = "CoFlow 2.0: a self-hosted personal decision system"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "jsonschema>=4.26.0",
+    "mcp>=2.3.0",
+    "pyyaml>=6.0.3",
+    "starlette>=1.8.0",
+    "tzdata>=2026.5",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+coflow = "coflow.app.supervisor:main"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.170.1",
+    "import-linter>=2.15",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/coflow"]
+
+[tool.uv]
+required-version = ">=0.9"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "tools"]
+# Python only: Markdown code blocks in docs/ are specification text, not formatted code.
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
+# tools/check_docs.py belongs to the documentation workflow and predates this configuration.
+extend-exclude = ["local", "Inbox", "tools/check_docs.py"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # bugbear
+    "UP",   # pyupgrade
+    "SIM",  # simplify
+    "C4",   # comprehensions
+    "PIE",  # misc lints
+    "PT",   # pytest style
+    "DTZ",  # timezone-aware datetimes only
+    "TID",  # banned APIs (determinism, spec §12.5)
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "RUF001",  # ambiguous characters in strings: look-alike letters are test data (AT-K3)
+    "RUF002",  # ambiguous characters in docstrings: the spec's typography (§, en dash)
+    "RUF003",  # ambiguous characters in comments
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The one home of the wall clock and of randomness (Clock, SystemClock, new_salt).
+"src/coflow/kernel/context.py" = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.datetime.now".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"datetime.datetime.utcnow".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"datetime.datetime.today".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"datetime.date.today".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"time.time".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"time.time_ns".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"time.localtime".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"time.gmtime".msg = "No wall clock outside kernel.context.Clock (spec §12.5)."
+"random".msg = "No randomness outside kernel.context.new_salt() (spec §12.5)."
+"secrets".msg = "No randomness outside kernel.context.new_salt() (spec §12.5)."
+"os.urandom".msg = "No randomness outside kernel.context.new_salt() (spec §12.5)."
+"uuid.uuid1".msg = "No randomness outside kernel.context.new_salt() (spec §12.5)."
+"uuid.uuid4".msg = "No randomness outside kernel.context.new_salt() (spec §12.5)."
+
+[tool.ruff.format]
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+xfail_strict = true
+# Warnings raised from our own code are errors; third-party warnings are left to their authors.
+filterwarnings = ["error:::coflow", "error:::tests"]

@@ -1,11 +1,13 @@
 # CoFlow 2.0 — Modules
 
-Version 0.1 · 4 October 2026 · **draft — nothing here is implemented yet**
+Version 0.2 · 18 October 2026 · **draft — the STO, IDS, DEC and CMT cards are being built in stage 0A
+since 17 October 2026; every other card is not implemented yet**
 
 One card per module: what it owns, what it offers, what it needs, and the numbers it must meet to be
 accepted (P-14, NFR-10). How the modules fit together — layers, contracts, data classes, process view,
-the quality gate and the build order — is in [ARCHITECTURE.md](ARCHITECTURE.md). Requirement IDs refer to
-[REQUIREMENTS.md](REQUIREMENTS.md) v0.4 and [DEPLOYMENT.md](DEPLOYMENT.md).
+the quality gate and the build order — is in [ARCHITECTURE.md](ARCHITECTURE.md); the decision core in
+detail is in [SPEC_DECISION_CORE.md](SPEC_DECISION_CORE.md). Requirement IDs refer to
+[REQUIREMENTS.md](REQUIREMENTS.md) v0.7 and [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
 
@@ -13,13 +15,14 @@ the quality gate and the build order — is in [ARCHITECTURE.md](ARCHITECTURE.md
 
 | Field | Meaning |
 |---|---|
-| Release · stage | R1, R2, Plugin or Research, and the roadmap stage; "8.1a" is stage 8, module 1a |
+| Release · stage | R1, R2, Plugin or Research, and the roadmap stage; "0A" and "0B" are the two parts of stage 0; "8.1a" is stage 8, module 1a; "8.0" is the module moved to the front of stage 8 |
 | Runs in | `core` (the writing process), a satellite process, or the owner's device |
 | Owns | The tables this module alone writes. Kernel tables are `sys_*`, registered per module; domain modules use their code as prefix; plugins use `px_<id>_*` |
 | Commands · Queries | The module's `api`: commands write (one unit of work each), queries read (with `as_of` and coverage). Names only; signatures live in code |
 | Emits · consumes | Event types `coflow.<mod>.<entity>.<verb>`; payloads carry ids and changed-field names only |
 | Depends on | The `api` of modules in lower tiers, and kernel ports (ARCHITECTURE §5) |
-| Requirements | IDs this module delivers, wholly or in part |
+| Implements | The kernel ports this module implements for other modules (ARCHITECTURE §5.1); left out when there are none |
+| Requirements | IDs this module delivers, wholly or in part. Every R1 requirement is listed by at least one card (NFR-10); ranges are written in the short form (`DEC-11…22`) |
 | Data classes · DATA_FLOWS | The class of the owned tables and the `DATA_FLOWS.md` rows the module declares |
 | Quality parameters | 2–7 attributes (ISO/IEC 25010 names), each with a metric and a threshold that a test, an evaluation set or a drill checks. Where a requirement said "measured", the card states a default number |
 | Acceptance suite | What runs in isolation: a temp database, fakes for every port, synthetic fixtures, other modules only through their `api` |
@@ -31,9 +34,11 @@ needs a recorded decision. Cards move through: drafted → approved → built �
 in production (28-day window passed) → kept or retired.
 
 **Applies to every card and is not repeated:** the fitness functions of ARCHITECTURE §5.3; the journal
-canary under both switch settings; every table registered with an owner and a data class; no model or
-network call inside a write transaction; idempotency keys on every retried command; an undo handler or a
-"not undoable" mark on every command reachable over MCP.
+canary under both switch settings; every table registered with an owner, a data class and its
+append-only, set-once and erasable columns; one transaction-log row per unit of work and an event time
+with precision and basis on every row that describes an event (NFR-13); no model or network call inside a
+write transaction; idempotency keys on every retried command; an undo handler or a "not undoable" mark on
+every command reachable over MCP; every core scenario passes with every external app absent (EXT-6).
 
 ### Template
 
@@ -51,6 +56,7 @@ network call inside a write transaction; idempotency keys on every retried comma
 | Queries | |
 | Emits · consumes | |
 | Depends on | |
+| Implements | |
 | Requirements | |
 | Data classes · DATA_FLOWS | |
 | Acceptance suite | |
@@ -66,7 +72,7 @@ network call inside a write transaction; idempotency keys on every retried comma
 
 | Approval | Modules |
 |---|---|
-| Owner (card and scorecard, before the first deploy that enables the module) | FIN, TAX (with ESP), IMP, INV — money; JRN, POL — journal; ACT, CAL, NEG — external writes; GOL |
+| Owner (card and scorecard, before the first deploy that enables the module) | FIN, TAX (with ESP), IMP, INV — money; JRN, POL — journal; ACT, CAL, NEG — external writes; EDG — the internet-facing surface; GOL; DEC — the decision core becomes the core data |
 | CI scorecard (all green) | Every other module |
 
 ## Ported from v1
@@ -91,7 +97,7 @@ What v1 built but nobody used is not ported (REQUIREMENTS §7).
 | SIG | The recorder pipeline (inbox to session, chunking, retries, the night archive queue), chats as sessions, voice notes as text, one-sentence logs of calls | §6 |
 | JRN | The private journal: entries by explicit marker, no index, no tools | §4 |
 | WRK | Directions, goals and tasks with a status log and a ball holder; goal moves without copies | §1 |
-| DEC | Decision records with grounds, monitored assumptions and computed health | — |
+| DEC | Decision records with grounds, monitored assumptions and computed health; the check dates and the waiting list of the decision loop (D-037); v1's decision numbers, kept in fixed width | §1, §3 |
 | CMT | Commitments with a due date and a quote; v1's unreviewed proposal queue is not ported | §1 |
 | CAL | The read-only calendar copy, free slots and approved calendar writes | §5 |
 | MTG | Meetings as intents linked to work, briefs, recording-to-meeting linking, outcomes | §5 |
@@ -110,6 +116,7 @@ What v1 built but nobody used is not ported (REQUIREMENTS §7).
 | BRG | New; it replaces v1's local stdio mode for a remote host | §9 |
 | AGT | The Windows activity agent (spans, no screenshots, titles purged after 90 days); the uploader is new | §7, §9 |
 | UPD | New (v1 deployed by a manual pull plus a script) | §8, §9 |
+| EDG | New | — |
 | PLG | New | — |
 | TGC | The read-only Telegram user-session collector for marked chats, with voice and video notes | — |
 | MLR | Mail read: threads the owner wrote or with registry counterparts, read-only scope | — |
@@ -130,14 +137,14 @@ applies migrations, keeps the table registry and runs the writer watchdog.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 |
+| Release · stage | R1 · 0A (writer, migrations, table registry with generated triggers, transaction log, instance lock); 0B (`migrate` as a deploy step in a one-off container) |
 | Runs in | `core`, writer thread |
-| Owns | `sys_meta` (schema version, code revision), `sys_migrations` (file, module tag, checksum), `sys_table_registry` (table, owner, data class) |
+| Owns | `sys_meta` (schema version, code revision), `sys_migrations` (file, module tag, checksum), `sys_table_registry` (table, owner, data class, append-only flag, set-once and erasable columns; the triggers are generated from it), `sys_tx_log` (one row per unit of work: actor, channel, owner-channel flag, approval, instance role, code version; stamped by the store layer, never by callers) |
 | Commands | `submit_unit_of_work` (kernel only), `apply_migrations` (admin, `core` stopped, snapshot first), `checkpoint` |
-| Queries | `schema_version`, `table_registry`, `writer_stats` (queue depth, longest transaction) |
+| Queries | `schema_version`, `table_registry`, `writer_stats` (queue depth, longest transaction), `tx(id)` (provenance of a unit of work) |
 | Emits · consumes | `coflow.sto.migration.applied` · none |
 | Depends on | `kernel.context` |
-| Requirements | P-1, P-14, OPS-3, OPS-4, NFR-4, NFR-8, DEP-6 |
+| Requirements | P-1, P-14, OPS-3, OPS-4, NFR-4, NFR-8, NFR-13, DEP-6 |
 | Data classes · DATA_FLOWS | system · no outbound flow |
 | Acceptance suite | Fault-injection harness (process killed at random points) on a temp database; migration replay from the previous release; authorizer harness |
 | Usage signal | Kernel: writer queue depth and transaction times on the status page |
@@ -151,6 +158,7 @@ applies migrations, keeps the table registry and runs the writer watchdog.
 | Compatibility (upgrade) | Previous release's schema upgraded vs. a clean install (`sqldiff`) | Empty diff |
 | Security (one writer) | Entry points other than `core` able to resolve the database path while `core` runs | 0 |
 | Security (classes) | Units of work that store an output in a table of a less restrictive data class | 0 (refused) |
+| Integrity (append-only) | `UPDATE` or `DELETE` accepted on an append-only table; set-once columns changed; units of work without a transaction-log row, or with a record time a caller supplied | 0; 0; 0 |
 
 ### IDS — Identity and numbering
 
@@ -159,14 +167,14 @@ statement lines; machine-readable labels in external artifacts.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 |
+| Release · stage | R1 · 0A |
 | Runs in | `core` |
-| Owns | `sys_id_sequence`, `sys_id_prefixes`, `sys_id_burned`, `sys_content_ids` (hash, kind, public ref) |
-| Commands | `issue_id(prefix)` (inside the caller's unit of work), `burn_id`, `register_content(hash, kind)` |
-| Queries | `prefix_registry`, `render_label`, `parse_label`, `lookup_content(hash)` |
+| Owns | `sys_id_sequence`, `sys_id_prefixes` (letter, width, issuer; fixed before the first number is issued), `sys_id_burned`, `sys_id_foreign` (numbers a predecessor issued, registered as taken), `sys_id_aliases` (legacy and foreign forms, issuer-scoped, many-to-many, with their source), `sys_content_ids` (hash, kind, public ref) |
+| Commands | `issue_id(prefix)` (inside the caller's unit of work), `burn_id`, `register_foreign(prefix, n, issuer, source_id)`, `add_alias`, `register_content(hash, kind)` |
+| Queries | `prefix_registry`, `render_label`, `parse_label`, `resolve(text)` (tolerant input: short forms and look-alike letters from the locale pack; canonical output; an ambiguous hint returns candidates and writes nothing), `lookup_content(hash)` |
 | Emits · consumes | `coflow.ids.id.burned` · none |
 | Depends on | STO |
-| Requirements | IDN-1, IDN-2, IDN-6, IDN-7 |
+| Requirements | IDN-1, IDN-2, IDN-6, IDN-7, IDN-9, IDN-10 |
 | Data classes · DATA_FLOWS | system · no outbound flow |
 | Acceptance suite | Concurrency test with 8 threads on a temp database; property tests for labels; content-identity fixtures |
 | Usage signal | Kernel: ids issued per prefix per week |
@@ -176,8 +184,15 @@ statement lines; machine-readable labels in external artifacts.
 |---|---|---|
 | Functional correctness | Duplicate or reused ids after 1,000 concurrent issues from 8 threads, burned ids included | 0 |
 | Security (registry) | Issues with an unregistered prefix that are accepted | 0 |
-| Functional correctness (labels) | `parse_label(render_label(id)) = id` over 10,000 generated cases, every prefix | 100 % |
+| Functional correctness (labels) | `parse_label(render_label(id)) = id` over 10,000 generated cases, every prefix and every scoped code (`D-0042_A-03`) | 100 % |
+| Functional correctness (continuity) | Foreign or burned numbers issued (property test); a mirrored `D907` that does not resolve as `D-0907`; after adoption, a next number that does not follow the highest in use | 0; 0; 0 |
 | Functional correctness (content) | Source records after the same file is imported twice, renamed or re-sent | Exactly 1 |
+
+The prefixes the decision core registers in stage 0A (D-045): decisions `D` in four digits, v1's numbers
+kept (`D907` becomes `D-0907`) and new ones from `D-1001`; forks `Q`; commitments `F`, new ones from
+`F-10001` — accepted by the owner on 18 October 2026. Proposed: `Q` takes four digits and `F` five; codes
+scoped inside a decision take the identity protocol's form (`D-0042_A-03`); foreign forms are
+issuer-scoped aliases (`V1_D907`).
 
 ### EVT — Events, outbox, jobs and scheduler
 
@@ -186,7 +201,7 @@ satellite workers; the scheduler that replaces operating-system scheduler entrie
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (outbox, in-process dispatch, scheduler for kernel jobs such as the daily backup and retention); 2 (worker jobs and leases) |
+| Release · stage | R1 · 0A (events in the unit of work, in-process dispatch); 0B (outbox delivery, the scheduler for kernel jobs such as the daily backup, retention, the daily snapshot import and `check_due`); 2 (worker jobs and leases) |
 | Runs in | `core` |
 | Owns | `sys_events` (envelope, ids only), `sys_event_deliveries`, `sys_jobs` (kind, input ref, state, lease, result ref), `sys_schedules` |
 | Commands | `publish` (inside a unit of work), `retry_delivery`, `prune_delivered`, `enqueue_job`, `claim_job` / `complete_job` / `fail_job` (core-side dispatcher), `register_schedule` |
@@ -215,14 +230,14 @@ literal gate and the canary framework.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (classes, switches, canary, literal gate); 1 (derivations, erasure); R2 · 6 (forget a person) |
+| Release · stage | R1 · 0A (classes, the canary fixture, the minimal literal gate); 0B (switches, the full literal gate); 1 (derivations, erasure, the `untrusted_external` sub-class); 2 (the egress allow-list); R2 · 6 (forget a person) |
 | Runs in | `core` |
 | Owns | `sys_dataflow_switches` (class × destination × purpose → off / on), `sys_derivations` (output ref → input refs), `sys_tombstones`, `sys_deletion_log` (ids and hashes, no content), `sys_retention_runs`, `sys_secrets_inventory` (names only) |
 | Commands | `set_flow_switch` (owner channel only), `record_derivation` (inside a unit of work), `erase_source`, `blank_as_journal`, `forget_person`, `run_retention` |
 | Queries | `flow_allowed(class, destination, purpose)`, `data_flows_report` (generates `DATA_FLOWS.md`), `derivations_of`, `deletion_log`, `retention_state` |
 | Emits · consumes | `coflow.pol.erasure.completed`, `coflow.pol.flow.changed` · journal-class events (bookkeeping only) |
 | Depends on | STO, EVT; `Eraser` implementations registered by every module that stores derived data |
-| Requirements | P-2, P-10, P-11, P-12, PRV-1, PRV-2, PRV-4, PRV-7, PRV-9, BOT-3 (mechanism), PPL-6 (mechanism), NFR-6, NFR-9 |
+| Requirements | P-2, P-10, P-11, P-12, PRV-1, PRV-2, PRV-4, PRV-7, PRV-9, PRV-10 (public projections), PRV-12 (egress allow-list), PRV-14 (the `untrusted_external` sub-class), BOT-3 (mechanism), PPL-6 (mechanism), NFR-6, NFR-9 |
 | Data classes · DATA_FLOWS | system · generates the whole document from code declarations; every switch change is logged |
 | Acceptance suite | The canary suite, run twice (journal switch off and on) over every channel, table, index, plan, event table, log, trace and the worker directory; erasure fixtures over every registered eraser |
 | Usage signal | Erasures and switch changes per month (counts only) |
@@ -237,6 +252,9 @@ literal gate and the canary framework.
 | Functional completeness | Model functions, tables, outbound hosts and MCP tools not registered in `DATA_FLOWS.md` or the registry | 0 (CI fails) |
 | Security (literals, secrets) | Literal-gate and secret-scan hits in the repository, the image and the logs | 0 |
 | Reliability (retention) | Prompts and traces older than 30 days; retained prompts that contained journal text | 0 and 0 |
+| Security (untrusted text) | Stored text fields without a declaration whether they may hold `untrusted_external` text; planted instructions in synthetic transcripts and satellite items that trigger a tool, rule or approval | 0; 0 |
+| Security (egress) | Connections from `core` to an undeclared destination that are not refused and logged (fake resolver in CI) | 0 |
+| Security (publishability) | Private or third-party-sensitive decisions in a public projection (canary); `public` set over MCP | 0; 0 |
 
 ### MDL — Model gateway
 
@@ -246,14 +264,14 @@ the cost ledger and daily budget, and the offline evaluation harness.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (fake provider, ledger, budget, policy check, taint); 1 (real adapter behind the live flag) |
+| Release · stage | R1 · 0B (fake provider, ledger, budget, policy check, taint); 1 (real adapter behind the live flag); 2 (the private evaluation gate) |
 | Runs in | `core`; the local adapter calls the optional `llm` service |
 | Owns | `sys_model_calls` (model, function, prompt version, input hash, classes sent, tokens, cost, duration, error), `sys_prompts`, `sys_budget`, `sys_eval_runs` |
 | Commands | `call(function, fragments, purpose)` (never inside a transaction), `set_budget`, `record_eval_run` |
 | Queries | `cost_by_day`, `cost_by_month`, `budget_state`, `provenance(output_ref)`, `eval_report(set)` |
 | Emits · consumes | `coflow.mdl.call.completed` (no content), `coflow.mdl.budget.exhausted` · `coflow.pol.flow.changed` |
 | Depends on | STO, POL, CFG (templates, locale); provider port |
-| Requirements | P-6, P-7, EXT-2, OPS-7, OPS-8, OPS-11, OPS-12, PRV-2, PRV-3, PRV-9, FIN-5 (mechanism), NFR-3 |
+| Requirements | P-6, P-7, EXT-2, OPS-7, OPS-8, OPS-11, OPS-12, OPS-13 (the evaluation gate), PRV-2, PRV-3, PRV-9, FIN-5 (mechanism), NFR-3 |
 | Data classes · DATA_FLOWS | system rows; prompts kept ≤ 30 days, never when they held journal text · one row per model function: classes it may receive, destination (`provider` or `local_llm`), purpose |
 | Acceptance suite | Every suite runs on the fake provider, which asserts the policy and the transaction rule; the shared port contract suite runs on the fake and, behind the live flag, on the real adapter |
 | Usage signal | Calls and cost per function per day; functions without a call in 90 days are reviewed |
@@ -280,12 +298,12 @@ outside world; the undo log for internal writes made over MCP, executed by each 
 |---|---|
 | Release · stage | R1 · 2 (cards); 5 (outbox executor, verification, deploy-approval card) |
 | Runs in | `core` |
-| Owns | `act_cards` (preview hash, expiry, channel, decision), `act_operations` (operation key, external id, state), `act_attempts`, `act_undo_log` |
+| Owns | `act_cards` (preview hash, expiry, channel, `verdict` — renamed from `decision`, so it does not collide with the entity name — and the step-up state), `act_operations` (operation key, external id, state), `act_attempts`, `act_undo_log` |
 | Commands | `propose_card`, `approve_card(card, preview_hash)` (owner channel only), `reject_card`, `execute_operation`, `undo_write(entry)` |
 | Queries | `pending_cards`, `operation_state(key)`, `undo_log(channel, period)` |
 | Emits · consumes | `coflow.act.card.proposed` / `approved` / `rejected` / `expired`, `coflow.act.operation.applied` / `verified` / `failed` · none |
 | Depends on | STO, EVT, IDS, POL; `OperationHandler` (CAL, CMT, NEG, OPS) and `UndoHandler` (every module with MCP writes) |
-| Requirements | P-3, P-4, P-8, MCP-4, BOT-4, MTG-5 (mechanism), DEP-9 (deploy approval card) |
+| Requirements | P-3, P-4, P-8, MCP-4, BOT-4, BOT-11 (the step-up mechanism), MTG-5 (mechanism), DEP-9 (deploy approval card) |
 | Data classes · DATA_FLOWS | work (previews), system · one destination row per operation kind (`calendar`, `messenger`, …) |
 | Acceptance suite | Recording fakes for every operation kind; fault injection (lost response, double approval, crash between steps); the generated MCP catalogue checked against registered undo handlers |
 | Usage signal | Cards approved, rejected and expired per week; an expiry share above 50 % over 4 weeks opens a redesign issue |
@@ -297,6 +315,7 @@ outside world; the undo log for internal writes made over MCP, executed by each 
 | Security (unforgeable approval) | Executions without a valid preview hash and an owner-channel action, including approvals asserted in text | 0 |
 | Reliability (verification) | Operations marked "verified" without a successful read-back | 0 |
 | Functional correctness | Cards executed twice or after their 24-hour expiry | 0 |
+| Security (step-up) | High-risk cards executed without a valid second factor; a code that approves a card other than the one whose preview hash it is bound to | 0; 0 |
 | Maintainability (undo) | MCP write tools without an undo handler or a "not undoable" mark; undoable tools whose undo does not restore the prior state (table test) | 0 and 0 |
 
 ### CFG — Owner profile and locale
@@ -307,14 +326,14 @@ rendering of prompt and bot templates.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 |
+| Release · stage | R1 · 0A (profile minimum, locales, the instance data root); 0B (the rest) |
 | Runs in | `core` |
 | Owns | `cfg_profile`, `cfg_locale_overrides`, `cfg_life_domains`, `cfg_direction_roles` |
 | Commands | `update_profile`, `set_locale`, `set_life_domains`, `set_direction_role` |
 | Queries | `profile`, `render(template_key, locale)`, `variants(text)` (from the locale pack) |
 | Emits · consumes | `coflow.cfg.profile.changed` · none |
 | Depends on | STO |
-| Requirements | CFG-1…CFG-5, NFR-7, P-12 |
+| Requirements | CFG-1…5, NFR-7, P-12 |
 | Data classes · DATA_FLOWS | work · none of its own (profile fields reach the provider only inside other modules' registered prompts) |
 | Acceptance suite | Literal gate on code, prompts and stored defaults; the scenario suite in both locales; fresh-install content scan |
 | Usage signal | Kernel: profile changes (counts) |
@@ -333,14 +352,14 @@ feature and the runtime module scorecards shown on the status page.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (trace skeleton); 1 (traces); 4 (health, SLIs, runtime scorecards) |
+| Release · stage | R1 · 0A (usage-signal rows, including the decision core's loop metrics); 0B (trace skeleton, the daily usage-signal job); 1 (traces); 2 (the off-host heartbeat with its status, disk health, security alerts in two channels); 4 (health, SLIs, runtime scorecards) |
 | Runs in | `core` |
 | Owns | `sys_traces`, `sys_trace_steps`, `sys_health`, `sys_sli_samples`, `sys_usage_signals`, `sys_scorecards` |
 | Commands | `record_step` (interfaces), `record_health` (from `HealthProbe`s), `compute_scorecard(module, window)` |
 | Queries | `trace(interaction_id)`, `health`, `scorecard(module, window)`, `usage(feature)` |
 | Emits · consumes | `coflow.obs.health.degraded`, `coflow.obs.slo.missed`, `coflow.obs.trace.closed` · every event (counts and SLIs; journal events counted only) |
 | Depends on | STO, EVT, `kernel.context`; never imported by EVT |
-| Requirements | OPS-6, OPS-10, P-13, NFR-9, PRV-3 (traces), DEP-15 |
+| Requirements | OPS-6, OPS-10, OPS-17 (security alerts in two channels, with OPS), P-13, NFR-9, PRV-3 (traces), DEP-15 |
 | Data classes · DATA_FLOWS | system; ids and hashes only · `status_page` row (aggregates) |
 | Acceptance suite | Traced evaluation runs on the fake provider; a failure-injection drill (stopped worker, stale source, old backup) |
 | Usage signal | Kernel: scorecards viewed (through STS) |
@@ -352,26 +371,29 @@ feature and the runtime module scorecards shown on the status page.
 | Reliability (detection) | Time from a stopped worker, a stale source or an old backup to a red status | ≤ 5 min in the drill |
 | Functional completeness | Features without a usage signal; hand-entered numbers in scorecards | 0 and 0 |
 | Security | Trace steps holding message, transcript or journal text instead of ids and hashes | 0 |
+| Security (alerts) | Listed security events that exist in the build without exactly one alert in both channels (fake messenger, fake monitor); alerts carrying content (canary) | 0; 0 |
+| Reliability (heartbeat) | A router restart shorter than the grace period that raises an alert; a planted disk-health warning without exactly one alert | 0; 0 |
 
 ### OPS — Instance, backups, export and deploy state
 
-The supervisor and OS-held single-instance locks; instance identity, roles, epoch and fencing; `init`,
-`doctor`, `promote`, `retire`, `drill`; backup and restore; full export and import. The CLI reaches it
-through ADM; the updater (UPD) runs outside the stack.
+The supervisor and OS-held single-instance locks; instance identity, roles (including `validation`),
+epoch and fencing; `init`, `doctor`, `promote`, `retire`, `drill`; the host gate, travel mode and the
+lost-host and lost-device runbooks; backup and restore; the mechanics of the snapshot import; full export
+and import. The CLI reaches it through ADM; the updater (UPD) runs outside the stack.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (init, doctor, backup, restore, image, Compose); 1 (the validation snapshot of the owner's existing system, OPS-15); 2 (staging host, promote, retire, fencing); 5 (holds, rollback support); R2 · 6 (export, import, move and rebuild drill) |
+| Release · stage | R1 · 0A (`init` and a basic `doctor` with the `dev` and `validation` roles; the snapshot import of decisions, OPS-15); 0B (the full `init` and `doctor`, backup, restore, image, Compose); 1 (the snapshot extended to people, sessions and tasks); 2 (staging host, laptop profile, promote, retire, fencing, the host gate, travel mode, runbooks); 5 (holds, rollback support); R2 · 6 (export, import, move and rebuild drill) |
 | Runs in | `core` (supervisor); CLI through ADM; `migrate`, `restore`, `drill` without a live `core` in their target instance |
-| Owns | `sys_instance` (instance id, role, epoch, host id, volume id), `sys_backups`, `sys_deploys`, `sys_holds`, `sys_exports` |
-| Commands | `init`, `doctor`, `backup`, `restore`, `drill`, `migrate`, `promote`, `retire`, `hold` / `release`, `export`, `import` |
-| Queries | `instance_state`, `backup_age`, `doctor_report`, `deploy_history` |
+| Owns | `sys_instance` (instance id, role, epoch, host id, volume id), `sys_backups` (with the tier times of each restore drill), `sys_deploys`, `sys_holds`, `sys_exports`, `sys_host_gate` (each gate measurement and drill with its date and source, DEP-27) |
+| Commands | `init` (roles production, staging, validation, dev, drill), `doctor` (`--host`, `--access`, `--deps`), `backup`, `restore` (in tiers), `drill` (also `--from offsite`), `migrate`, `promote` (refused without a passed host gate), `retire`, `hold` / `release`, `travel on` / `off`, `export`, `import` |
+| Queries | `instance_state`, `backup_age`, `doctor_report`, `deploy_history`, `gate_state` (every missing measurement named), `revocation_list` (from the secrets inventory) |
 | Emits · consumes | `coflow.ops.backup.completed`, `coflow.ops.instance.fenced`, `coflow.ops.role.changed` · `coflow.obs.health.degraded` |
 | Depends on | STO, EVT, POL, OBS, ACT (implements the deploy-approval `OperationHandler`) |
-| Requirements | OPS-1, OPS-2, OPS-5, PRV-4 (inventory check), PRV-5, PRV-8, NFR-1, NFR-2, NFR-5, DEP-1…DEP-7, DEP-12…DEP-15, DEP-18…DEP-20 |
+| Requirements | OPS-1, OPS-2, OPS-5, OPS-15 (import mechanics, with DEC), OPS-16 (the adoption gate's host and backup conditions, with DEC), OPS-17 (with OBS), PRV-4 (inventory check), PRV-5, PRV-8, PRV-11 (the host check), PRV-15 (the owner-side checks in `doctor`), NFR-1, NFR-2, NFR-5, DEP-1…7, DEP-12…15, DEP-18…20, DEP-22 (toolchain checks in CI), DEP-23, DEP-24, DEP-26, DEP-27 |
 | Data classes · DATA_FLOWS | system · `backup` (ciphertext, off-host), `export` (owner's files) |
-| Acceptance suite | CI restore test; Compose smoke with egress blocked; exposure test; upgrade test; fencing drill with a copied database; DEPLOYMENT §10.3 drills |
-| Usage signal | Kernel: backup age and drill results on the status page |
+| Acceptance suite | CI restore test; Compose smoke with egress blocked; exposure test; upgrade test; fencing drill with a copied database; the role matrix (validation and dev refusals); the host-gate refusal matrix; the lost-host runbook dry run; DEPLOYMENT §10.3 drills |
+| Usage signal | Kernel: backup age and drill results on the status page; gate measurements recorded per day during the 30-day gate |
 | Approval | CI scorecard |
 
 | Quality attribute | Metric | Acceptance threshold |
@@ -381,7 +403,10 @@ through ADM; the updater (UPD) runs outside the stack.
 | Safety (one writer) | A second production instance or a copied database left able to write or poll | 0; fenced or refused in 100 % of drills |
 | Security (exposure) | Listeners on a non-loopback address with default configuration | 0 |
 | Maintainability (CI) | Full offline suite time on Windows and Linux runners | ≤ 15 min |
-| Reliability (rebuild) | Rebuild on another machine from the off-host backup (stage 6); RTO in R2 | ≤ 2 h excluding the OS install; ≤ 4 h |
+| Reliability (rebuild) | Rebuild of the first two restore tiers on another machine from the off-host backup (the host gate and stage 6); RTO in R2 | ≤ 2 h excluding the OS install; ≤ 4 h |
+| Safety (roles) | Outward actions, bot polls or production tokens used by a validation instance; a validation data root inside a repository working tree accepted; a dev instance accepting a snapshot not marked synthetic | 0; 0; 0 |
+| Safety (host gate) | `promote` or the decision adoption accepted onto a host without a recorded passed gate | 0 (refused, naming every missing measurement) |
+| Reliability (travel mode) | Platform updates applied or window reboots while travel mode is on; reboots after a predicted unlock-policy mismatch | 0; 0 |
 
 ---
 
@@ -400,8 +425,8 @@ deterministic dossiers, merge and undo, forgetting a person, birthdays and the c
 | Commands | `resolve_or_create_person`, `update_person`, `add_strong_key`, `add_fact`, `merge` / `undo_merge`, `forget` (through POL) |
 | Queries | `person_profile`, `dossier(person, size budget)`, `search_persons` (script variants from CFG), `company_context`, `client_view`, `birthdays_due` |
 | Emits · consumes | `coflow.ppl.person.created` / `updated` / `merged` / `forgotten`, `coflow.ppl.fact.added` · `coflow.pol.erasure.completed` |
-| Depends on | Kernel only (IDS, CFG, POL) |
-| Requirements | IDN-3, IDN-4, IDN-5, IDN-8, PPL-1…PPL-7 (PPL-3 acceptance writes), REL-3 (stated positions only) |
+| Depends on | Kernel (IDS, CFG, POL); `DecisionDirectory` (the dossier line "open decisions about this person", from stage 1) |
+| Requirements | IDN-3, IDN-4, IDN-5, IDN-8, PPL-1…7 (PPL-3 acceptance writes), REL-3 (stated positions only) |
 | Data classes · DATA_FLOWS | work · dossiers to `provider` (answers, briefs), `mcp:<client>`, `messenger` |
 | Acceptance suite | Synthetic identity set (namesakes, strong keys, transliterations); dossier golden files; merge and undo round trips |
 | Usage signal | Resolutions and dossiers served per week |
@@ -429,11 +454,12 @@ proposals extracted from conversations.
 | Release · stage | R1 · 1 (sessions, messages, segments, quick log, connector contract, messenger export); 4 (recorder pipeline, contact proposals) |
 | Runs in | `core`; transcription in `stt` through jobs |
 | Owns | `sig_sources` (content hash, consent), `sig_sessions` (initiator), `sig_messages` (direction, sender, timestamp to the second), `sig_participants`, `sig_segments` (offset, absolute and original time), `sig_summaries`, `sig_connector_cursors`, `sig_recorder_profiles`, `sig_notes`, `sig_contact_proposals`, `sig_rejected_values` |
-| Commands | `register_file`, `import_connector_batch`, `log_quick`, `set_participant`, `request_summary`, `retry_recording`, `decide_contact_proposal`, `delete_source` (through POL) |
+| Commands | `register_file`, `import_connector_batch`, `log_quick` (a quick log naming a decision, "D-0042: …", becomes a fact proposal on it), `set_participant`, `request_summary`, `retry_recording`, `decide_contact_proposal`, `delete_source` (through POL) |
 | Queries | `session`, `messages(session)`, `segment(ref)` with a playable offset, `recording_queue` (why it waits), `recent_sessions`, `contact_proposals`, projection queries for SRC and TML |
 | Emits · consumes | `coflow.sig.source.registered`, `coflow.sig.transcript.ready`, `coflow.sig.session.created` / `updated`, `coflow.sig.message.added`, `coflow.sig.summary.computed`, `coflow.sig.contact.proposed` · job completions, `coflow.pol.erasure.completed` |
-| Depends on | PPL (resolve only; never creates people from pipelines); `GoalDirectory`; MDL, POL |
-| Requirements | SIG-1…SIG-6, SIG-11, SIG-14, SIG-15, PPL-3 (extraction, rejected values), PRV-6, REL-6 (direction, initiators, timestamps, original times); SIG-12, SIG-13 Later |
+| Depends on | PPL (resolve only; never creates people from pipelines); `GoalDirectory`; `DecisionDirectory` (resolving decision labels in quick logs); MDL, POL |
+| Implements | `EvidenceResolver` for segments, messages and sessions (stage 1): the quote check is an exact substring after normalisation; journal-class refs are refused |
+| Requirements | SIG-1…6, SIG-11, SIG-14, SIG-15, SIG-16, PPL-3 (extraction, rejected values), PRV-6, PRV-14 (inbound messages and other people's speech marked `untrusted_external`), REL-6 (direction, initiators, timestamps, original times); SIG-12, SIG-13 Later |
 | Data classes · DATA_FLOWS | work · transcripts and messages to `provider` (summaries); audio never leaves the host |
 | Acceptance suite | Synthetic exports and audio fixtures; fake STT worker; out-of-memory and transient-error injection; inbox JSON contract tests |
 | Usage signal | Sessions per source per week; contact-proposal decision rate (a type below 20 % over its last 30 switches itself off) |
@@ -487,15 +513,16 @@ control view. In R1 it also holds directions and goals (with an optional money t
 |---|---|
 | Release · stage | R1 · 1 (tasks, directions, goals, WRK-8); 2 (control view); 8.2 (directions and goals transferred to GOL) |
 | Runs in | `core` |
-| Owns | `wrk_tasks` (`goal_ref` only, never a direction copy), `wrk_status_log`, `wrk_comments`, `wrk_links` (decisions, sessions); until 8.2: `wrk_directions`, `wrk_goals` |
-| Commands | `create_task`, `update_task`, `change_status` (one operation, logged), `set_ball`, `comment`, `link_task`, `take_to_deliberation(goal)`; until 8.2: `create_direction`, `create_goal`, `update_goal` |
+| Owns | `wrk_tasks` (`goal_ref` and `decision_ref`, never a direction copy; the entry-time `link_answer`), `wrk_status_log`, `wrk_comments`, `wrk_links` (sessions); until 8.2: `wrk_directions`, `wrk_goals` (with `pursued_by_decision_ref`) |
+| Commands | `create_task` (offers up to three likely decisions and the likely goal inline; "no decision" with a reason allowed), `update_task`, `change_status` (one operation, logged), `set_ball`, `comment`, `link_task`, `take_to_deliberation(goal)`; until 8.2: `create_direction`, `create_goal`, `update_goal`, `activate_goal` (offers "record the decision to pursue it?") |
 | Queries | `task_context`, `open_tasks`, `search_tasks`, `control_view` (overdue, waiting for me, waiting for them, no movement for N days, goals without a next step), `unlinked_share(week)` |
 | Emits · consumes | `coflow.wrk.task.created` / `status_changed` / `ball_changed` / `linked` (and `coflow.wrk.goal.*` until 8.2) · `coflow.act.card.approved` (approved task proposals) |
-| Depends on | DEC, SIG, FIN (money target, from 8.1a); `GoalDirectory` (implements it until 8.2); implements `ReviewContributor` (control view) |
-| Requirements | WRK-1…WRK-3, WRK-6, WRK-8, CFG-5; WRK-5 Later |
+| Depends on | SIG, FIN (money target, from 8.1a); `DecisionDirectory` (replaces the direct DEC dependency; tasks attach only to open decisions whose system of record is this instance) |
+| Implements | `GoalDirectory` (until 8.2); `ReviewContributor` (control view); `DecisionAttachmentProbe` for tasks (from stage 1) |
+| Requirements | WRK-1…3, WRK-6, WRK-8, DEC-19 (the task side of the unlinked report), CFG-5, P-15; WRK-5 Later |
 | Data classes · DATA_FLOWS | work · to `provider` (answers, phrasing), `mcp:<client>`, `messenger` |
 | Acceptance suite | Property tests for status and ball; control-view golden files; resolution tests after a goal moves |
-| Usage signal | Tasks created and status changes per week; share of unlinked items per week (WRK-8) |
+| Usage signal | Tasks created and status changes per week; tasks per link bucket per week — linked, explicit none, unanswered, not offered (WRK-8, DEC-19) |
 | Approval | CI scorecard |
 
 | Quality attribute | Metric | Acceptance threshold |
@@ -506,62 +533,88 @@ control view. In R1 it also holds directions and goals (with an optional money t
 | Functional correctness (control view) | Same data → same list and order; items that do not say why they are listed | Identical; 0 |
 | Safety (execution mode) | Daily or weekly items offering pause or drop (exits are a dated next step or "take to the next deliberation slot"; before 8.2 the slot is the goal's review date) | 0 |
 | Performance efficiency | MCP `create_task` and `change_status` latency | p95 ≤ 300 ms |
-| Interaction capability (WRK-8) | Background link-proposal queues | 0 (offers are inline only) |
+| Interaction capability (WRK-8) | Background link-proposal queues; tasks created in an owner channel with the link answer "not offered" | 0 (offers are inline only); 0 |
+| Functional correctness (attachment) | Tasks attached to an ended decision or to a mirror | 0 (refused, the successor named) |
 
 ### DEC — Decisions
 
-Decision records: statement, context, alternatives, stake; grounds and monitored assumptions; health
-computed from assumption states; explicit closing with an outcome; morning surfacing; check dates, a
-"waiting" list and reviews answered in the chat behind approval (D-037).
+The hub of the chain (P-15). Decisions with a kind (choice, test, pursue, attendance), a decider and a
+depth; forks and options recorded before the choice; assumptions with check dates, an append-only check
+log and readings that only propose a state; facts with evidence; reviews that keep the number and seal a
+new edition of the basis (P-16); outcomes with a basis and a learning at closing; health computed on two
+axes with the unverifiable share first; one waiting list with the context needed to answer it; typed
+links with an owner per kind; history, as-of and loop metrics; the one-way import of the owner's existing
+system as read-only mirrors, the shadow report, the case runner and the adoption gate. Model-free in stage
+0A; the chat loop arrives in stage 2. The full design is in [SPEC_DECISION_CORE.md](SPEC_DECISION_CORE.md).
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 3 (DEC-1…7, DEC-9; placement of DEC-6, DEC-7 and DEC-9 proposed, D-037); Later: DEC-8 (view, behind UI-2), DEC-10 (research) |
+| Release · stage | R1 · 0A (core, import, shadow, cases, adoption gate); 2 (the chat loop: DEC-5, DEC-7, DEC-9); 3 (capture from conversations, occasions, silence and contradiction: DEC-17, DEC-21, DEC-22); R2 · 6 (external references, DEC-23); Later: DEC-8 (view), DEC-10 (research, after 1 December 2026) |
 | Runs in | `core` |
-| Owns | `dec_decisions`, `dec_facts` (grounds, monitoring), `dec_assumptions` (metric, threshold, source, frequency), `dec_checks`, `dec_outcomes` |
-| Commands | `create_decision`, `update_decision` (versioned fields), `add_fact`, `add_assumption`, `set_assumption_state` (moves the next check), `postpone_check`, `review_decision` (keep / adjust / revise with a next date), `close_decision` (needs an outcome), `cancel`, `supersede` |
-| Queries | `decision_context`, `decisions_due`, `waiting(today)` (reasons and due dates), `assumption_due(assumption)`, `health(decision)`, `list_decisions` |
-| Emits · consumes | `coflow.dec.decision.created` / `closed` / `health_changed`, `coflow.dec.assumption.state_changed` · none |
-| Depends on | PPL; `GoalDirectory`; ACT (cards for model-proposed decisions and review answers); MDL (splitting a review answer, DEC-7); WRK (tasks proposed for a decision, DEC-9) |
-| Requirements | DEC-1…DEC-10 |
-| Data classes · DATA_FLOWS | work · to `provider` (phrasing; splitting the owner's review answer with the decision's context into card items, DEC-7, DEC-9), `mcp:<client>`, `messenger` |
-| Acceptance suite | Table test of every assumption-state combination; a synthetic month of assumption checks |
-| Usage signal | Decisions opened and closed per month; assumption checks answered on their due day |
-| Approval | CI scorecard |
+| Owns | `dec_decisions`, `dec_editions` (sealed bases), `dec_options`, `dec_forks`, `dec_assumptions`, `dec_checks` (append-only), `dec_readings`, `dec_facts`, `dec_fact_assumptions`, `dec_reviews`, `dec_outcomes`, `dec_learnings`, `dec_stakes` (financial), `dec_links`, `dec_foreign_context`, `dec_proposals`, `dec_versions`; bookkeeping (system class, kept in the validation data root): `dec_import_runs`, `dec_mirror_state`, `dec_shadow_items`, `dec_cases`; later `dec_occasions` (3), `dec_external_decisions` (6), `dec_questions_asked` (2) |
+| Commands | `create_decision`, `update_decision`, `activate_decision` (seals edition 1), `complete_decision`, `add_option`, `add_assumption`, `supersede_assumption`, `drop_assumption`, `record_check`, `record_reading`, `postpone_check`, `add_fact`, `correct_fact`, `review_decision` (keep, adjust, revise with a reason, close with an outcome and a learning, cancel, supersede), `set_manual_flag`, `set_publishability`, `link`, `unlink`, `open_fork`, `decide_fork`, `dissolve_fork`, `delegate_fork`, `move_fork_deadline`, `propose_decision`, `approve_proposal` (owner channel only), `reject_proposal`, `import_snapshot`, `import_decision_log`, `run_case`, `adopt_mirrors`, `undo` |
+| Queries | `decision_context`, `list_decisions`, `waiting`, `drafts_to_finish`, `assumption_due`, `health`, `integrity`, `as_of`, `decision_history`, `related_learnings`, `forks`, `proposals`, `unlinked_report`, `loop_metrics`, `shadow_report`, `cases` |
+| Emits · consumes | `coflow.dec.decision.{created,updated,activated,reviewed,closed,cancelled,superseded,withdrawn,imported,adopted}`, `coflow.dec.edition.sealed`, `coflow.dec.assumption.{added,superseded,dropped,checked,state_changed,postponed,check_due}`, `coflow.dec.reading.recorded`, `coflow.dec.fact.{added,voided}`, `coflow.dec.link.{added,removed}`, `coflow.dec.fork.{opened,decided,dissolved,delegated}`, `coflow.dec.proposal.{proposed,approved,rejected}`, `coflow.dec.import.completed`, `coflow.dec.integrity.mismatch` · none: goal changes are read through `GoalDirectory`, attachments through the probes |
+| Depends on | Kernel (STO, IDS, EVT, POL, CFG); ports `GoalDirectory`, `DecisionAttachmentProbe`, `EvidenceResolver`; from stage 2 ACT (cards) and MDL (splitting an answer). **Not** WRK, CMT, SIG or MTG |
+| Implements | `DecisionDirectory`; `UndoHandler`; `Projector` sources for SRC and TML (stage 1) |
+| Requirements | DEC-1…7, DEC-9, DEC-11…22, OPS-15 (decisions), OPS-16, IDN-10 (with IDS), PRV-10, EXT-5 (decision parts), EXT-6, P-15, P-16; R2 DEC-23; Later DEC-8, DEC-10 |
+| Data classes · DATA_FLOWS | work (stakes financial; import and shadow bookkeeping system) · `mcp:<client>` (agent projection; money withheld unless the client's financial flag is on), `messenger` (stage 2), `provider` (stage 2: splitting the owner's answer with the decision's context), `app:<client>` (stage 3 and 6 projections); public projections only from decisions marked public (PRV-10) |
+| Acceptance suite | The named health vectors and the agreement with an independent oracle written from the specification; the date table; the synthetic month of checks; seal and integrity fault injection, including erasure; the import fixture family (synthetic snapshots shaped like the owner's existing system); the shadow's expected-difference rules SR-1 to SR-10; the case runner; the link registry and tier tests; the canaries |
+| Usage signal | Headline: closed decisions with an outcome and a learning per month — below 1 a month for two months after adoption, the close card is redesigned. Also: checks answered within 7 days of their due date (below 50 % over 4 weeks, the question rhythm is re-examined); days from a violation to a review (a median above 7 checks the "violated asks at once" rule); waiting-list pulls per day by channel (no pull for 7 days before the bot exists: the owner is asked once whether the pull loop serves them); the share of new commitments and tasks linked at entry, in four buckets (`not offered` above 0 for owner-channel entries is a defect; `unanswered` above 50 % redesigns the offer); unexpected shadow differences per run (each is fixed or becomes a numbered rule before the next run); proposals approved per origin (below 20 % over the last 30, the origin switches itself off) |
+| Approval | **Owner** (it becomes the core data) |
 
 | Quality attribute | Metric | Acceptance threshold |
 |---|---|---|
-| Functional correctness (health) | Table test over every assumption-state combination | 100 % match |
-| Functional correctness (closing) | Closings accepted without an outcome | 0 |
-| Functional correctness (evidence) | Grounds or assumptions without a source | 0 |
-| Reliability (surfacing) | Assumption checks due that appear in the morning plan on their due day, synthetic month | 100 % |
+| Functional correctness (health) | Named vectors; agreement with the independent oracle over every enumerated state combination | 100 %; 100 % |
+| Functional correctness (dates) | The DEC-6 date table and the synthetic month | 100 %; "1.5", "0.80", "12.5 %" never dates |
+| Functional correctness (one list) | Items of the CLI, MCP and the query for the same day | Identical |
+| Integrity (seal) | Editions that fail to verify without a database bypass; bypass edits not detected on the next full read | 0; 0 |
+| Functional correctness (closing) | Closings without an outcome basis or a learning; keep, adjust or revise without a next date, in any channel | 0; 0 |
+| Functional correctness (evidence) | Facts naming another decision's assumption; journal-class evidence accepted; model-set probabilities | 0; 0; 0 |
+| Compatibility (import) | Changes after re-importing an unchanged snapshot; writes accepted on a mirror; differences reported on a run not fully applied | 0; 0; 0 |
+| Maintainability (tiers) | Imports from DEC into a higher tier | 0 |
+| Security (events) | Values in event payloads (schema scan, canary) | 0 |
+| Performance efficiency | `waiting` over 200 active decisions; a command | p95 ≤ 500 ms; p95 ≤ 300 ms |
+
+Over MCP, decision tools live in the `dec_` namespace and commitment tools in `cmt_`, so an AI client
+connected to both the predecessor's server and this one cannot confuse them by name. Not exposed over MCP:
+`approve_proposal`, `import_snapshot`, `import_decision_log`, `run_case`, `adopt_mirrors`, and
+`set_publishability` to public — owner-channel or admin actions. Numbers follow IDS (D-045): `D-0907`
+for a mirrored v1 decision, `D-1001` onward for new ones, `Q-0007` for a fork, `D-0042_A-03` for a
+scoped code.
 
 ### CMT — Commitments
 
-Who owes what to whom by when, with the quote it came from; inline, capped proposals with the decision
-rate measured per type; "send material" as the first commitment carried through to a result.
+Who owes what to whom by when, by what success criterion, with the quote it came from and the decision it
+executes — or an explicit "no decision" with a reason (P-15). Stage 0A builds the minimum the decision
+core needs; inline, capped proposals with the decision rate measured per type come in stage 3; delegated
+commitments from a team tool by reference in stage 6; "send material" as the first commitment carried
+through to a result in stage-8 module 3.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 3; R2 · 8.3 (send material); CMT-4 Later |
+| Release · stage | R1 · 0A (CMT-1, minimum); 3 (CMT-2); R2 · 6 (CMT-5), 8.3 (CMT-3); CMT-4 Later |
 | Runs in | `core` |
-| Owns | `cmt_commitments` (both sides, initiator), `cmt_history` (timestamped status), `cmt_proposals`, `cmt_proposal_stats`, `cmt_material_sends` |
-| Commands | `create_commitment`, `close_commitment` (needs a reason), `propose_inline`, `decide_proposal`, `prepare_material_send`, `confirm_sent` |
-| Queries | `open_commitments`, `due(period)`, `proposal_decision_rate(type)`, `material_send_state` |
-| Emits · consumes | `coflow.cmt.commitment.created` / `closed` / `due`, `coflow.cmt.proposal.type_switched_off` · `coflow.sig.summary.computed`, `coflow.sig.message.added` (finding an outgoing message for "sent") |
-| Depends on | PPL, SIG, DEC; `GoalDirectory`; ACT (implements `OperationHandler` for material send), MDL |
-| Requirements | CMT-1…CMT-3, REL-6 (both sides, history); CMT-4 Later |
-| Data classes · DATA_FLOWS | work · to `provider` (proposal extraction, drafts), `mcp:<client>`, `messenger` |
-| Acceptance suite | Synthetic conversations and outcomes with planted agreements; proposal-cap and switch-off rule tests; recording fake for material sends |
-| Usage signal | Decision rate per proposal type: below 20 % over the last 30 proposals the type switches itself off and says so |
+| Owns | `cmt_commitments` (debtor, creditor, initiator, what, success criterion, due date and its basis, status, the done time and its basis, `decision_ref`, `link_answer`, source and quote; `external_ref` from stage 6), `cmt_history` (timestamped status changes and due shifts with reasons); from stage 3 `cmt_proposals`, `cmt_proposal_stats`; from 8.3 `cmt_material_sends` |
+| Commands | `create_commitment`, `change_commitment_status` (dropped and unclear need a reason; done needs an actual time or "unknown"; suggested done only from a proposal), `shift_commitment_due` (needs a reason), `link_commitment`; from stage 3 `propose_inline`, `decide_proposal`; from 8.3 `prepare_material_send`, `confirm_sent` |
+| Queries | `open_commitments` (each annotated "decision ended: keep, drop or move?" when its decision ended), `commitment`, `due(period)`; `proposal_decision_rate(type)` (3); `material_send_state` (8.3) |
+| Emits · consumes | `coflow.cmt.commitment.created` / `status_changed` / `due_shifted` / `linked` / `due`, `coflow.cmt.proposal.type_switched_off` · `coflow.sig.summary.computed` (3), `coflow.sig.message.added` (finding an outgoing message for "sent", 8.3) |
+| Depends on | PPL, SIG (from stage 3); `DecisionDirectory` (not DEC directly); `GoalDirectory`; ACT (implements `OperationHandler` for material send), MDL (from stage 3) |
+| Implements | `DecisionAttachmentProbe`: the summary, timeline and unlinked counts of commitments per decision, ids and counts only |
+| Requirements | CMT-1…3, CMT-5, REL-6 (both sides, history), DEC-19 (the commitment side of the unlinked report), WRK-8 (the entry-time offer for commitments), P-15; CMT-4 Later |
+| Data classes · DATA_FLOWS | work · to `provider` (proposal extraction, drafts; from stage 3), `mcp:<client>`, `messenger` |
+| Acceptance suite | The attachment refusals (an ended decision, a mirror) and the four link buckets against a fake `DecisionDirectory`; the probe contract suite shared with DEC; from stage 3 synthetic conversations and outcomes with planted agreements and the proposal-cap and switch-off rule tests; a recording fake for material sends |
+| Usage signal | New commitments per link bucket per week (`not offered` above 0 for owner-channel entries is a defect); from stage 3 the decision rate per proposal type — below 20 % over the last 30 proposals the type switches itself off and says so |
 | Approval | CI scorecard |
 
 | Quality attribute | Metric | Acceptance threshold |
 |---|---|---|
 | Functional correctness (evidence) | Commitments whose quote does not resolve to a segment or message | 0 |
+| Functional correctness (link) | Commitments attached to an ended decision or to a mirror; an explicit "no decision" without a reason | 0 (refused, the successor named); 0 |
+| Functional correctness (done) | "Done" without an actual time or "unknown"; closing without a reason where one is required | 0; 0 |
 | Interaction capability (hygiene) | Proposals over the cap (default 5 per type per day); a type below 20 % over its last 30 that stays on | 0; 0 |
 | Safety (send material) | Automatic sends; "sent" without an owner confirmation or a found outgoing message | 0; 0 |
-| Functional correctness (history) | Status changes without a timestamped history row | 0 |
+| Functional correctness (history) | Status changes and due shifts without a timestamped history row | 0 |
 
 ### CAL — Calendar
 
@@ -599,12 +652,13 @@ linking, and outcomes that become commitment and task proposals through the outc
 |---|---|
 | Release · stage | R1 · 5; MTG-9 Later |
 | Runs in | `core` |
-| Owns | `mtg_meetings` (initiator; `goal_ref` and task refs, no direction copy), `mtg_participants`, `mtg_briefs`, `mtg_outcomes`, `mtg_recording_links`, `mtg_link_proposals` |
-| Commands | `plan_meeting` (link to work required unless "no link"), `update_meeting`, `complete_meeting`, `record_outcome`, `decide_link` |
+| Owns | `mtg_meetings` (initiator; `goal_ref` and task refs, no direction copy), `mtg_meeting_decisions` (meeting, decision ref, role `prepares` or `reviews`), `mtg_participants`, `mtg_briefs`, `mtg_outcomes`, `mtg_recording_links`, `mtg_link_proposals` |
+| Commands | `plan_meeting` (a link to work — a decision, direction, goal or task — required unless "no link"; offers the likely decisions), `update_meeting`, `complete_meeting`, `record_outcome` (decision items first), `decide_link` |
 | Queries | `meeting_brief`, `upcoming`, `meeting_chain`, `link_options` |
 | Emits · consumes | `coflow.mtg.meeting.planned` / `changed` / `held`, `coflow.mtg.brief.ready`, `coflow.mtg.outcome.recorded`, `coflow.mtg.recording.linked` · `coflow.sig.transcript.ready`, `coflow.sig.session.created`, `coflow.cal.event.synced`, `coflow.cal.write.verified` |
-| Depends on | PPL, SIG, CAL, DEC, CMT, WRK; `GoalDirectory`; ACT, MDL, IDS (labels) |
-| Requirements | MTG-1…MTG-4, MTG-12…MTG-16, OPS-11 (the tier for the analysis mode), OPS-13, NFR-12, REL-6 (initiator); MTG-9 Later |
+| Depends on | PPL, SIG, CAL, CMT, WRK; `DecisionDirectory` (briefs use the open decisions for the participants and the assumptions to probe); `GoalDirectory`; ACT, MDL, IDS (labels) |
+| Implements | `DecisionAttachmentProbe` for meetings and `EvidenceResolver` for outcomes (stage 5) |
+| Requirements | MTG-1…4, MTG-12…17, OPS-11 (the tier for the analysis mode), OPS-13, NFR-12, EXT-5 (assumptions to probe in the brief), REL-6 (initiator); MTG-9 Later |
 | Data classes · DATA_FLOWS | work · briefs to `provider` (phrasing), `mcp:<client>`, `messenger` |
 | Acceptance suite | 30 consecutive synthetic meetings with recordings; outcome fixtures with planted agreements; fake clock for brief times |
 | Usage signal | Meetings planned and held per week; briefs opened |
@@ -616,6 +670,7 @@ linking, and outcomes that become commitment and task proposals through the outc
 | Functional correctness (evidence) | Outcome quotes that are exact substrings of a segment; brief facts with sources | 100 %; 100 %, gaps named |
 | Reliability (brief SLO) | Briefs delivered at the configured time over 28 days | ≥ 26 of 28 days |
 | Functional correctness (link to work) | Meetings accepted without a link to work and without "no link" | 0 |
+| Functional correctness (decisions) | Decisions in a brief that do not state why they are there; a planted retelling of an existing decision that creates a new decision instead of a fact on it | 0; 0 |
 | Functional correctness (outcome recall) | Planted agreements reaching the outcome card on the fixture set; recall on the owner's private set for the chosen tier (OPS-13) | 100 %; ≥ 80 % |
 | Transparency (honest outcomes) | "Nothing found" messages produced by a run that was truncated or dropped items (MTG-13) | 0 |
 | Timeliness (time to outcome) | Median time from the arrival of the recording to the outcome message (NFR-12) | ≤ 30 min |
@@ -631,12 +686,13 @@ classification rules with their labelled-day accuracy gate.
 |---|---|
 | Release · stage | R1 · 2 (RHY-1…3); R2 · 6 (activity spans and rules), 7 (RHY-4 weekly review) |
 | Runs in | `core` |
-| Owns | `rhy_plans` (snapshots), `rhy_day_reviews`, `rhy_week_reviews` (journal-class sections referenced by id only), `rhy_activity_spans` (start, end, goal or direction ref, device, rule version), `rhy_classification_rules` (versioned, gate state), `rhy_labelled_days` |
+| Owns | `rhy_plans` (snapshots), `rhy_day_reviews`, `rhy_week_reviews` (journal-class sections referenced by id only), `rhy_activity_spans` (start, end, goal or direction ref, decision ref, device, rule version), `rhy_classification_rules` (versioned, gate state), `rhy_labelled_days` |
 | Commands | `build_morning_plan` (scheduled), `refine_plan`, `close_day`, `run_weekly_review`, `record_spans` (from INT), `propose_rules`, `record_labelled_day`, `activate_rules` (only after the gate) |
 | Queries | `today_plan`, `plan_vs_fact(period)`, `week_review(period)`, `time_by_direction(period)` with coverage, `agent_config` (served to agents by INT) |
 | Emits · consumes | `coflow.rhy.plan.delivered`, `coflow.rhy.day.closed`, `coflow.rhy.week.reviewed`, `coflow.rhy.spans.recorded` · `coflow.obs.health.degraded` (health line) |
-| Depends on | WRK, CMT, DEC, CAL, MTG, TAX (reminders); `GoalDirectory`; `ReviewContributor` (WRK, GOL); MDL (phrasing of top lines only) |
-| Requirements | RHY-1…RHY-5, WRK-8 (spans), DEC-5 (surfacing), FIN-12 (reminders in the plan), GOL-12 (weekly-review pause rule) |
+| Depends on | WRK, CMT, DEC (`waiting`: the decision waiting list heads the plan), CAL, MTG, TAX (reminders); `GoalDirectory`; `ReviewContributor` (WRK, GOL); MDL (phrasing of top lines only) |
+| Implements | `DecisionAttachmentProbe` for time spans (stage 6) |
+| Requirements | RHY-1…5, WRK-8 (spans), DEC-5 (surfacing), FIN-12 (reminders in the plan), GOL-12 (weekly-review pause rule) |
 | Data classes · DATA_FLOWS | work · plans to `provider` (phrasing), `messenger`, `mcp:<client>`; window titles never reach `core` |
 | Acceptance suite | Golden morning plans; an adversarial fake model; fake clock over 28 days; a labelled synthetic day for rule accuracy |
 | Usage signal | Plans opened per week; weekly review unopened 3 weeks in a row → generation pauses and asks once (GOL-12 default); completion below 50 % over 4 weeks opens a redesign issue |
@@ -665,7 +721,7 @@ ready to become public issues. The weekly reflection (LRN-6) is delivered by GOL
 | Queries | `rules(active)`, `rule_history`, `why(answer_ref)` |
 | Emits · consumes | `coflow.lrn.rule.approved` / `revoked`, `coflow.lrn.incident.packaged` · `coflow.obs.trace.closed` (errors) |
 | Depends on | Kernel only (ACT, MDL, OBS, POL) |
-| Requirements | LRN-1…LRN-5 |
+| Requirements | LRN-1…5 |
 | Data classes · DATA_FLOWS | work · corrections to `provider` (rule candidates, owner's own words only) |
 | Acceptance suite | Rule evaluation set run in a new conversation and after a restart; forwarded-text injection set; incident-package scrubbing fixtures |
 | Usage signal | Rules approved and applied per week |
@@ -692,7 +748,7 @@ A full-text read model over transcripts, summaries, messages, facts, decisions, 
 | Queries | `search(query, filters, destination)` with coverage and freshness; `entities_of(ref)` |
 | Emits · consumes | `coflow.src.index.rebuilt` · synchronous projectors on SIG, PPL, WRK, DEC, CMT, MTG and FIN changes; `coflow.pol.erasure.completed` |
 | Depends on | PPL, SIG, DEC, CMT, FIN, WRK, MTG (projection queries); CFG (variants) |
-| Requirements | SRC-1…SRC-4, P-9; SRC-5, SRC-6 Later |
+| Requirements | SRC-1…4, P-9; SRC-5, SRC-6 Later |
 | Data classes · DATA_FLOWS | work, financial (separate partition) · results to `mcp:<client>`, `messenger`, `provider` per the requester's flow |
 | Acceptance suite | Load test of projector cost; labelled Latin ↔ Cyrillic query set; rebuild-equals-incremental test; canaries |
 | Usage signal | Searches per week and zero-hit share |
@@ -747,12 +803,13 @@ targets keyed by goal, and reports. It never issues invoices, keeps statutory bo
 |---|---|
 | Release · stage | R2 · 8.1a; FIN-19, FIN-20 Later |
 | Runs in | `core` (structured files first: CSV, XLSX, structured XML); PDF text and OCR as `extract` jobs in a worker |
-| Owns | `fin_taxpayers`, `fin_books` (taxpayer, contour, regime), `fin_accounts` (mixed-use flag), `fin_entries` (append-only; one book, or a split with a reason), `fin_transfers` (same-taxpayer pairs), `fin_related_flows` (related-party flag, "market value documented?"), `fin_fx_rates`, `fin_categories`, `fin_invoices` (EN 16931 names; source: compliant system id, QR or hash, structured e-invoice, or "manual, outside register"), `fin_payment_matches`, `fin_documents` (hash, `retention_until`), `fin_targets` (`goal_ref`; migrated from WRK's optional goal money target), `fin_import_identities` |
+| Owns | `fin_taxpayers`, `fin_books` (taxpayer, contour, regime), `fin_accounts` (mixed-use flag), `fin_entries` (append-only; one book, or a split with a reason; `decision_ref`), `fin_transfers` (same-taxpayer pairs), `fin_related_flows` (related-party flag, "market value documented?"), `fin_fx_rates`, `fin_categories`, `fin_invoices` (EN 16931 names; source: compliant system id, QR or hash, structured e-invoice, or "manual, outside register"), `fin_payment_matches`, `fin_documents` (hash, `retention_until`), `fin_targets` (`goal_ref`; migrated from WRK's optional goal money target), `fin_import_identities` |
 | Commands | `post_entry`, `reverse_entry`, `split_entry`, `record_transfer` (same taxpayer), `record_related_flow` (income in one book, expense in the other), `import_invoice_files`, `attach_document`, `set_target`, `close_period`, `post_imported_entries` (for IMP) |
 | Queries | `balance(book, account, as_of)`, `report(book, period, currency)`, `consolidated_report` (explicit flag, stated FX), `taxpayer_entries(taxpayer, period)` (for TAX only), `runway(book)`, `target_progress(goal_ref)`, `money_by_client`, `money_by_direction`, `decision_money` |
 | Emits · consumes | `coflow.fin.entry.posted` / `reversed`, `coflow.fin.invoice.registered` / `paid`, `coflow.fin.period.closed`, `coflow.fin.target.set` · `coflow.pol.erasure.completed` (refusals inside retention) |
-| Depends on | PPL (counterparties), DEC; `GoalDirectory`; MDL (one-line parsing and phrasing under the financial switch); invoice-file port |
-| Requirements | FIN-1, FIN-2, FIN-4…FIN-9, FIN-14, FIN-16 (file adapter), PRV-7 and PPL-6 (retention refusals); FIN-19, FIN-20 Later; D-026, D-027 |
+| Depends on | PPL (counterparties); `DecisionDirectory` (an entry's `decision_ref`, the actual stake); `GoalDirectory`; MDL (one-line parsing and phrasing under the financial switch); invoice-file port |
+| Implements | `DecisionAttachmentProbe` for ledger entries and `EvidenceResolver` for entries (8.1a) |
+| Requirements | FIN-1, FIN-2, FIN-4…9, FIN-14, FIN-16 (file adapter), PRV-7 and PPL-6 (retention refusals); FIN-19, FIN-20 Later; D-026, D-027 |
 | Data classes · DATA_FLOWS | financial · `provider` per purpose (proposed defaults: owner questions on; weekly review, goal control and reminders off, amounts as placeholders); `mcp:<client>` off until allowed per client; `messenger` on; raw documents to `provider` a separate row, off, only after redaction; third-party identifiers masked; credentials never |
 | Acceptance suite | A three-book fixture (household and own practice under one taxpayer, a company as a second); invoice export fixtures (CSV, XLSX, structured XML, PDFs); canary documents with a synthetic tax id and IBAN |
 | Usage signal | Entries posted per week; reports opened per month |
@@ -787,7 +844,7 @@ warning is an estimate for planning, not tax advice, and carries that label with
 | Queries | `tax_view(taxpayer, period)`, `filing_calendar(taxpayer)`, `reserve(book)` (set-aside per book from taxpayer-level figures), `warnings`, `rules_watch`, `render_figure(id, locale)` (labelled block) |
 | Emits · consumes | `coflow.tax.obligation.due`, `coflow.tax.estimate.computed`, `coflow.tax.warning.raised`, `coflow.tax.pack.loaded` · `coflow.fin.entry.posted`, `coflow.fin.invoice.registered`, `coflow.fin.period.closed` |
 | Depends on | FIN (`taxpayer_entries`, invoices with a compliant source); CFG (residence, regime, registration in the intra-EU operator register (ROI), individual or joint filing). Never MDL with figures |
-| Requirements | FIN-10…FIN-13, FIN-15, FIN-17, FIN-18; D-026, D-027 |
+| Requirements | FIN-10…13, FIN-15, FIN-17, FIN-18; D-026, D-027 |
 | Data classes · DATA_FLOWS | financial · tax figures to a model: never (placeholders only); to `messenger` and `mcp:<client>` only as rendered blocks, per the financial switch; advisor export to `export` |
 | Acceptance suite | Golden files per tax year; fixtures for one person with two books and for a person plus their company; one fixture per threshold; a fixture with only intra-EU purchases; a fixture of manual issued invoices; the core suite with no pack installed |
 | Usage signal | Obligations tracked and estimates viewed per quarter |
@@ -816,11 +873,12 @@ score.
 | Release · stage | R2 · 8.2; WRK-4 hypotheses in 8.8. **R1 · 3 for the slice (D-036):** importing, keeping and versioning the owner's existing centre documents and citing them (GOL-13), and the one computed link check (GOL-14) — no sessions, no goal cards, no model wording |
 | Runs in | `core` |
 | Owns | `gol_centre_documents`, `gol_centre_versions` (immutable, with diffs), `gol_spans`, `gol_rules` (typed fields; free text only as a span reference), `gol_directions` and `gol_goals` (transferred from WRK, ids unchanged), `gol_goal_versions`, `gol_hypotheses`, `gol_if_then_plans`, `gol_sessions` and `gol_drafts` (journal class; origin owner or MCP client), `gol_reviews`, `gol_verdicts` (output, outcome, path), `gol_check_marks`, `gol_reflections` (journal class when journal input was used) |
-| Commands | `import_centre_documents`, `classify_section`, `start_session(protocol)`, `submit_draft`, `propose_version` (approval card with diff), `approve_version` (bot or local CLI only), `set_rule_field`, `create_direction`, `create_goal`, `activate_goal`, `set_goal_state` (pause, drop, supersede only in a deliberation review or by a DEC record), `park_for_deliberation`, `record_verdict`, `set_cap`, `mark_check` |
+| Commands | `import_centre_documents`, `classify_section`, `start_session(protocol)`, `submit_draft`, `propose_version` (approval card with diff), `approve_version` (bot or local CLI only), `set_rule_field`, `create_direction`, `create_goal`, `activate_goal`, `set_goal_state` (pause, drop, supersede only in a deliberation review or through a review of the goal's `pursue` decision), `park_for_deliberation`, `record_verdict` (the path verdict linked to the assumptions and learnings of the decisions that served the goal), `set_cap`, `mark_check` |
 | Queries | `centre(version)`, `directions`, `goals(filter)`, `goal_context` (money targets through FIN), `control_list(period)`, `review_pack(period)`, `session_state` (owner channels only), `self_measures` |
 | Emits · consumes | `coflow.gol.centre.version_approved`, `coflow.gol.direction.created` / `changed`, `coflow.gol.goal.created` / `state_changed` / `moved`, `coflow.gol.review.completed`, `coflow.gol.check.switched_off` · none (reads through `api` at review time) |
-| Depends on | WRK, FIN, CMT, CAL, DEC, MTG, RHY; ACT; MDL (dialogue, pointing to spans, phrasing); CFG. Implements `GoalDirectory` and `ReviewContributor` |
-| Requirements | GOL-1…GOL-12, LRN-6, RHY-4 (link), WRK-1 (directions and goals, from 8.2), WRK-4, CFG-4, CFG-5, REL-6 (centre version per analysis); D-028 |
+| Depends on | WRK, FIN, CMT, CAL, DEC, MTG, RHY; ACT; MDL (dialogue, pointing to spans, phrasing); CFG |
+| Implements | `GoalDirectory` (from 8.2), `ReviewContributor`; `EvidenceResolver` for centre spans (from stage 3) |
+| Requirements | GOL-1…12, GOL-13 and GOL-14 (the R1 slice, stage 3; the link check computed over DEC-19), LRN-6, RHY-4 (link), WRK-1 (directions and goals, from 8.2), WRK-4 (hypotheses as decisions of kind `test`), CFG-4, CFG-5, REL-6 (centre version per analysis); D-028 |
 | Data classes · DATA_FLOWS | work (approved centre, rules, goals), journal (sessions, drafts, journal-derived reflections) · session turns to `provider` (formation; journal class, so model feedback in sessions needs the journal switch on for GOL, or the local model); approved centre to `mcp:<client>` read; drafts from MCP write-only (a client cannot read sessions or drafts back) |
 | Acceptance suite | A synthetic year with planted problems (top direction at 5 % of hours, a goal without a next step for 30 days, a cap exceeded, a domain with zero time) and planted non-problems; a provenance set with pasted-back model sentences and MCP-origin drafts; byte-identical import fixtures |
 | Usage signal | Sessions completed; share of active goals with attainment levels and an if-then plan; review completion; median session duration. The pause rule for the weekly review is enforced by RHY |
@@ -859,7 +917,7 @@ the goals module by the owner's decision of 4 October 2026; alignment formulas a
 | Queries | `findings(period, scope)` (journal-class findings only in owner channels), `check_status`, `eval_results` |
 | Emits · consumes | `coflow.aln.run.completed`, `coflow.aln.check.switched_off` · none (reads through `api` at run time) |
 | Depends on | GOL (centre versions, rule objects), WRK, CMT, FIN, CAL, RHY, SIG, JRN (through MDL under PRV-9); MDL; CFG |
-| Requirements | ALN-2…ALN-5, PRV-9, LRN-6 (adds findings to the weekly reflection when enabled), SIG-14, REL-6; D-017, D-029 |
+| Requirements | ALN-2…5, PRV-9, LRN-6 (adds findings to the weekly reflection when enabled), SIG-14, REL-6; D-017, D-029 |
 | Data classes · DATA_FLOWS | work (findings from work data), journal (findings that used journal input) · centre spans and stream excerpts to `provider` per check; journal input only with the switch on for ALN; journal-class findings never to `mcp:<client>`, search, the timeline or the status page |
 | Acceptance suite | A synthetic quarter with planted inconsistencies and planted consistent cases across think, say and do; journal canaries under both switch settings; evidence-integrity fixtures (every quote equals a stored segment or record) |
 | Usage signal | Findings marked useful per month; checks switched off; weekly-reflection lines that cite a finding |
@@ -881,8 +939,9 @@ the goals module by the owner's decision of 4 October 2026; alignment formulas a
 ### BOT — Messenger bot
 
 The private daily interface: long polling, owner only, rule-based routing (work by default, journal by
-marker), local transcription of voice before routing, answers through `api` queries, approval cards,
-notifications with caps and quiet hours, sources and a "wrong" button.
+marker), local transcription of voice before routing, answers through `api` queries, approval cards with a
+second factor for high-risk ones, the decision loop asked one question at a time, notifications with caps
+and quiet hours, sources and a "wrong" button.
 
 | Field | Value |
 |---|---|
@@ -891,9 +950,9 @@ notifications with caps and quiet hours, sources and a "wrong" button.
 | Owns | `bot_offsets`, `bot_routes` (message ref → route), `bot_notifications` (sent, caps) |
 | Commands | `handle_update` (internal), `route`, `send_notification`, `render` (data-flow check for `messenger`) |
 | Queries | None public (state on the status page) |
-| Emits · consumes | `coflow.bot.message.routed` (journal routes carry no text) · `coflow.act.card.proposed`, `coflow.rhy.plan.delivered`, `coflow.mtg.brief.ready`, `coflow.sig.transcript.ready`, `coflow.cmt.commitment.due`, `coflow.tax.obligation.due`, `coflow.obs.health.degraded` |
+| Emits · consumes | `coflow.bot.message.routed` (journal routes carry no text) · `coflow.act.card.proposed`, `coflow.rhy.plan.delivered`, `coflow.mtg.brief.ready`, `coflow.sig.transcript.ready`, `coflow.cmt.commitment.due`, `coflow.dec.assumption.state_changed` ("violated" asks at once), `coflow.dec.assumption.check_due`, `coflow.dec.proposal.proposed`, `coflow.tax.obligation.due`, `coflow.obs.health.degraded` |
 | Depends on | Module `api`s; ACT, JRN, LRN, POL, MDL, CFG; STT through jobs; messenger port (one reference adapter and a fake) |
-| Requirements | BOT-1…BOT-7, BOT-8…BOT-10, LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10; threads follow BOT-2 routing |
+| Requirements | BOT-1…12, DEC-5, DEC-7, DEC-9 (the chat side of the decision loop), LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10; threads follow BOT-2 routing |
 | Data classes · DATA_FLOWS | all classes pass its renderer · `messenger` rows per class; journal outputs only when the journal × messenger row is on (otherwise the local CLI) |
 | Acceptance suite | Fake messenger with text, voice, captions, replies, commands and forwards; double taps and restarts; quiet-hour clock tests |
 | Usage signal | Owner messages per active day; cards decided per week |
@@ -905,6 +964,10 @@ notifications with caps and quiet hours, sources and a "wrong" button.
 | Security (routing canary) | Journal canary in a model call before the owner's choice, over every message kind, under both switch settings | 0 |
 | Security (financial) | Financial canary in bot answers with the financial × messenger row off | 0 |
 | Safety | Card executions under double taps and restarts | Exactly 1 |
+| Safety (fencing) | Fenced on a network cut or a container restart; a second poller not fenced after the configured repeats (default 3 conflicts within 2 minutes) | 0; 0 |
+| Security (step-up) | High-risk cards executed from a messenger tap alone (BOT-11) | 0 |
+| Security (journal in the chat) | Journal entries, or the bot's replies to them, left in the chat after ingestion (BOT-12) | 0 |
+| Functional correctness (decision loop) | Writes before approval; a repeated question inside its window; an answer without an assessment that yields an assumption state on the card | 0; 0; 0 |
 | Performance efficiency | Answer latency; answers without the cost shown | Median ≤ 15 s; 0 |
 | Interaction capability | Notifications breaking the daily cap or quiet hours | 0 |
 | Interaction capability (asking) | Turns asking more than one question, or asking again about something already resolved in the same command (BOT-10) | 0 and 0 |
@@ -915,18 +978,20 @@ notifications with caps and quiet hours, sources and a "wrong" button.
 ### MCP — MCP server
 
 Context-oriented tools over module `api`s: Streamable HTTP inside `core` on loopback with scoped tokens
-and host and Origin checks; stdio through BRG; a generated catalogue; remote MCP for cloud clients in 8.6.
+and host and Origin checks; stdio through BRG (the SSH bridge, and the local shim on the instance's own
+machine); a generated catalogue; decision and commitment tools in their own `dec_` and `cmt_` namespaces;
+remote MCP for cloud clients in 8.0, served through the separate `edge` container (EDG).
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 1; R2 · 8.6 (MCP-5) |
+| Release · stage | R1 · 0A (loopback, the local shim, the `dec_` and `cmt_` tools), 1 (the network listener for owner devices, the SSH bridge); R2 · 8.0 (MCP-5, with EDG) |
 | Runs in | `core` |
-| Owns | `mcp_clients` (token hash, scope, tool allow-list, allowed flows), `mcp_call_log` |
+| Owns | `mcp_clients` (token hash, scope, tool allow-list, allowed flows, financial flag), `mcp_call_log`; from 8.0 the grants of cloud clients (hashed opaque tokens, pairing state, absolute lifetime) |
 | Commands | Tool calls mapped to `api` commands: internal writes execute, are logged in `act_undo_log` and are undoable; external writes return a preview only. `issue_client`, `revoke_client` (through ADM) |
 | Queries | Tool calls mapped to `api` queries; `catalogue` |
 | Emits · consumes | none · none |
 | Depends on | Module `api`s; ACT, OBS, POL |
-| Requirements | MCP-1…MCP-5, DEP-11, DEP-12, GOL-5 (drafts only, origin "MCP client") |
+| Requirements | MCP-1…5 (MCP-5 with EDG), DEC-17 (proposals from AI clients), PRV-14 (the cloud view withholds `untrusted_external` text), DEP-11, DEP-12, GOL-5 (drafts only, origin "MCP client") |
 | Data classes · DATA_FLOWS | work, financial per client · one `mcp:<client>` row per client; journal never |
 | Acceptance suite | HTTP tests with valid, missing and read-only tokens; response-layer canaries (journal, financial); generated catalogue diff; read-tool latency on the synthetic dataset |
 | Usage signal | Calls per tool per week; tools without a call in 90 days are reviewed for removal |
@@ -939,7 +1004,9 @@ and host and Origin checks; stdio through BRG; a generated catalogue; remote MCP
 | Security (financial) | Financial canary in responses to a client without the financial flow | 0 |
 | Maintainability | Generated catalogue vs. code; write tools without an undo handler or a "not undoable" mark | Equal; 0 |
 | Performance efficiency | Read-tool latency on the synthetic dataset | p95 ≤ 2 s |
-| Interaction capability | Responses without the instance role and id | 0 |
+| Interaction capability | Responses without the instance role and id (and, for mirrors, the authority) | 0 |
+| Safety (namespaces) | v2 tools sharing a name with the predecessor's tools; owner-channel actions (approve a proposal, import, run a case, adopt, make a decision public) exposed as tools | 0; 0 |
+| Security (cloud grants, 8.0) | `/authorize` answering outside a pairing window; an unconfirmed grant calling anything but the confirmation tool; a reused refresh token that does not revoke the grant; a token for another audience accepted | 0; 0; 0; 0 |
 
 ### STS — Status page
 
@@ -969,19 +1036,20 @@ with the same token and host check as MCP. More screens only when their use is m
 ### INT — Integration and ingestion API
 
 The public versioned contract for external apps (read a brief; write a session, highlights and an
-outcome, idempotently) and the ingestion API for device agents (resumable uploads, CloudEvents batches,
-agent configuration).
+outcome, idempotently), carrying the decision anchors (the decisions in play and the assumptions to
+probe); read-only pull connectors for apps hosted on a third-party platform; and the ingestion API for
+device agents (resumable uploads, CloudEvents batches, agent configuration).
 
 | Field | Value |
 |---|---|
-| Release · stage | R2 · 6 |
+| Release · stage | R1 · 3 (the versioned decision-anchor schemas, with the event app's file adapter as first consumer, EXT-5); R2 · 6 (the API, pull connectors, the ingestion API) |
 | Runs in | `core` (HTTP on the `core` listener) |
-| Owns | `int_clients` (scoped, revocable tokens; per-device source types), `int_idempotency` (key → result), `int_uploads` (resumable chunks) |
-| Commands | `write_session`, `write_highlights`, `write_outcome`, `upload_chunk` / `complete_upload`, `ingest_events` |
+| Owns | `int_clients` (scoped, revocable tokens; per-device source types), `int_idempotency` (key → result), `int_uploads` (resumable chunks), `int_connectors` (pull connectors: source, token reference, cursor, size limits, the controller of each pulled data class) |
+| Commands | `write_session`, `write_highlights`, `write_outcome`, `upload_chunk` / `complete_upload`, `ingest_events`, `pull(connector)` (outbound, by cursor; acknowledgement with its own token) |
 | Queries | `read_brief`, `agent_config` (direction list and active rules from RHY) |
 | Emits · consumes | `coflow.int.upload.completed`, `coflow.int.events.ingested` · none |
-| Depends on | SIG, MTG, PPL, RHY; EVT, POL |
-| Requirements | EXT-4, DEP-16, RHY-5 (rule distribution) |
+| Depends on | SIG, MTG, PPL, RHY; `DecisionDirectory` (projections per app audience, assumptions to probe); EVT, POL |
+| Requirements | EXT-4, EXT-5, EXT-6 (an absent app is a coverage note, never an error), PRV-14 (pulled and pushed items are `untrusted_external` and become proposals), DEP-16, RHY-5 (rule distribution) |
 | Data classes · DATA_FLOWS | work · `app:<client>` and `device:<id>` rows |
 | Acceptance suite | JSON Schema contract suite against the reference consumer; replay tests; deploy-hold tests |
 | Usage signal | Calls per client per week |
@@ -993,6 +1061,8 @@ agent configuration).
 | Compatibility | Contract suite on provider and reference consumer | Passes; a breaking change needs a new version |
 | Security | Writes outside a device token's source types; device text treated as an instruction; outcomes that create commitments without approval | 0; 0; 0 |
 | Reliability | Behaviour during deploy holds | 503 with `Retry-After`; 0 lost uploads |
+| Security (pull) | A pull token that can acknowledge; an oversized or schema-breaking pull that stops the writer (fake app); pulled items stored as records instead of proposals | 0; 0; 0 |
+| Functional correctness (anchors) | Probe quotes kept that are not substrings of a segment; app messages about decisions applied as states | 0 (dropped and counted); 0 |
 
 ### ADM — Admin API and CLI
 
@@ -1002,14 +1072,14 @@ import goes through it with a scoped token; only `migrate`, `restore` and `drill
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 |
+| Release · stage | R1 · 0A |
 | Runs in | `core` listener (`/admin`, 127.0.0.1); CLI on the host or through `docker compose exec` |
-| Owns | `adm_tokens` (hash, scope: `admin`, `import`, `journal-write`, `journal-read`) |
-| Commands | Every write the CLI offers (`journal add`, `import`, `export`, `backup`, `promote`, `retire`, `set-flow`, `issue-mcp-client`, approvals before stage 5) |
+| Owns | `adm_tokens` (hash, scope: `admin`, `import` — snapshot imports of the owner's existing system and bulk imports — `journal-write`, `journal-read`) |
+| Commands | Every write the CLI offers (`journal add`, `import`, `dec import`, `dec case run`, `dec adopt`, `export`, `backup`, `promote`, `retire`, `set-flow`, `issue-mcp-client`, approvals before stage 5); without a running `core` the CLI starts an ephemeral one under the same instance lock |
 | Queries | `status`, `logs` (ids only), `doctor`, journal reading (journal-read token, owner's terminal only) |
 | Emits · consumes | none · none |
 | Depends on | OPS, POL, ACT and module `api`s |
-| Requirements | DEP-11, OPS-1, PRV-1 (local entry path) |
+| Requirements | DEP-11, OPS-1, OPS-15 (the `import` scope), PRV-1 (local entry path) |
 | Data classes · DATA_FLOWS | all classes, owner channel · none outbound |
 | Acceptance suite | CLI against a running `core` on a temp data root; token-scope matrix; fitness test on the CLI entry point |
 | Usage signal | Kernel: admin calls per week |
@@ -1027,19 +1097,19 @@ import goes through it with a scoped token; only `migrate`, `restore` and `drill
 
 ### STT — Speech-to-text and extraction worker
 
-A stateless local worker: transcription of voice notes and recordings, and from 8.1a local text and OCR
-extraction of financial documents. It takes jobs from files, returns schema-validated results and has no
-database and no network (ARCHITECTURE §6.5).
+A stateless local worker: transcription of voice notes and recordings, on the GPU where the host has one
+and on the CPU otherwise, and from 8.1a local text and OCR extraction of financial documents. It takes
+jobs from files, returns schema-validated results and has no database and no network (ARCHITECTURE §6.5).
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 2 (voice), 4 (recordings); R2 · 8.1a (`extract`); embeddings Later (SRC-5) |
+| Release · stage | R1 · 2 (voice; the GPU image variant, DEP-25), 4 (recordings); R2 · 8.1a (`extract`); embeddings Later (SRC-5) |
 | Runs in | `stt` container; a supervised subprocess pool in native development |
 | Owns | No tables; job, result and audio files in `work/`, deleted on completion |
-| Commands · Queries | `transcribe(job)`, `extract(job)` · `bench` (`coflow bench stt`) |
+| Commands · Queries | `transcribe(job)`, `extract(job)` · `bench` (`coflow bench stt`, `--device gpu`), the device in use |
 | Emits · consumes | none (`core` records completion in `sys_jobs`) · none |
 | Depends on | `coflow.contracts` only; the models volume |
-| Requirements | BOT-7, SIG-2, SIG-3, SIG-14, NFR-11, FIN-14 (local extraction); SRC-5 Later |
+| Requirements | BOT-7, SIG-2, SIG-3, SIG-14, NFR-11, DEP-25 (GPU reservation, CPU fallback), FIN-14 (local extraction); SRC-5 Later |
 | Data classes · DATA_FLOWS | transient work, journal or financial content in `work/` · none outbound (no network) |
 | Acceptance suite | Synthetic EN and RU audio benchmark; OOM kill mid-job; malformed-result fixtures; residue scan of `work/` |
 | Usage signal | Jobs per day and backlog on the status page |
@@ -1052,16 +1122,19 @@ database and no network (ARCHITECTURE §6.5).
 | Security (isolation) | Database or network access (Compose lint, import contract, fitness test); malformed results accepted by `core` | 0; 0 |
 | Security (residue) | Files left in `work/` after completion, and after a kill mid-job plus recovery | 0 |
 | Functional correctness | Word error rate on the synthetic benchmark vs. the recorded baseline | No regression > 2 points |
+| Reliability (device) | A GPU fault that is not followed by a CPU fallback; "CPU instead of GPU" not shown as a warning in health | 0; 0 |
 
-### BRG — MCP stdio bridge
+### BRG — MCP stdio bridge and local shim
 
 `coflow-bridge mcp` forwards a stdio MCP client to `core`'s loopback MCP endpoint with that client's
-scoped token. It is started by an SSH forced command and holds no database path.
+scoped token. It is started by an SSH forced command and holds no database path. `coflow mcp-stdio` is
+the same forwarder for AI clients on the instance's own machine: it forwards stdio to the loopback
+endpoint and never resolves the database path, so two local clients share one `core`.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 1 |
-| Runs in | The host, one process per MCP client, started by an SSH forced command |
+| Release · stage | R1 · 0A (the local shim), 1 (the SSH bridge) |
+| Runs in | The host, one process per MCP client, started by an SSH forced command; the shim on the instance's own machine, started by the local AI client |
 | Owns | Nothing |
 | Commands · Queries | None of its own; forwards MCP requests and responses |
 | Emits · consumes | none · none |
@@ -1074,7 +1147,7 @@ scoped token. It is started by an SSH forced command and holds no database path.
 
 | Quality attribute | Metric | Acceptance threshold |
 |---|---|---|
-| Security | Database path resolvable; requests forwarded without the client's token | 0; 0 |
+| Security | Database path resolvable by the bridge or the shim; requests forwarded without the client's token | 0; 0 |
 | Compatibility | MCP conformance suite through the bridge vs. direct HTTP | Same results |
 
 ### AGT — Device agents
@@ -1109,13 +1182,13 @@ owner's approval, holds writes, snapshots, migrates, health-gates and rolls back
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0 (manual `coflow update <digest>` over SSH), 2 (signature verification), 5 (approval card bound to the digest, holds, automatic rollback); DEP-21 Later |
+| Release · stage | R1 · 0B (manual `coflow update <digest>` over SSH), 2 (signature verification before any label is read, version ascent, the driver-branch check, platform updates held), 5 (approval card bound to the digest and showing the facts computed by CI, holds, automatic rollback); DEP-21 Later |
 | Runs in | The host (systemd timer); the only component that calls Docker |
 | Owns | Host files: handled tags, the deploy lock, approvals read from `control/` |
-| Commands · Queries | `approve <version>` (CLI, stages 0–4), `deploy`, `rollback --to-snapshot` · `status`, deploy history (recorded through OPS) |
+| Commands · Queries | `approve <version>` (CLI, stages 0B–4), `deploy`, `rollback --to-snapshot` · `status`, deploy history (recorded through OPS) |
 | Emits · consumes | Deploy records in `control/`, picked up by OPS into `sys_deploys` · approvals written to `control/` by `core` (from stage 5) |
 | Depends on | Docker Engine, the image registry, signature verification; never the database |
-| Requirements | DEP-8, DEP-9, DEP-10; DEP-21 Later |
+| Requirements | DEP-8, DEP-9, DEP-10, DEP-25 (the image's minimum driver branch), DEP-26 (platform updates only by owner command; the unlock-policy prediction before a reboot); DEP-21 Later |
 | Data classes · DATA_FLOWS | system · the image-registry row (host address, pull times) |
 | Acceptance suite | Signature tests with wrong identities; approval-hash mismatch and expiry; the rollback and failed-rollback drills |
 | Usage signal | Deploys and rollbacks per month |
@@ -1124,8 +1197,40 @@ owner's approval, holds writes, snapshots, migrates, health-gates and rolls back
 | Quality attribute | Metric | Acceptance threshold |
 |---|---|---|
 | Security | Images deployed with a missing or foreign signature; approvals accepted that mismatch, expired or came from another instance | 0; 0 |
+| Security (ascent) | A correctly signed release of an older commit, or of one that does not descend from the deployed commit, accepted | 0 |
+| Compatibility (GPU) | Images deployed whose declared minimum driver branch the host does not meet | 0 |
+| Safety (platform) | Kernel, GPU driver, bootloader, shim or firmware updates applied without an owner command; reboots after a predicted unlock-policy mismatch | 0; 0 |
 | Reliability (rollback drill) | A deliberately broken release | Rolled back automatically; no lost bot message; no external write |
 | Reliability (failed rollback) | A rollback that fails | Everything stopped; off-host alert received |
+
+### EDG — Internet edge for cloud AI clients (stage 8, module 0)
+
+The separate container that serves the internet-facing MCP listener for cloud AI clients (proposed,
+D-053): TLS termination on the owner's host, the OAuth and consent pages, MCP request parsing and the
+route table. It holds no database and no secret except its TLS key, makes no outbound requests, and calls
+only a narrow internal "cloud view" API of `core`, which re-checks data classes. Grants and tokens live in
+`core` (MCP). The owner relay forwards encrypted traffic to it and never decrypts.
+
+| Field | Value |
+|---|---|
+| Release · stage | R2 · 8.0 |
+| Runs in | `edge` container (optional Compose profile) |
+| Owns | Nothing: no database; its TLS key only |
+| Commands · Queries | None of its own; forwards MCP and OAuth requests to the cloud-view API of `core` |
+| Emits · consumes | none · none |
+| Depends on | The internal cloud-view API of `core`, over a network marked `internal` |
+| Requirements | MCP-5 (the edge part), PRV-13 |
+| Data classes · DATA_FLOWS | Only what the cloud view returns; never the journal; `untrusted_external` withheld by default · covered by the `edge` rows and the client's `mcp:<client>` row |
+| Acceptance suite | Route-table test against the allow-list; reachability tests from inside the container (every other port of `core` and the host, outbound connections); the journal and planted-instruction canaries under both journal-switch settings; interoperability and pairing first on a throwaway machine with synthetic data and a throwaway name |
+| Usage signal | Cloud-client calls per week and per client; grants paired and revoked |
+| Approval | **Owner** (an external surface) |
+
+| Quality attribute | Metric | Acceptance threshold |
+|---|---|---|
+| Security (routes) | Route table equal to the allow-list (MCP endpoint, the metadata documents, the OAuth endpoints) (CI) | 100 % |
+| Security (isolation) | Outbound connections from the container; ports of `core` and of the host reachable from it, other than the cloud-view API | 0; 0 |
+| Security (journal) | The journal canary or a planted-instruction canary in an edge response, under either journal-switch setting | 0 |
+| Security (pages) | Login and consent pages without `frame-ancestors 'none'`, CSRF tokens or host-only `__Host-` cookies | 0 |
 
 ---
 
@@ -1322,7 +1427,7 @@ module imports them, and removing them needs no core migration. Each gets a full
 
 | Code | Module | Requirements | Reads | Key acceptance thresholds |
 |---|---|---|---|---|
-| REL | Relationship measures E(t) and balance alerts; stated positions only | REL-1…REL-3 | SIG, MTG, CMT, PPL | Same data → same series; values without links to their events: 0; recall of planted balance shifts in a synthetic quarter ≥ 90 %; schema fields for inferred emotions or diagnoses: 0 |
+| REL | Relationship measures E(t) and balance alerts; stated positions only | REL-1…3 | SIG, MTG, CMT, PPL | Same data → same series; values without links to their events: 0; recall of planted balance shifts in a synthetic quarter ≥ 90 %; schema fields for inferred emotions or diagnoses: 0 |
 | CND | Conductivity protocol and prediction of G(t+1), specified after a planned experiment gate (November 2026) | REL-4, REL-5 | REL measures, SIG, MTG | Corpus cases without a prediction locked before the outcome: 0; predictive models shown before beating the pre-registered baselines: 0 |
 | EVO | Evolution over time: positions per period, communication change, recurring chains of thought | TML-3 | TML, REL; the journal under PRV-9 | Findings without per-period evidence: 0; same data → identical series |
 

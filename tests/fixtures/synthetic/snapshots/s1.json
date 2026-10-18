@@ -1,0 +1,810 @@
+{
+  "format": "coflow.import.decisions",
+  "format_version": 1,
+  "synthetic": true,
+  "exported_at": "2026-11-15T05:00:12Z",
+  "as_of": "2026-11-15T05:00:00Z",
+  "as_of_date": "2026-11-15",
+  "source": {
+    "issuer": "V1",
+    "schema_revision": "synthetic-1",
+    "exporter_version": "1.0.0",
+    "timezone": "Europe/Berlin"
+  },
+  "id_space": {
+    "decision": {
+      "highest_issued": 910,
+      "deleted_without_trace": [
+        901,
+        902
+      ]
+    }
+  },
+  "context": {
+    "goals": [
+      {
+        "ref": "G901",
+        "title": "Cut fixed costs",
+        "status": "dropped",
+        "status_changed_at": "2026-11-05"
+      },
+      {
+        "ref": "G902",
+        "title": "Grow the training line",
+        "status": "active",
+        "status_changed_at": null
+      }
+    ],
+    "tasks": [
+      {
+        "ref": "K9001",
+        "title": "Measure the room",
+        "status": "done"
+      },
+      {
+        "ref": "K9002",
+        "title": "Book the trial session",
+        "status": "open"
+      }
+    ],
+    "topics": [
+      {
+        "ref": "T901",
+        "title": "Workshop",
+        "status": "active"
+      }
+    ],
+    "sessions": [
+      {
+        "ref": "S90001",
+        "communication_type": "chat",
+        "started_at": "2026-10-30T08:00:00Z"
+      },
+      {
+        "ref": "S90002",
+        "communication_type": "call",
+        "started_at": "2026-08-30T09:00:00Z"
+      }
+    ],
+    "people": [
+      {
+        "ref": "P901",
+        "display_name": "Person A",
+        "is_self": false
+      },
+      {
+        "ref": "P902",
+        "display_name": "Person B",
+        "is_self": false
+      }
+    ],
+    "companies": [
+      {
+        "ref": "C-901",
+        "name": "Example Landlord Ltd"
+      },
+      {
+        "ref": "C-902",
+        "name": "Supplier A"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "v1_id": 903,
+      "v1_ref": "D903",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Run the autumn workshop series as a pilot",
+      "statement": "Run four evening sessions in October",
+      "context": "Demand for evening sessions was unclear",
+      "alternatives": [
+        {
+          "option": "Skip the autumn series",
+          "why_rejected": "loses the group"
+        }
+      ],
+      "investment": "about 10 hours",
+      "expected_result": "at least 6 people per session",
+      "confidence": 60,
+      "decided_at": "2026-09-01",
+      "review_due": null,
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": null,
+      "context_known": "Last spring 5 people came per session",
+      "context_unknown": "whether evenings suit the group",
+      "context_would_help": null,
+      "status": "closed",
+      "manual_health": null,
+      "outcome": "success",
+      "learning": "Evening sessions filled up; small groups worked better",
+      "process_type": "operational",
+      "folder_path": null,
+      "source_session": "S90002",
+      "created_at": "2026-09-01T18:00:00Z",
+      "closed_at": "2026-10-30T17:00:00Z",
+      "assumptions": [
+        {
+          "v1_id": 9031,
+          "code": "A1",
+          "statement": "At least 6 people sign up per session",
+          "metric": "sign-ups",
+          "threshold": "6 per session",
+          "data_source": "booking sheet",
+          "check_frequency": "weekly",
+          "is_critical": 1,
+          "state": "HOLDING",
+          "next_check_at": null,
+          "last_checked_at": "2026-10-20",
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-09-01T18:05:00Z"
+        }
+      ],
+      "facts": [
+        {
+          "v1_id": 90301,
+          "assumption_v1_id": 9031,
+          "phase": "grounding",
+          "occurred_at": "2026-06-30",
+          "fact": "Spring sessions averaged 5 people",
+          "source": "booking sheet",
+          "session": null,
+          "created_at": "2026-09-01T18:06:00Z"
+        }
+      ],
+      "reviews": [
+        {
+          "v1_id": 903001,
+          "reviewed_at": "2026-10-30",
+          "verdict": "worked",
+          "action": "close",
+          "health_at_review": "ON_TRACK",
+          "next_review_due": null,
+          "notes": null,
+          "created_at": "2026-10-30T17:00:00Z"
+        }
+      ],
+      "links": [
+        {
+          "kind": "topic",
+          "ref": "T901",
+          "source": "app",
+          "created_at": "2026-09-01T18:10:00Z"
+        }
+      ],
+      "versions": []
+    },
+    {
+      "v1_id": 904,
+      "v1_ref": "D904",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Offer a monthly maintenance plan to existing customers",
+      "statement": "Offer the plan at a fixed monthly price from October",
+      "context": "Customers ask for repairs at short notice",
+      "alternatives": [
+        {
+          "option": "Keep billing repairs one by one",
+          "why_rejected": "uneven"
+        }
+      ],
+      "investment": null,
+      "expected_result": "five plans sold by January",
+      "confidence": 50,
+      "decided_at": "2026-10-01",
+      "review_due": "2026-11-01",
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": "C-902",
+      "context_known": null,
+      "context_unknown": "how many customers want a plan",
+      "context_would_help": null,
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": null,
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-10-01T16:00:00Z",
+      "closed_at": null,
+      "assumptions": [
+        {
+          "v1_id": 9041,
+          "code": "A1",
+          "statement": "Customers value predictable costs",
+          "metric": null,
+          "threshold": "most customers say yes",
+          "data_source": null,
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "UNVERIFIABLE",
+          "next_check_at": null,
+          "last_checked_at": null,
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-10-01T16:02:00Z"
+        },
+        {
+          "v1_id": 9042,
+          "code": "A2",
+          "statement": "The plan price covers the average repair cost",
+          "metric": "margin",
+          "threshold": "positive margin",
+          "data_source": "rough estimate from last year",
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "UNVERIFIABLE",
+          "next_check_at": null,
+          "last_checked_at": "2026-10-20",
+          "position": 2,
+          "notes": null,
+          "created_at": "2026-10-01T16:03:00Z"
+        }
+      ],
+      "facts": [],
+      "reviews": [],
+      "links": [
+        {
+          "kind": "goal",
+          "ref": "G902",
+          "source": "app",
+          "created_at": "2026-10-01T16:05:00Z"
+        }
+      ],
+      "versions": []
+    },
+    {
+      "v1_id": 905,
+      "v1_ref": "D905",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Switch the newsletter to every second week",
+      "statement": "Send it every second Thursday",
+      "context": null,
+      "alternatives": [],
+      "investment": null,
+      "expected_result": null,
+      "confidence": null,
+      "decided_at": "2026-11-05",
+      "review_due": "2026-11-25",
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": null,
+      "context_known": null,
+      "context_unknown": null,
+      "context_would_help": null,
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": null,
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-11-05T12:00:00Z",
+      "closed_at": null,
+      "assumptions": [],
+      "facts": [],
+      "reviews": [],
+      "links": [],
+      "versions": []
+    },
+    {
+      "v1_id": 906,
+      "v1_ref": "D906",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Rent a second storage unit for the winter",
+      "statement": "Rent a small unit from November to March",
+      "context": null,
+      "alternatives": [],
+      "investment": null,
+      "expected_result": null,
+      "confidence": null,
+      "decided_at": "2026-10-20",
+      "review_due": null,
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": null,
+      "context_known": null,
+      "context_unknown": null,
+      "context_would_help": null,
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": null,
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-10-20T10:00:00Z",
+      "closed_at": null,
+      "assumptions": [
+        {
+          "v1_id": 9061,
+          "code": "A1",
+          "statement": "The extra stock sells before spring",
+          "metric": null,
+          "threshold": "sold out by March",
+          "data_source": null,
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "UNVERIFIABLE",
+          "next_check_at": null,
+          "last_checked_at": null,
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-10-20T10:01:00Z"
+        },
+        {
+          "v1_id": 9062,
+          "code": "A2",
+          "statement": "Storage prices stay flat",
+          "metric": null,
+          "threshold": "no increase",
+          "data_source": null,
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "UNVERIFIABLE",
+          "next_check_at": null,
+          "last_checked_at": null,
+          "position": 2,
+          "notes": null,
+          "created_at": "2026-10-20T10:02:00Z"
+        },
+        {
+          "v1_id": 9063,
+          "code": "A3",
+          "statement": "The unit is reachable by van",
+          "metric": null,
+          "threshold": "access confirmed",
+          "data_source": "site visit",
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "HOLDING",
+          "next_check_at": null,
+          "last_checked_at": "2026-11-10",
+          "position": 3,
+          "notes": null,
+          "created_at": "2026-10-20T10:03:00Z"
+        }
+      ],
+      "facts": [],
+      "reviews": [],
+      "links": [],
+      "versions": []
+    },
+    {
+      "v1_id": 907,
+      "v1_ref": "D907",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Move the shared workshop to a smaller room for one quarter",
+      "statement": "Rent the small room from 1 Dec to 28 Feb; keep the equipment",
+      "context": "The large room costs more than the workshop earns in winter",
+      "alternatives": [
+        {
+          "option": "Keep the large room",
+          "why_rejected": "cost"
+        }
+      ],
+      "investment": "about 6 hours of moving",
+      "expected_result": "rent down by a third",
+      "confidence": 70,
+      "decided_at": "2026-11-02",
+      "review_due": "2026-11-12",
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": "C-901",
+      "context_known": "The small room is free from December",
+      "context_unknown": "whether the small room has enough power",
+      "context_would_help": "A test run of the kiln in the small room",
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": "operational",
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-11-02T19:02:11Z",
+      "closed_at": null,
+      "assumptions": [
+        {
+          "v1_id": 9071,
+          "code": "A1",
+          "statement": "The landlord confirms the small room by 10.11",
+          "metric": "written confirmation",
+          "threshold": "confirmation by 10.11",
+          "data_source": "mail",
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "NOT_YET_DUE",
+          "next_check_at": null,
+          "last_checked_at": null,
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-11-02T19:03:00Z"
+        }
+      ],
+      "facts": [
+        {
+          "v1_id": 90701,
+          "assumption_v1_id": 9071,
+          "phase": "monitoring",
+          "occurred_at": "2026-11-09",
+          "fact": "The landlord asked for one more week",
+          "source": "chat",
+          "session": "S90001",
+          "created_at": "2026-11-09T10:00:00Z"
+        }
+      ],
+      "reviews": [],
+      "links": [
+        {
+          "kind": "goal",
+          "ref": "G901",
+          "source": "mcp",
+          "created_at": "2026-11-02T19:05:00Z"
+        },
+        {
+          "kind": "task",
+          "ref": "K9001",
+          "source": "app",
+          "created_at": "2026-11-03T09:00:00Z"
+        }
+      ],
+      "versions": [
+        {
+          "v1_id": 90711,
+          "entity": "decision",
+          "entity_v1_id": 907,
+          "field": "review_due",
+          "old_value": "2026-11-08",
+          "new_value": "2026-11-12",
+          "source": "app",
+          "changed_by": "owner",
+          "changed_at": "2026-11-03T09:30:00Z"
+        }
+      ]
+    },
+    {
+      "v1_id": 908,
+      "v1_ref": "D908",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Sell the old display cases through a local listing",
+      "statement": "List all four cases at a fixed price",
+      "context": null,
+      "alternatives": [],
+      "investment": null,
+      "expected_result": null,
+      "confidence": null,
+      "decided_at": "2026-10-25",
+      "review_due": "2026-11-30",
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": "P901",
+      "about_company": null,
+      "context_known": null,
+      "context_unknown": null,
+      "context_would_help": null,
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": null,
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-10-25T09:00:00Z",
+      "closed_at": null,
+      "assumptions": [
+        {
+          "v1_id": 9081,
+          "code": "A1",
+          "statement": "Each case sells for at least 100 EUR",
+          "metric": "price",
+          "threshold": "100 EUR per case",
+          "data_source": "listing messages",
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "HOLDING",
+          "next_check_at": null,
+          "last_checked_at": "2026-11-08",
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-10-25T09:01:00Z"
+        },
+        {
+          "v1_id": 9082,
+          "code": "A2",
+          "statement": "A buyer collects the cases within a week",
+          "metric": null,
+          "threshold": "pickup within 7 days",
+          "data_source": "messages",
+          "check_frequency": "ad-hoc",
+          "is_critical": 0,
+          "state": "VIOLATED",
+          "next_check_at": null,
+          "last_checked_at": "2026-11-09",
+          "position": 2,
+          "notes": null,
+          "created_at": "2026-10-25T09:02:00Z"
+        }
+      ],
+      "facts": [],
+      "reviews": [],
+      "links": [
+        {
+          "kind": "goal",
+          "ref": "G902",
+          "source": "mcp",
+          "created_at": "2026-10-25T09:05:00Z"
+        }
+      ],
+      "versions": []
+    },
+    {
+      "v1_id": 909,
+      "v1_ref": "D909",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Hold a weekly check-in with the evening group",
+      "statement": "Meet every Monday for 30 minutes",
+      "context": null,
+      "alternatives": [],
+      "investment": null,
+      "expected_result": null,
+      "confidence": null,
+      "decided_at": "2026-10-05",
+      "review_due": "2026-12-01",
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": null,
+      "context_known": null,
+      "context_unknown": null,
+      "context_would_help": null,
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": null,
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-10-05T08:00:00Z",
+      "closed_at": null,
+      "assumptions": [
+        {
+          "v1_id": 9091,
+          "code": "A1",
+          "statement": "Attendance stays at four or more",
+          "metric": "attendance",
+          "threshold": "4 or more",
+          "data_source": "attendance list",
+          "check_frequency": "weekly",
+          "is_critical": 1,
+          "state": "HOLDING",
+          "next_check_at": "2026-11-10",
+          "last_checked_at": "2026-11-03",
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-10-05T08:01:00Z"
+        }
+      ],
+      "facts": [],
+      "reviews": [],
+      "links": [],
+      "versions": []
+    },
+    {
+      "v1_id": 910,
+      "v1_ref": "D910",
+      "kind": "choice",
+      "decider_mapping": "self",
+      "title": "Try a new supplier for clay",
+      "statement": "Order one trial batch from the new supplier",
+      "context": null,
+      "alternatives": [],
+      "investment": null,
+      "expected_result": null,
+      "confidence": null,
+      "decided_at": "2026-10-28",
+      "review_due": "2026-12-10",
+      "owner_person": null,
+      "executor_person": null,
+      "about_person": null,
+      "about_company": "C-902",
+      "context_known": null,
+      "context_unknown": null,
+      "context_would_help": null,
+      "status": "active",
+      "manual_health": null,
+      "outcome": null,
+      "learning": null,
+      "process_type": null,
+      "folder_path": null,
+      "source_session": null,
+      "created_at": "2026-10-28T11:00:00Z",
+      "closed_at": null,
+      "assumptions": [
+        {
+          "v1_id": 9101,
+          "code": "A1",
+          "statement": "The trial batch arrives in good condition",
+          "metric": null,
+          "threshold": "no broken bags",
+          "data_source": "delivery note",
+          "check_frequency": "ad-hoc",
+          "is_critical": 1,
+          "state": "NOT_YET_DUE",
+          "next_check_at": null,
+          "last_checked_at": "2026-11-06",
+          "position": 1,
+          "notes": null,
+          "created_at": "2026-10-28T11:01:00Z"
+        }
+      ],
+      "facts": [],
+      "reviews": [],
+      "links": [],
+      "versions": [
+        {
+          "v1_id": 91011,
+          "entity": "assumption",
+          "entity_v1_id": 9101,
+          "field": "state",
+          "old_value": "HOLDING",
+          "new_value": "NOT_YET_DUE",
+          "source": "app",
+          "changed_by": "owner",
+          "changed_at": "2026-11-06T10:00:00Z"
+        }
+      ]
+    }
+  ],
+  "v1_computed": {
+    "today": "2026-11-15",
+    "health": {
+      "903": {
+        "label": "CLOSED_SUCCESS",
+        "reasons": [
+          "closed with success"
+        ]
+      },
+      "904": {
+        "label": "INSUFFICIENT_DATA",
+        "reasons": [
+          "2 of 2 unverifiable"
+        ]
+      },
+      "905": {
+        "label": "INSUFFICIENT_DATA",
+        "reasons": [
+          "no assumptions"
+        ]
+      },
+      "906": {
+        "label": "WATCH",
+        "reasons": [
+          "2 unverifiable, 0 not yet checked"
+        ]
+      },
+      "907": {
+        "label": "STALE",
+        "reasons": [
+          "review overdue"
+        ]
+      },
+      "908": {
+        "label": "ON_TRACK",
+        "reasons": [
+          "all critical assumptions hold"
+        ]
+      },
+      "909": {
+        "label": "ON_TRACK",
+        "reasons": [
+          "all critical assumptions hold"
+        ]
+      },
+      "910": {
+        "label": "WATCH",
+        "reasons": [
+          "1 assumption not yet checked"
+        ]
+      }
+    },
+    "waiting": [
+      {
+        "v1_id": 904,
+        "reasons": [
+          {
+            "kind": "review_overdue",
+            "due": "2026-11-01"
+          }
+        ]
+      },
+      {
+        "v1_id": 907,
+        "reasons": [
+          {
+            "kind": "review_overdue",
+            "due": "2026-11-12"
+          },
+          {
+            "kind": "check_due",
+            "due": "2026-11-10",
+            "assumption_v1_id": 9071
+          }
+        ]
+      },
+      {
+        "v1_id": 909,
+        "reasons": [
+          {
+            "kind": "check_due",
+            "due": "2026-11-10",
+            "assumption_v1_id": 9091
+          }
+        ]
+      }
+    ],
+    "assumption_due": {
+      "9041": {
+        "due": "2026-11-01",
+        "source": "review"
+      },
+      "9042": {
+        "due": "2026-11-01",
+        "source": "review"
+      },
+      "9061": {
+        "due": null,
+        "source": null
+      },
+      "9062": {
+        "due": null,
+        "source": null
+      },
+      "9063": {
+        "due": null,
+        "source": null
+      },
+      "9071": {
+        "due": "2026-11-10",
+        "source": "text"
+      },
+      "9081": {
+        "due": "2026-11-30",
+        "source": "review"
+      },
+      "9082": {
+        "due": "2026-11-30",
+        "source": "review"
+      },
+      "9091": {
+        "due": "2026-11-10",
+        "source": "next_check"
+      },
+      "9101": {
+        "due": "2026-12-10",
+        "source": "review"
+      }
+    }
+  },
+  "counts": {
+    "decisions": 8,
+    "assumptions": 11,
+    "facts": 2,
+    "reviews": 1,
+    "links": 5,
+    "versions": 2
+  },
+  "content_hash": "sha256:2be584b46caf92fe399ac1271e84605428b95e6818742415edbbe918a6cd43e0"
+}

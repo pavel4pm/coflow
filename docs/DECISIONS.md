@@ -7,6 +7,429 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-053 · The public entry is an owner relay that never decrypts, on a separate domain outside the edge platform's DNS — accepted (18 October 2026); the relay recipe details and the opt-in edge-tunnel recipe are proposed
+
+- **Context:**
+  - An edge tunnel that terminates TLS lets a third party read every response and token; its account can
+    route to local services; and shared edge address ranges are blocked by some regional internet
+    providers during sports broadcasts by court order.
+  - On a zone served by an edge platform with universal certificates, CAA account and validation-method
+    binding (RFC 8657) may not be enforced, so the instance's names need a zone whose DNS provider serves
+    its records as configured.
+  - A pass-through relay must not terminate TLS for other services, expose SSH to the internet, or be
+    managed with a provider token stored on a development machine.
+- **Owner's decision (18 October 2026):** the public entry is the owner's own relay on a separate small
+  virtual machine in the EU, used for nothing else. It passes TLS through by server name, without
+  decrypting, into a WireGuard tunnel that the laptop opens; TLS, OAuth and every check terminate on the
+  laptop. The host names live on a separate domain whose DNS is not served by the edge platform, because
+  CAA is not enforced there, with DNSSEC on. The domain is bought now and kept closed, with CAA forbidding
+  all issuance, until the entry opens.
+- **Proposed:**
+  - the relay forwards TCP 443 for two neutral host names (MCP and authorization) only; it has no
+    TLS-terminating proxy, no port 80 and no SSH from the internet, and a provider-level firewall; its
+    provider credential is never stored on a development machine; its configuration has one source and
+    is provider-neutral (DEP-12);
+  - the domain's DNS provider is neither an edge platform that rewrites CAA nor the relay's provider; the
+    registrar lock is set; when MCP-5 opens, CAA pins one certificate authority, the host's ACME account
+    and `tls-alpn-01`, with wildcard issuance forbidden; certificate-transparency monitoring covers the
+    whole domain;
+  - TLS terminates in the separate `edge` container on the host (PRV-13);
+  - from stage 2 the relay tunnel is the second remote administration path (DEP-11): WireGuard inside
+    WireGuard, the relay forwarding the packets of an owner-device tunnel whose keys it does not hold;
+    the relay's own peer reaches only the edge port; no public name exists before stage 8;
+  - the client address from the PROXY protocol is used for logs and rate limits, never for authorization;
+  - the edge-tunnel recipe (for example Cloudflare Tunnel with Cloudflare Access) stays a documented
+    opt-in and is never the default; a mesh-VPN funnel that terminates TLS on the node is an accepted
+    fallback if the relay fails.
+- **Alternatives:**
+  - an edge tunnel by default: a third party decrypts, plus regional blocking; its one gain is a managed
+    OAuth server;
+  - a relay that terminates TLS: it holds keys, so its compromise is a full interception;
+  - host names in a zone at an edge platform that rewrites CAA and is shared with public apps: CAA is not
+    enforced, and cookies and the WebAuthn relying party share a site with public apps;
+  - a delegated sub-zone at another DNS provider: cheaper, but the parent zone's account can re-delegate
+    it, and the site is still shared;
+  - a hosted mesh-VPN funnel as the default: beta, provider-owned names only, capped bandwidth, one vendor
+    for both paths;
+  - a port forward on the home router: exposes the home address and network and fails behind CGNAT.
+- **Consequences:** DEP-11, DEP-12, MCP-5 and PRV-4 change; the relay and the DNS provider get
+  `DATA_FLOWS.md` rows; DEPLOYMENT §8 gains the owner-relay recipe; D-023 is revisited.
+
+## D-052 · Internet access in two steps: the bot and the VPN now, cloud AI clients later as the first stage-8 module — accepted (18 October 2026); the module's security baseline is proposed
+
+- **Context:** internet access means three different things. The bot needs no inbound port (long
+  polling). The owner's devices reach the host over the overlay VPN. Cloud AI clients connect to remote
+  MCP servers from their operator's cloud on every client, mobile included, so they need a public
+  endpoint. A hosted multi-tenant OAuth client identifier does not identify the owner's account at the AI
+  provider, so consent can be phished into another account; text written by third parties, returned into
+  a chat that also has send-capable connectors, is an exfiltration path that "read-only" does not close;
+  and the client's operator receives every result and holds a refresh token for as long as the grant
+  lives.
+- **Owner's decision (18 October 2026):** the first step is the bot and the VPN: the phone, a travelling
+  laptop and desktop AI clients reach v2 from anywhere, without a public entry. Cloud AI clients in the
+  browser and on the phone come later, as a separate module with its own security baseline, first in the
+  stage-8 queue: read-only first, with other people's raw text withheld.
+- **Proposed:**
+  - the module's baseline is MCP-5: a separate `edge` container (PRV-13), OAuth as the MCP authorization
+    specification defines it, a pairing window opened from an owner channel, one grant per client
+    confirmed in the bot, an absolute grant lifetime of 14 days, quotas and quiet-hour alerts, and
+    `untrusted_external` text withheld by default (PRV-14);
+  - writes for cloud clients are a separate resource with a separate audience, off by default;
+  - before the module opens, interoperability and pairing (including an attempt from a foreign account at
+    the AI provider) are tested on a throwaway machine with synthetic data and a throwaway name, never on
+    the production host or the production domain;
+  - high-risk approvals need a second factor (BOT-11) and security alerts go to two channels (OPS-17), so
+    a hijacked messenger session alone cannot pair a client.
+- **Alternatives:** read-only cloud access at stage 6 (the whole baseline lands on the switch-over, the
+  riskiest moment of the year); keeping the module at its old place in stage 8 (the same security, months
+  later); a static token in the connector header (a beta open only to some organisations at the time of
+  writing).
+- **Consequences:** D-031's stage-8 order changes: internet-facing MCP moves to the front as module 0;
+  D-023 is revisited; MCP-5 grows from M to L; PRV-13, PRV-14, BOT-11 and OPS-17 are added.
+
+## D-051 · Trust zones: the core on the home host, hosted apps stay where they run and are pulled read-only, no shared server — accepted (18 October 2026); the connector rules are proposed
+
+- **Context:** the owner also runs apps with external users on a serverless platform (an event-memory
+  app and a tasks-from-correspondence app) and a live conversation assistant that must run on the
+  machine where the meeting happens (system audio loopback, a USB controller). The owner had considered
+  one own server for the whole organisation. One server for the core and all of these would put
+  customers' data next to the journal and would mean rewriting the hosted apps away from their platform
+  bindings.
+- **Owner's decision (18 October 2026):** hosting follows trust zones. CoFlow 2.0 runs on the home GPU
+  laptop, with its data and processing at home (D-050); the two hosted apps stay on their platform, and
+  the core takes data from them read-only; the live conversation assistant runs on the work desktop.
+  There is no single server for the whole organisation.
+- **Proposed:**
+  - the instance's host runs the instance and nothing else;
+  - hosted apps never push into the home network and never hold a credential of the instance;
+  - `core` pulls from them outbound with a read-only export token that the app issues for one workspace
+    the owner owns (never an operator or service-wide scope); acknowledgement is a separate right with its
+    own token; tokens are revocable in the app and rate-limited; the pull is served by cursor; every pull
+    has size limits and a schema check;
+  - pulls never go through a fallback host name whose TLS terminates on a third machine;
+  - pulled items are `untrusted_external` (PRV-14) and become proposals (P-3), never records;
+  - apps on the owner's devices use EXT-4 over the private network with per-app tokens; a local app that
+    holds an instance token enforces a Host allow-list, a per-launch token and Origin checks, and its
+    token covers only what it needs (for a live conversation assistant: briefs of meetings within the
+    next 12 hours, no person search);
+  - data that the owner processes on behalf of an app's customers is not pulled unless the customer
+    agreed to that purpose; backups of hosted apps never restore onto the instance's host; a processing
+    agent that serves an app's customers does not run on the instance's host and holds no instance
+    credential;
+  - every app uses its own model API key, and the instance's key carries a provider-side spend limit
+    (PRV-4).
+- **Alternatives:** one server for the core and all apps (customer data next to the journal; a rewrite
+  of the apps); moving the hosted apps to a rented machine (weeks of rewriting, for a gain that other
+  measures already give); push from hosted apps into the home network (an inbound path and a credential
+  of the instance stored on a third-party platform).
+- **Consequences:** EXT-4 gains the pull-connector clause; PRV-14 is added; `DATA_FLOWS.md` gains one
+  `app:<client>` row per connector, naming the controller of every pulled data class; the blocks of D-041
+  get their hosting.
+
+## D-050 · Production runs on a dedicated home laptop with a GPU, reachable over the internet, after a 30-day gate — accepted (17 October 2026); the gate accepted (18 October 2026); the laptop profile is proposed
+
+- **Context:** the owner wants the instance reachable over the internet, while all work happens on a
+  separate home machine whose GPU is dedicated to this data (local speech-to-text, optionally a local
+  model). The machine is a laptop; DEP-14 said "not a laptop", and D-020's owner decision named a desktop.
+  v1's home server failed because it was run like a desktop application (start at logon, sleep on lid
+  close, no remote administration), not because it was a laptop. A laptop differs in four ways that
+  matter: its firmware rarely powers on when AC returns; its battery keeps the host running but not the
+  network equipment; firmware and boot-chain updates can stop an unattended disk unlock; and it is
+  tempting to take it on a trip. The alternative the owner weighed is an own server on the internet
+  holding everything (D-051). The host decision had changed several times since July; a measured gate is
+  meant to stop that.
+- **Owner's decision (17 October 2026):** (1) access to v2 over the internet is required; (2) all work,
+  data and processing stay on a separate home laptop whose GPU is dedicated to this data.
+- **Owner's decision (18 October 2026):** before the laptop holds real data it passes a measured gate of at
+  least 30 days in the staging role: availability of at least 99 %; drills for a power cut, a network loss
+  and 48 hours without connectivity; a 4-hour sustained heat run; battery health of at least 70 %; a
+  weekly restore from the off-host backup; a rebuild on another machine within 2 hours. While the owner
+  travels, up to 7 days of downtime is acceptable. If the gate fails, another home machine with a GPU
+  takes the same image.
+- **Proposed:**
+  - the laptop is dedicated: no other workloads, no second user, and it does not travel;
+  - it runs under the laptop profile of DEP-14, with full-disk encryption required (PRV-11);
+  - the GPU image variant comes at stage 2 (DEP-25); platform updates are applied only by an owner
+    command, and a travel mode exists (DEP-26);
+  - the gate's measurements and drills in detail are DEP-27: availability measured by an off-host monitor
+    that does not depend on blocked address ranges, with no failure that needed physical intervention
+    while the owner was away; a 20-minute power cut with the host and the network reachable; a longer cut
+    ending in a clean shutdown and an unattended power-on by a tested method; a network unplug alerting
+    within 30 minutes; a forced kernel panic recovered by the watchdog; the 48-hour outage drill; four
+    green weekly off-host restore drills; a rebuild of the first two restore tiers within 2 hours; and,
+    beyond the owner's list, one platform update applied at home with the unlock-policy prediction, after
+    which the disk unlocked without the recovery key; one hour of sustained load with the lid closed,
+    without sleep and with at most 20 % slowdown; the bot, the VPN and the relay path checked from a mobile
+    network during a regional blocking window, with no false alarm from the off-host monitor; free disk
+    for a year of active recordings below the 80 % warning;
+  - the fallback host has firmware power-on after AC loss; a rented server remains a disaster-recovery
+    target only (DEP-19), with the explicit "journal at rest with a provider" switch; the machine for the
+    yearly rebuild drill with real data is declared in advance (DEP-19).
+- **Alternatives:**
+  - a rented GPU server holding everything: the journal and third parties' recordings at rest with a
+    provider, and a monthly cost of the order of a few hundred euros for the smallest GPU line at the
+    time of writing;
+  - a rented CPU server with the home GPU as a remote worker: data at rest with a provider and a
+    networked speech-to-text worker, against D-024;
+  - a rented CPU server without a GPU: the archive takes weeks;
+  - one server for every app of the owner: see D-051;
+  - no gate, switching over as soon as the functions are ready: faster, and it repeats v1's path.
+- **Consequences:** D-020's owner decision changes to the laptop; DEP-3, DEP-14, DEP-15, DEP-18, DEP-19
+  and OPS-5 change; PRV-11, DEP-25, DEP-26 and DEP-27 are added; ROADMAP stages 2 and 6 name the laptop and
+  the gate; REQUIREMENTS §8 question 7 is updated; the decision adoption of D-039 waits for the gate
+  (proposed).
+
+## D-049 · Evidence is append-only and bitemporal; one transaction log holds provenance; as-of is a core query — proposed
+
+- **Context:** in v1 a repeated "still holding" check left no trace, bot writes were labelled as MCP
+  writes, and 75 % of "done" marks fell on clean-up days (aggregates), so status dates measured clean-ups,
+  not execution.
+- **Decision (proposed):**
+  - every unit of work writes one transaction-log row (actor, channel, owner-channel flag, approval,
+    instance role, code version), stamped by the store layer, never by callers;
+  - append-only, set-once and erasable columns are declared per table and enforced by generated triggers;
+  - every row that describes an event carries its event time with precision and basis, and imported rows
+    keep their original record time;
+  - `as_of(T)` answers on the knowledge, instance and occurrence axes;
+  - an event time is never defaulted to a record time;
+  - readings only propose states, and an owner assessment decides them.
+- **Alternatives:** per-table actor and channel columns (duplication, and the v1 mislabel stays possible);
+  versions only (a repeated check leaves no row).
+- **Consequences:** DEC-13 and NFR-13; the kernel's table registry and transaction log in stage 0A.
+
+## D-048 · Every new commitment, task and meeting is offered its likely decisions at entry; "no decision" is allowed and counted — accepted (18 October 2026); the offer for ledger entries and time spans, and the attachment refusals, are proposed
+
+- **Context:** in v1 a handful of tasks were formally linked to decisions while dozens named a decision
+  only in their title, and background link queues were never reviewed.
+- **Owner's decision (18 October 2026):** the link to a decision is offered and counted, not required.
+  When a task, a commitment or a meeting is created, up to three likely decisions are offered, and "no
+  decision" is a valid answer. A report shows four buckets: linked, deliberately without a decision, not
+  answered, not offered. A commitment may exist without a decision.
+- **Proposed:**
+  - the offers are deterministic, and a named label beats a guess; an explicit "no decision" carries a
+    reason;
+  - every spoke stores the answer, and the hub reports the buckets;
+  - the same offer applies to ledger entries and time spans when those modules exist;
+  - a commitment cannot attach to a decision whose system of record is still v1, or to an ended decision.
+- **Alternatives:** a mandatory link (friction on routine items, and false links); no offer (the links
+  stay in titles).
+- **Consequences:** P-15; DEC-19; WRK-8, CMT-1 and GOL-14 edited.
+
+## D-047 · Decision kinds instead of parallel entities: a hypothesis is a decision to test, a goal is framed by a decision to pursue, an event is an attendance decision; others' decisions are referenced — proposed
+
+- **Context:** in v1, goals, hypotheses and decision assumptions stored the same measure up to three times.
+  Offline events had no home. Decisions of clients recorded while advising became orphaned reminders when
+  the engagement ended.
+- **Decision (proposed):**
+  - the kinds are `choice`, `test`, `pursue` and `attendance`, plus `advisee` and `forecast_container` for
+    imported records only;
+  - deciders are `self` (always the owner profile, never a name lookup), `joint`, and `other` for those
+    imported kinds only;
+  - one measure lives in one assumption and is referenced by goals and gates;
+  - other people's decisions are facts or external references;
+  - imported advisee records are asked about once, through the goal-changed question, when their
+    engagement's goal ends.
+- **Alternatives:** separate hypothesis and event entities (two parallel monitoring mechanisms); storing
+  client decisions natively (a second register of other people's choices).
+- **Consequences:** DEC-1 and DEC-4 edited; DEC-21 and DEC-23; WRK-4, GOL-7 and GOL-9 edited (R2).
+
+## D-046 · A validation instance holds the real snapshot; real cases run there and on throw-away copies; selected entries of the project's decision log are native data — proposed
+
+- **Context:** DEP-4 allowed no real data before the staging host (stage 2), so the real snapshot had no
+  legal home, while the stage gates require real cases (D-036). The owner wants to use v2 now without a
+  second writer.
+- **Decision (proposed):**
+  - a `validation` role on the owner's machine holds the snapshot as read-only mirrors, with its data root
+    outside any repository; it never acts outward; its data reaches production only at the adoption gate,
+    by a restore onto a host that passed its gate (DEP-27), where the restored instance is promoted to
+    production with decisions only and the host's staging instance is retired;
+  - `dev` accepts only snapshots marked synthetic, and `validation` accepts only snapshots that are not;
+  - the owner's named cases are scripts that run on a throw-away copy of the validation database, so
+    write paths are exercised on real decisions before adoption, and their results gate the stage and the
+    adoption; the cases themselves stay in the validation data root, never in any repository;
+  - entries the owner selects from the public decision log are imported as drafts whose text the log owns
+    and whose monitoring v2 owns; no other native decision is recorded in the validation instance before
+    adoption, because until then every real record is written in v1 (D-039);
+  - after adoption there is no staging instance: pre-releases are checked in CI and by `coflow drill`
+    before the owner approves a production deploy; the kinds v1 still owns (people, sessions, commitments,
+    tasks, goals) are imported one way into production as read-only mirrors until stage 6; the real cases
+    of stages 3 to 5 run on throw-away drill copies of the production database.
+- **Alternatives:** bring the staging host forward (hardware work before code); synthetic data only until
+  stage 6 (no real use); write paths only after adoption (the cases could not pass before the gate).
+- **Consequences:** DEP-23; DEP-2, DEP-4, OPS-8 and OPS-15 edited; OPS-16; ROADMAP "How a stage runs",
+  steps 5 and 6, edited; before the first real snapshot enters the validation instance, the AI coding
+  agents' account cannot read a validation data root and the development disk is encrypted (PRV-15).
+
+## D-045 · Decision numbers keep v1's in fixed width, new decisions start at D-1001, forks are Q and commitments F from F-10001 — accepted (18 October 2026); scoped codes and aliases are proposed
+
+- **Context:** the owner uses decision and promise numbers as conversation keys. The identity protocol
+  wants a fixed width and one source per issuing space, and v1 keeps issuing numbers during the shadow
+  period.
+- **Owner's decision (18 October 2026):** decisions from v1 keep their numbers, written in four digits
+  (`D907` becomes `D-0907`); new 2.0 decisions are numbered from `D-1001`; `Q` numbers forks (open
+  questions); `F` numbers commitments, new ones from `F-10001`. Numbers are permanent.
+- **Proposed:**
+  - every number v1 issued is registered as taken and every one it deleted as burned; after adoption the
+    tap continues after the highest number in use, and ids never change;
+  - `Q` takes four digits and `F` five;
+  - codes scoped inside a decision take the protocol's form (`D-0042_A-03`); foreign forms are
+    issuer-scoped aliases (`V1_D907`); input is tolerant and output canonical.
+- **Alternatives:** restart numbering (it breaks the conversation keys and the pilot's references); a
+  validation-only prefix renumbered at switch-over (ids change); a shared range (two taps for one space).
+- **Consequences:** IDN-2 edited; IDN-9 and IDN-10; the prefix registry is fixed before the first number
+  is issued.
+
+## D-044 · Health on two axes, one composite label by a fixed table, the unverifiable share first — proposed
+
+- **Context:** three implementations in the ecosystem evaluate health in three different orders. v1
+  masked overdue reviews behind missing data, ignored non-critical violations while its waiting list
+  included them, and showed "watch" for decisions that had simply not been checked (aggregate: 15 of 23
+  active decisions).
+- **Decision (proposed; not yet put to the owner):**
+  - a ground axis (from the critical assumptions, or all when none is critical) and a timeliness axis
+    (review, checks, silence);
+  - the composite order is the owner's flag, then review required, stale, insufficient data, watch, on
+    track, and awaiting checks;
+  - an overdue check or a stale "holding" is never on track, and a non-critical violation is a "watch"
+    reason that also waits;
+  - the unverifiable share is always the first line;
+  - named vectors and an independent oracle are the acceptance test.
+- **Alternatives:** insufficient data first (it hides a known violation behind fog); v1's order (it masks
+  overdue reviews).
+- **Consequences:** DEC-3 edited; the shadow comparison carries the expected-difference rules SR-1 to
+  SR-10.
+
+## D-043 · The basis is sealed; revise is a new edition of the same decision; outcomes carry a basis and closing carries a learning — accepted (18 October 2026) for the seal and the editions; outcome bases and the learning at closing are proposed
+
+- **Context:** DEC-7 said "revise: the decision itself is rewritten, the record keeps its history". The
+  forecast pilot and the team-tool line showed that what was believed before the result is the one thing
+  that cannot be rebuilt later. v1 closed most decisions without a learning, and could not tell a measured
+  outcome from a reported one.
+- **Owner's decision (18 October 2026):** a revision keeps the decision's number and creates a new sealed
+  edition. The basis is sealed by a hash when the decision is activated. A revision needs a reason: a new
+  fact, a stated change of mind, or the correction of a mistake. A genuinely different decision gets a new
+  number and a link saying that it replaces the old one (supersede).
+- **Proposed:**
+  - the seal uses salted per-item hashes over a float-free canonical JSON that is byte-identical to the
+    pilot's for its records, so an erasure keeps the seal verifiable;
+  - adjust (the terms change, the decision stands) cuts no edition;
+  - imported records are sealed at import, and a changed source cuts a `source_changed` edition;
+  - outcome resolutions are `resolved`, `reported` or `not_confirmed`, and only `resolved` shows green;
+    outcome claims from anyone are evidence;
+  - closing requires a learning, and later decisions of the same kind, subject or assumption class are
+    shown it.
+- **Alternatives:** a new record per revision (stable ids are the owner's conversation keys); free-text
+  outcome and learning (v1's state); adjust as an edition too (it inflates editions and mixes execution
+  with belief).
+- **Consequences:** P-16; DEC-12, DEC-13 and DEC-15; DEC-3 and DEC-7 edited.
+
+## D-042 · Links to a decision are stored by the module whose workflow forces them; the hub reads its spokes through ports — proposed
+
+- **Context:** making the decision the base needs links from many modules. It needs them without import
+  cycles, without a generic link graph (dropped in REQUIREMENTS §7) and without two units of work per
+  entry. The DEC→WRK edge in the module map was a cycle.
+- **Decision (proposed):**
+  - a closed registry of link kinds, each stored by the module whose workflow fills it, at a named
+    enforcement point;
+  - DEC stores decision↔decision links, serves, tests, about, informed by, origin and evidence; spokes
+    store their own `decision_ref` and entry-time answer;
+  - DEC reads spokes only through `DecisionAttachmentProbe` (implemented by every spoke), and spokes and
+    same-tier modules reach DEC through `DecisionDirectory`; evidence is checked through
+    `EvidenceResolver`;
+  - DEC stays in tier 2 and loses its WRK dependency; ALN joins the import contract as tier 8.
+- **Alternatives:** every decision link in DEC (two units of work per entry, silent partial failures); a
+  kernel link ledger (the generic graph again).
+- **Consequences:** DEC-11 and DEC-19; WRK-3, WRK-8 and MTG-1 edited; three ports in ARCHITECTURE §5.1;
+  an import-linter test that DEC imports nothing above its tier.
+
+## D-041 · The ecosystem stays as separate blocks — accepted (17 October 2026); independence from every block, remote access and the contracts are proposed
+
+- **Context:** the owner runs a real-time online conversation agent, an offline-event app for events whose
+  purpose is known upfront, plain uploads of communications, and a tool for external work with a team.
+  Hosting was decided in parallel: internet access is required, and data and processing should live on a
+  home GPU laptop.
+- **Decision:** the owner decided that these stay separate blocks, as they are. The hosting choice itself
+  is recorded in D-050 to D-053.
+- **Alternatives:** absorbing the apps into CoFlow (it mixes customer data with the journal and couples
+  release cycles); a private network only (cloud clients cannot reach it).
+- **Consequences (proposed):**
+  - CoFlow works without any of the blocks: this restates the independence rule of the owner's earlier
+    product notes (29 September 2026) and waits for the owner to confirm it for v2 (EXT-6);
+  - remote access is not precluded: MCP over the internet with OAuth, and satellites calling an ingestion
+    API (the owner requires internet access, D-050);
+  - apps are sensors around decisions: they read projections and send evidence and proposals, never
+    state (EXT-5, EXT-6);
+  - all decision behaviour sits behind the module `api`, with thin MCP, CLI and INT adapters;
+  - every write carries an actor, a channel and an idempotency key from day one.
+
+## D-040 · Today's build order: a minimal kernel and a vertical slice of the decision core — accepted (17 October 2026); the increments are proposed
+
+- **Context:** the decision core needs only part of stage 0 to run on the owner's machine, and the owner
+  wants to use it on real data as early as possible.
+- **Decision:** the owner decided to build now a minimal stage-0 kernel (storage with migrations, one
+  numbering tap, events, data classes, CI on Windows and Linux, uv and ruff) and a vertical slice of the
+  decision core (decision, fork, options, assumptions with check dates, facts, reviews, commitments,
+  outcome, learning; CLI and MCP for decisions; import of v1 decisions). Docker, CD and backups come in
+  the next part of stage 0.
+- **Alternatives:** the full stage 0 first (the decision core waits for the delivery pipeline); the
+  decision core without the kernel (no numbering tap, no one-writer guarantee).
+- **Consequences (proposed):** events are written in the same unit of work as the change, and the
+  kernel includes the configuration minimum (the owner profile and settings). Stage 0 splits into 0A and
+  0B. 0A is built in three increments, each a gate:
+  a read-only shadow first, then the native loop, then commitments, history and metrics. The slice is
+  model-free and offline. DEC-6 moves to stage 0A, and DEC-5, DEC-7 and DEC-9 move to stage 2 with the
+  bot; this replaces the stage placement proposed in D-037.
+
+## D-039 · Shadow first, then switch-over; never two writers; v1 stays the decision system of record until the forecast pilot reports — accepted (17 October 2026); reading the shadow during the pilot accepted (18 October 2026); the mechanics are proposed
+
+- **Context:** two writers of the same data broke v1 before. A pilot of weekly sealed forecasts runs on
+  v1's decision data until 30 November 2026 and needs v1 to stay the decision system of record until its
+  report on 1 December 2026.
+- **Decision:** the owner decided that v2 runs in shadow on one-way snapshots of the owner's v1 decisions
+  (v1 → v2 only, never back) and computes the waiting list, check dates and health itself, so the owner
+  can compare. When the owner's 3–5 real cases pass, decisions move to v2 for good, and v1's decision
+  module becomes read-only. There are never two writers for the same data. Because of the forecast pilot,
+  the switch-over gate is not before 1 December 2026 unless the owner changes that; until then every real
+  record is written in v1.
+- **Owner's decision (18 October 2026):** reading the shadow is part of the pilot's record: the pilot's
+  change journal records that the v2 shadow started on 18 October 2026, the owner reads the shadow waiting
+  list daily, and every intervention it causes is recorded and taken into account in the pilot's analysis.
+- **Alternatives:** v2 live with mirroring into v1 (two writers); waiting until the full switch-over at
+  stage 6 (no real use for months); a weekly shadow report only until 30 November (less influence on the
+  pilot, but no daily use of v2 for six weeks).
+- **Consequences (proposed):**
+  - imported decisions are read-only mirrors that keep their numbers;
+  - a daily idempotent import with a classified shadow report (OPS-16);
+  - real cases run on throw-away copies (D-046);
+  - an adoption gate enforced in code (date, cases, 14 clean runs, backups, a daily asking channel, the
+    target host);
+  - the daily asking channel is the stage-2 chat loop; a pull-only adoption (CLI and MCP only) needs a
+    separate owner decision;
+  - the target host is the production host after its gate (D-050, DEP-27), so adopted decisions never
+    land on a machine that has not passed it: at adoption the host's staging instance is retired and the
+    restored validation instance becomes production, and the kinds v1 still owns are mirrored into it one
+    way until stage 6 (D-046);
+  - the v2 MCP tools use their own namespace, so the pilot's v1 tool stays its only write path.
+
+## D-038 · The decision is the base entity of CoFlow 2.0, and development starts on 17 October 2026 — accepted (17 October 2026); the stage placement is proposed
+
+- **Context:** the decision layer is the one the private v1 proved, yet in the plan it was built at stage 3,
+  behind the memory core and the bot, and the goal was the only cross-cutting anchor. A study of v1's
+  decision records (aggregates: 25 decisions, 91 assumptions, none ever checked, 6 reviews) found the
+  record filled at creation and its loop open. D-004 tied the start of code to the end of v1's acceptance
+  period, and the acceptance record had no case marked.
+- **Decision:** the owner decided that the decision is the base entity of CoFlow 2.0: signals,
+  commitments, tasks, meetings, events, goals and learning attach to it, so the owner can test and use v2
+  on themselves systematically. Development starts on 17 October 2026. This overrides D-004's "code after
+  the v1 acceptance period".
+- **Alternatives:** keep the goal as the spine (cheaper now, but the decision stays a leaf and its loop
+  stays untested until 2027); wait for the acceptance period to end (it had produced no marks).
+- **Consequences (proposed):** the decision core moves to a new stage 0A, built in three gated
+  increments; today's stage 0 splits into 0A and 0B; D-042 to D-049 propose the shape of the core, and
+  D-050 to D-053 record where it runs and how it is reached; the roadmap's timeline, the README and the
+  build-in-public calendar move "stage 0 starts" to 17 October 2026; the v1 acceptance period continues
+  in parallel and is no longer a condition for code.
+
 ## D-037 · Close the decision loop: check dates, one question in the chat, every write behind approval — accepted (17 October 2026); the priorities of DEC-6…DEC-10 are proposed
 
 - **Context:** a retrospective study on the private v1 (17 October 2026) found the decision record filled
@@ -33,6 +456,8 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   research module with a pre-registered protocol (proposed: Later, research, D-029). The v1 implementation —
   a scenario file, tests and a process document — is the reference for the 2.0 scenario (BOT-9). The pilot's
   result goes to the author, who decides whether DEC-10 moves up.
+- **Placement revised (proposed, 18 October 2026):** DEC-6 moves to stage 0A, and DEC-5, DEC-7 and DEC-9
+  move to stage 2 with the bot (D-040); DEC-8 and DEC-10 stay Later.
 
 ## D-036 · A thin slice of the centre in R1, real history from stage 1, and real cases as the stage gate — accepted (7 October 2026)
 
@@ -59,6 +484,8 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   inside stages 3 and 5 rather than a new stage; GOL-14's usage signal becomes evidence for or against the
   stage-8 goals module — if the owner does not open the list, that is a finding, not a failure, and the
   module is re-scoped before it is built.
+- **Extended (proposed, 18 October 2026):** the snapshot and the named cases live in a validation
+  instance, and the cases run on throw-away copies of it (D-046, OPS-16).
 
 ## D-035 · uv for dependencies and environments, ruff for linting and formatting — accepted (6 October 2026)
 
@@ -132,8 +559,17 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Changed 6 October 2026 (accepted):** the main episode moves from Monday to Tuesday, the day the
   series actually launched, and a video is part of an episode only in the weeks that allow one — episode
   0.1 went out as a post alone. The review gate moves with it, to 10 November 2026.
+- **Changed 15 October 2026 (accepted):** the Thursday lesson post becomes a Friday lesson video of
+  4–6 minutes on how one thing is made, after the author found the format cheap to produce — with a
+  cost guard: a Friday video that would take more than about 45 minutes end to end does not ship that
+  week. The series also gets its description: everything the author spent years putting into other
+  people's companies, now built for themselves and shown as it goes.
 - **Proposed:** the rubric's working name ("Decision system at work"); merging code automatically once CI
   and the independent review pass, so the author is never the bottleneck of the build.
+- **Proposed (18 October 2026):** automatic merges never touch security-sensitive paths (edge and
+  authorization, the MCP response layer, data-class policy, egress, the updater, secrets handling,
+  Compose and CI workflows); those need a review by a human code owner (DEP-8). An agent that reads
+  untrusted issue text holds no token with write access.
 - **Alternatives:** publishing only finished releases (no evidence of how decisions were made, which is
   the point of the series); the author writing the episodes (the time is not there); no public record at
   all (v1's outcome).
@@ -152,6 +588,8 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   afterwards; one episode per week with per-module acceptance results.
 - **Accepted later the same day:** the centre and goals module at position 2, before "send material",
   followed directly by the inconsistency-findings module (2b, D-029).
+- **Changed 18 October 2026 (accepted):** internet-facing MCP for cloud clients moves to the front of
+  stage 8 as module 0, read-only first (D-052); the relative order of the other modules is unchanged.
 - **Proposed:** money split into a core module and a country-pack module.
 - **Consequences:** ROADMAP stage 8; REQUIREMENTS §8 questions 11 and 14.
 
@@ -309,6 +747,8 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Alternatives:** one all-in-one container (an out-of-memory kill takes the bot down); one container per
   service on a shared volume (many writers again); Kubernetes or Swarm (far too heavy; rolling updates
   conflict with a single writer).
+- **Extended (proposed, 18 October 2026):** a separate `edge` container without database access serves the
+  internet-facing listener (PRV-13), and `stt` may reserve the GPU (DEP-25).
 
 ## D-023 · Private-network access by default; owner-device MCP in R1, internet-facing MCP in R2 — proposed
 
@@ -323,6 +763,9 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   MCP-5 in R1 (OAuth work before any user needs it); loopback only (unusable when CoFlow runs on another
   machine).
 - **Owner's confirmation (4 Oct 2026):** external systems need no MCP access before stage 8.
+- **Revisited 18 October 2026 (accepted):** internet-facing MCP for cloud clients is the first stage-8
+  module, read-only first (D-052), reached through the owner's relay on a separate domain, with TLS
+  terminating on the owner's host (D-053). Proposed: an edge tunnel stays an opt-in recipe.
 
 ## D-022 · Instance roles and one production writer — proposed
 
@@ -336,6 +779,8 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   an instance into fenced mode. Data flows one way: production → backup → non-production (DEP-2, DEP-3).
 - **Alternatives:** trust the owner to remember which copy is live (failed in v1); two-way sync between
   dev and production (recreates the collision); a shared database over the network (breaks WAL).
+- **Extended (proposed, 18 October 2026):** a fifth role, `validation`, on the owner's machine holds the
+  real snapshot as read-only mirrors and never acts outward (D-046, DEP-23).
 
 ## D-021 · Pull-based, signed releases; no self-hosted runner on the public repository — proposed
 
@@ -367,6 +812,9 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Alternatives:** Windows with Docker Desktop or WSL2 (the configuration that failed in v1); a
   hypervisor with a Linux VM (more layers); a low-power mini-PC (fine for daily load, slow for the
   archive).
+- **Changed 17 October 2026 (accepted):** the production host is a separate home laptop whose GPU is
+  dedicated to this work, not the desktop, and it moves to Linux for it (D-050); it holds real data only
+  after its gate (D-050, DEP-27). Proposed: the laptop profile of DEP-14.
 
 ## D-019 · Production runs on a separate home computer, delivered by CI/CD — accepted (4 Oct 2026); preconditions and staging plan proposed
 
@@ -534,7 +982,7 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
   tenants, no billing, no team features.
 - **Consequences:** the out-of-scope list in REQUIREMENTS §7.
 
-## D-004 · Requirements first, code after the v1 acceptance period — accepted (4 Oct 2026)
+## D-004 · Requirements first, code after the v1 acceptance period — accepted (4 Oct 2026); its timing superseded by D-038 (17 October 2026)
 
 - **Decision:** the requirements, roadmap and lessons are written and published first; development starts
   when the v1 acceptance period ends (planned mid-October 2026).

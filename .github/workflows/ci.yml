@@ -1,0 +1,62 @@
+# CI for every push to main and every pull request: the same checks on Windows and Linux.
+# GitHub-hosted runners only; actions pinned by full commit SHA (tag in the trailing comment);
+# the default token is read-only (DEP-7, DEP-22; decision-core design §12.1).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: checks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+      # The environment lives next to the checkout, not in it, so tools that walk the tree never
+      # see third-party files (relative paths resolve against the working directory).
+      UV_PROJECT_ENVIRONMENT: ../coflow-venv
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - name: lock matches pyproject.toml
+        run: uv lock --check
+
+      - name: uv sync --frozen
+        run: uv sync --frozen
+
+      - name: ruff check
+        run: uv run --frozen ruff check
+
+      - name: ruff format --check
+        run: uv run --frozen ruff format --check
+
+      - name: lint-imports
+        run: uv run --frozen lint-imports
+
+      - name: pytest -q
+        run: uv run --frozen pytest -q
+
+      - name: literal gate
+        run: uv run --frozen python tools/literal_gate.py
+
+      - name: docs check
+        run: uv run --frozen python tools/check_docs.py
