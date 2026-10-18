@@ -1,7 +1,9 @@
 # CoFlow 2.0 — Decision core specification
 
-Version 0.1 · 18 October 2026 · **status: draft for owner review.** It implements the decision entries
-D-038 to D-049 and follows D-050 to D-053 where the core meets hosting and access. Only what those entries
+Version 0.2 · 18 October 2026 · **status: draft for owner review.** It implements the decision entries
+D-038 to D-049 and follows D-050 to D-053 where the core meets hosting and access; version 0.2 adds D-055
+(capture where decisions are born, and the fields that are costly to add later, move into increment I2;
+the countermeasures against non-use are proposed). Only what those entries
 mark "accepted" is the owner's decision (see "Status of the parts" below). Every other rule, name, number
 and default in this document is proposed, and the requirements that implement a proposed part stay
 proposals until the owner confirms them.
@@ -9,7 +11,7 @@ proposals until the owner confirms them.
 This is the technical specification of the decision-first core of CoFlow 2.0: the slice built in stage 0A
 of [ROADMAP.md](ROADMAP.md), its data model, the values it computes, its API, MCP and CLI surfaces, the
 one-way import of the predecessor system's decisions, the decision fields of the ecosystem contracts, the
-acceptance tests and the build plan. Requirement IDs refer to [REQUIREMENTS.md](REQUIREMENTS.md) (v0.7),
+acceptance tests and the build plan. Requirement IDs refer to [REQUIREMENTS.md](REQUIREMENTS.md) (v0.8),
 decisions to [DECISIONS.md](DECISIONS.md), modules and boundaries to [ARCHITECTURE.md](ARCHITECTURE.md) and
 [MODULES.md](MODULES.md), hosts and roles to [DEPLOYMENT.md](DEPLOYMENT.md). A coding agent implements
 stage 0A from this text together with those documents; where this text is more precise than a requirement
@@ -59,14 +61,17 @@ commitments `F-NNNNN`.
 | Append-only and bitemporal evidence, one transaction log, as-of | §3.1, §3.8, §4.15 | D-049 | proposed |
 | Production on a dedicated home laptop with a GPU after a measured 30-day gate | §10.10 | D-050 | **accepted** (17 and 18 October 2026); that the decision adoption lands only on a host that passed the gate is proposed |
 | Internet access in two steps: the bot and the VPN first; cloud AI clients later as the first stage-8 module, read-only first; the public entry through the owner's relay | §5.5, §11.5 | D-052, D-053 | **accepted** (18 October 2026); the module's security baseline and the relay recipe details are proposed |
+| Capture of decisions where they are born, plus the fields that are costly to add later (an exit rule written at decision time, the kind of closing, the return date shown when a record is made), move into increment I2; the start of I2 is decided on 1 November 2026 from two weekly readings of the owner's own answer-on-the-due-day rate (both ≥ 50 % → I2 as re-scoped; both below → capture and the attention budget first, and the native loop waits; mixed → the capture tracks first) | §1.4, §13 | D-055 | **accepted** (18 October 2026) |
+| A one-off offline capture experiment on the owner's own AI working sessions of 1–18 October 2026, read-only, with thresholds written before the run; results outside the repository; nothing shown in the daily flow before a separate decision, not before 2 November 2026. A decision "arrived as a proposal" when anyone but the owner proposed it first (the AI client in a session, a review card, a meeting-without-decision question); retro records from the experiment do not count | §4.16, §13.0 | D-055 | **accepted** (18 October 2026) |
+| What capture contains (the capture scope, the AI-session source, proposals with expiry and one budget, the decided time from the quote), the exit-rule log, the cancel kinds, `at_close` checks and the foreseeability line, the return date, the compact card, decisions as context for the AI client, the attention gate; capture from conversations and recordings stays at stage 3, behind the evaluation gate of OPS-13 | §4.8, §4.9, §4.11, §4.12, §4.17, §8, §12, §13 | D-055 | proposed |
 
 ### Requirements this document implements
 
 | Stage | IDs |
 |---|---|
-| 0A (this slice) | P-15, P-16; IDN-1, IDN-2, IDN-9, IDN-10; DEC-1…4, DEC-6, DEC-11…20 (DEC-17 for AI clients); CMT-1; OPS-3, OPS-4, OPS-15 (decisions), OPS-16; PRV-1 (classes), PRV-10; EXT-6; MCP-1 (loopback and the local shim), MCP-2, MCP-3, MCP-4; DEP-2, DEP-23; NFR-6 (canary fixture), NFR-13 |
+| 0A (this slice) | P-15, P-16; IDN-1, IDN-2, IDN-9, IDN-10; DEC-1…4, DEC-6, DEC-11…20 (DEC-17 for AI clients and AI working sessions), DEC-26; CMT-1, CMT-6 (by decision); OPS-3, OPS-4, OPS-15 (decisions), OPS-16; PRV-1 (classes), PRV-10; EXT-6; MCP-1 (loopback and the local shim), MCP-2, MCP-3, MCP-4, MCP-6; SIG-19 (the proposal contract; the adapter lives outside the core); DEP-2, DEP-23; NFR-6 (canary fixture), NFR-13 |
 | 0B | OPS-5 (backups the adoption gate needs), OPS-8 (the evaluation harness refuses a validation data root) |
-| Later, specified here so the slice does not block them | DEC-5, DEC-7, DEC-9 (stage 2); DEC-17 for conversations, DEC-21, DEC-22, EXT-5 (stage 3); WRK-3, WRK-8 (stage 1); MTG-1, MTG-2, MTG-4 (stage 5); DEC-23, CMT-5, EXT-4 (stage 6); MCP-5 (stage-8 module 0); DEC-8 and DEC-10 (Later) |
+| Later, specified here so the slice does not block them | DEC-5, DEC-7, DEC-9, DEC-25, BOT-13 (the one budget for decision questions), RHY-6 (stage 2); DEC-17 for conversations, DEC-21, DEC-22, EXT-5 (stage 3); WRK-3, WRK-8 (stage 1); MTG-1, MTG-2, MTG-4 (stage 5); DEC-23, CMT-5, EXT-4 (stage 6); MCP-5 (stage-8 module 0); DEC-8 and DEC-10 (Later) |
 | Gates | the decision adoption gate (OPS-16) with the host gate (DEP-27) |
 
 ---
@@ -165,12 +170,12 @@ the kernel includes the configuration minimum (D-040); CoFlow works without any 
 | Area | Stage 0A (this slice) | Later |
 |---|---|---|
 | Kernel | STO: writer thread, numbered migrations, a table registry with owner, class and append-only declarations, generated triggers, the transaction log, the instance lock. IDS: the tap, the prefix registry, foreign and burned numbers, aliases, tolerant parsing. EVT: events in the unit of work, in-process dispatch. POL: class declarations, the journal canary fixture. CFG: the owner profile minimum and settings. OPS: `init` with the roles `dev` and `validation`, a basic `doctor`. OBS: usage-signal rows. ADM: the loopback admin API. The minimal literal gate (P-12) | 0B: Docker, Compose, CD, the image, the updater, backups and restore, the scheduler, the model gateway with a fake provider, the secrets store, the exposure test, the full `doctor` |
-| Decision core | Decisions, editions and the seal, options, forks, assumptions, the check log, readings, check dates, facts, reviews, outcomes, learnings, stakes, DEC-owned links, health, the waiting list, the question context, history and as-of, integrity, the v1 importer, the shadow report, the case runner, the project-log importer, proposals from MCP, the adoption gate | Stage 2: the chat loop (DEC-5, DEC-7, DEC-9) behind approval cards. Stage 3: capture from conversations, occasions, silence and contradiction questions (DEC-17, DEC-21, DEC-22). Stage 6: external decision references (DEC-23) |
+| Decision core | Decisions, editions and the seal, options, forks, assumptions, the check log, readings, check dates, facts, reviews, outcomes, learnings, stakes, DEC-owned links, health, the waiting list, the question context, history and as-of, integrity, the v1 importer, the shadow report, the case runner, the project-log importer, proposals from MCP, the adoption gate; capture where decisions are born and the fields that are costly to add later, in I2 (accepted, D-055): proposals from AI clients and from AI working sessions with their approval, the capture scope, exit rules, the kind of closing, the return date (the mechanisms proposed) | Stage 2: the chat loop (DEC-5, DEC-7, DEC-9) behind approval cards. Stage 3: capture from conversations, occasions, silence and contradiction questions (DEC-17, DEC-21, DEC-22). Stage 6: external decision references (DEC-23) |
 | Commitments | The CMT minimum (CMT-1): debtor, creditor, success criterion, due date, status, actual done time, the decision executed or an explicit "no decision" with a reason, the entry-time link answer, history; CMT implements the attachment probe | Stage 3: inline proposals (CMT-2). Stage 6: delegated commitments from a team tool (CMT-5) |
 | Interfaces | MCP over Streamable HTTP on loopback with per-client tokens and a read-only list; a local stdio shim that forwards to it; decision tools in the `dec_` namespace, commitment tools in `cmt_`; the CLI | Stage 1: the SSH bridge. Stage 2: the bot. Stage 6: INT (EXT-4). Stage-8 module 0: internet-facing MCP for cloud AI clients, read-only first (MCP-5, D-052) |
 | Ports | `DecisionDirectory` (DEC implements), `DecisionAttachmentProbe` (CMT implements), `EvidenceResolver` (built-ins), `GoalDirectory` (a shadow adapter over mirrored goal context) | Stage 1: SIG uses `DecisionDirectory` and implements `EvidenceResolver`; WRK implements the probe and `GoalDirectory` |
 | Projections | `owner` (CLI) and `agent` (MCP) | Stage 3: `event_app` (file). Stage 6: `live_app`, `team_tool`. Stage-8 module 0: the cloud view (PRV-13, PRV-14). Later: `public` tooling |
-| Model calls | none | Stage 2: splitting a chat answer (DEC-7). Stage 3: extraction behind an evaluation gate (OPS-13) |
+| Model calls | none in the core; the AI-session adapter (SIG-19, proposed) lives outside it, calls no model itself (the owner's coding client finds the candidates) and reaches DEC only through `propose_decision` | Stage 2: splitting a chat answer (DEC-7). Stage 3: extraction behind an evaluation gate (OPS-13) |
 
 ### 1.4 Increments inside stage 0A
 
@@ -180,8 +185,15 @@ Windows and Linux (proposed, D-040).
 | Increment | What the owner can do when it closes | Content |
 |---|---|---|
 | **I1 · read-only shadow** (first, within days) | Ask v2 "what is waiting and why" about the real v1 decisions, through MCP or the CLI, and compare with v1 | The kernel; the DEC schema for everything an import writes; the date, due, health and waiting functions; the snapshot importer with the rebuilt check log; the shadow report; the `GoalDirectory` shadow adapter; the MCP read tools; `coflow dec waiting / show / shadow / import` |
-| **I2 · native loop** | Record, activate, check, read, review, close and learn on the selected project-log decisions and on synthetic decisions; the owner's own new decisions are recorded in v1 until the adoption gate (D-039) | Create, update, activate, seal, integrity; options, forks, assumptions, checks, postponements, readings, facts, stakes; reviews with outcome and learning; completion of reconstructed records; links; publishability; undo; idempotency; MCP and CLI writes; the project-log importer |
-| **I3 · execution and evidence** | Attach commitments to decisions, see execution in reviews, ask "what changed and why" over a period, and run the real cases | CMT; the attachment probe; the unlinked report; `decision_history`; loop metrics and usage signals; proposals and their approval in an owner channel; the case runner; the adoption gate (refusing until its conditions hold) |
+| **I2 · native loop and capture** | Record, activate, check, read, review, close and learn on the selected project-log decisions and on synthetic decisions; capture drafts and proposals from AI working sessions and approve them in an owner channel; the owner's own new decisions are recorded in v1 until the adoption gate (D-039) | Create, update, activate, seal, integrity; options, forks, assumptions, checks, postponements, readings, facts, stakes; reviews with outcome and learning; completion of reconstructed records; links; publishability; undo; idempotency; MCP and CLI writes; the project-log importer. Moved in from I3 and new (D-055; the move accepted, the content proposed): proposals and their approval in an owner channel (§4.12); the capture scope (MCP-6); the AI-session proposal contract (SIG-19); the exit-rule log (§4.17, DEC-26); cancel kinds, `at_close` checks and the foreseeability line (§4.11); the return date (§4.8); the compact context and `dec_waiting(subject)` (§4.9, §8); the kind of evidence on every "holds" (DEC-13); the early signal on activation (DEC-6) |
+| **I3 · execution and evidence** | Attach commitments to decisions, ask what was promised per decision, see execution in reviews, ask "what changed and why" over a period, and run the real cases | CMT; commitments by decision (CMT-6); the attachment probe; the unlinked report; `decision_history`; loop metrics and usage signals; related learnings when a fork opens (DEC-15); the case runner; the adoption gate (refusing until its conditions hold), with the clean start of OPS-16 (proposed) |
+
+**The I2 gate (accepted, D-055).** The start of I2 is decided on 1 November 2026 from two weekly readings
+of the owner's own answer-on-the-due-day rate: both readings ≥ 50 % → I2 as re-scoped; both below →
+capture and the attention budget first, and the native loop waits; mixed → the capture tracks first
+(§13.3 names the tracks). Proposed: in the "both below" branch the next increment holds the capture
+tracks (the capture scope, proposals, the AI-session contract) and the specification of the stage-2
+attention gate (BOT-13), and the native-loop tracks wait.
 
 **Stage 0A closes** when the acceptance tests of §12.1 pass in CI on Windows and Linux, the first real
 snapshot has been imported into a validation instance with equal counts, the shadow report has run on at
@@ -191,7 +203,8 @@ the owner, and the owner's four named cases for stage 0A have passed with the ca
 ### 1.5 Not in this document
 
 The chat loop and its approval cards (stage 2, DEC-5, DEC-7, DEC-9) are specified only as far as the
-slice must not block them. Capture from conversations and the evaluation gate (stage 3, OPS-13), the
+slice must not block them. Capture from AI working sessions moves into I2 (D-055); its adapter lives
+outside the core (SIG-19, proposed) and is specified here only as far as its proposals reach DEC. Capture from conversations and the evaluation gate (stage 3, OPS-13), the
 meeting module (stage 5), money (FIN), goals beyond the shadow adapter (WRK, GOL), the delivery pipeline
 and backups (stage 0B, [DEPLOYMENT.md](DEPLOYMENT.md)) and internet-facing access (MCP-5) have their own
 requirements; this document names only their decision fields and ports.
@@ -371,6 +384,11 @@ their engagement's goal ends.
 | `dec.match_overlap_min` | `0.5` | proposal match candidates |
 | `dec.class_tags` | demand, payment, timeline, people, technical, cost, other | assumption classes |
 | `dec.proposal_switch_off` | `0.2` over the last `30` decided proposals | proposals per origin |
+| `dec.return_horizon_days` (I2, proposed, D-055) | `30` | `returns_on` (§4.8) |
+| `dec.proposal_expiry_hours` (I2, proposed, D-055) | `72` | proposal expiry (§4.8) |
+| `dec.proposal_early_stop` (I2, proposed, D-055) | fewer than `3` approved of the first `10` | a new origin (§4.12) |
+| `dec.early_signal_after_days` (I2, proposed, D-055) | `14` | the early signal on activation (§4.2) |
+| `dec.fork_offer_nondecision_max` (Later 1, proposed, D-055) | `0.15` | the fork option at entry (§4.14) |
 | `dec.import_unit_max_rows` | `5000` | import unit sizing (§10.5) |
 | `dec.shadow_clean_runs` | `14` | the adoption gate |
 | `dec.case_snapshot_max_age_days` | `7` | the adoption gate |
@@ -660,6 +678,8 @@ CREATE TABLE dec_checks (
   UNIQUE (assumption_id, code_n),
   CHECK ((kind = 'assessment') = (state IS NOT NULL)),
   CHECK (kind <> 'postponement' OR next_check_set IS NOT NULL)
+  -- I2, migration 0002 (proposed, D-055): at_close INTEGER NOT NULL DEFAULT 0 CHECK (at_close IN (0,1)),
+  -- set at insert (1 = assessed on the closing card, §4.11), never changed; observed_basis keeps event time only
 );
 -- A proposed_by other than 'owner' or 'import' requires the unit's tx to carry an approval_ref from an owner
 -- channel (command rule, tested). In the slice only 'owner' and 'import' occur.
@@ -744,6 +764,9 @@ CREATE TABLE dec_reviews (
   UNIQUE (decision_id, code_n),
   CHECK (action <> 'revise' OR revise_basis IS NOT NULL OR reconstructed = 1),
   CHECK (is_correction = 0 OR (action = 'revise' AND revise_basis = 'correction'))
+  -- I2, migration 0002 (proposed, D-055): cancel_kind TEXT CHECK (cancel_kind IN ('moot','abandoned')),
+  -- with CHECK (action <> 'cancel' OR cancel_kind IS NOT NULL OR reconstructed = 1 OR status_before = 'draft')
+  -- (a draft's cancel and imported or reconstructed reviews need no kind, §4.11)
 );
 
 -- 11. Outcome resolutions (reports are facts of kind outcome_report). AO; SO(voided_at, voided_reason). [O]
@@ -844,6 +867,11 @@ CREATE TABLE dec_proposals (
   status      TEXT NOT NULL DEFAULT 'proposed' CHECK (status IN ('proposed','approved','rejected','withdrawn','expired')),
   decided_tx INTEGER, reject_class TEXT, reject_reason TEXT, result_ref TEXT,
   version     INTEGER NOT NULL DEFAULT 1
+  -- I2, migration 0002 (proposed, D-055), set at insert:
+  --   quotes_json    TEXT,      -- quotes with roles (acceptance, proposal); erasable, like origin_quote
+  --   quote_attested INTEGER CHECK (quote_attested IN (0,1)),  -- 1 = the client's attestation, not a check
+  --   meaning_key    TEXT,      -- served goals + normalised statement, for suppression (§4.12)
+  --   expires_at     TEXT       -- K + dec.proposal_expiry_hours
   -- Later 3 (extraction): class, extracted_outcome, decided_by_ref, recounted_by_ref,
   -- made_in_this_conversation, prompt_version, input_hash
 );
@@ -994,7 +1022,7 @@ labels and results only. The case scripts live in the validation data root, neve
 | Fork | `opened_at` | K | `outcome_not_heard` |
 | Option | — (its record time is what matters) | K | `recorded_before_choice` set once at the choice |
 | Fact | `occurred_at` | K | `occurred_basis`; "added after seal" for grounds without `added_in_edition` |
-| Check | `observed_at` | K | `observed_basis`; `reconstructed` for checks rebuilt from snapshots |
+| Check | `observed_at` | K | `observed_basis`; `reconstructed` for checks rebuilt from snapshots; `at_close` for checks made on the closing card (I2, proposed) |
 | Reading | `observed_at` | K | `proposed_by` |
 | Review | `occurred_at` | K | `trigger_at` for latency |
 | Outcome | `occurred_at` | K | `basis`, `resolved_by` |
@@ -1161,6 +1189,11 @@ ADVISORY = ['expected', 'stake', 'confidence', 'ground', 'reversibility', 'not_d
   missing=[…])` without writing anything.
 - Native records of kind `advisee` or `forecast_container`, or with `decider = other`, are refused
   (`NATIVE_OTHER_DECIDER`, "record it as a fact about them, or later as an external reference") (DEC-4).
+- **The early signal [I2] (proposed, D-055; DEC-6).** The activation answer names "next check in N
+  days", N counted to the earliest assumption due (§4.6). For a full-depth decision with N above
+  `dec.early_signal_after_days` (14) it also offers an optional early signal: an assumption whose template
+  asks for an outside observation, with the owner's own action offered as a commitment instead. Nothing is
+  added without the owner's answer, and over MCP the answer needs the owner's quote.
 
 ### 4.3 Canonical form (CFJ-1), the seal, integrity, erasure
 
@@ -1346,6 +1379,11 @@ def near_limit(x, a, m):              # still holds, but within the margin on th
 accept_reading=RD)` writes an assessment whose state is the reading's proposal, unless the owner states
 another, with `reading_id` set and the reading's `accepted_by_check_id` set once. An app with the
 `dec:evidence` scope may write readings but never assessments [Later 6].
+
+**The kind of evidence on every HOLDING [I2] (proposed, D-055; DEC-13)** is computed, never stored:
+`reading_id` set → `reading`; `evidence_kind` in (`segment`, `message`, `session`, `document`,
+`app_envelope`, `foreign`) → `fact`; `owner_statement`, or `agent_session` with the owner's quote →
+`owner_statement`; no evidence or `none` → `none`. Only `none` is flagged on the card.
 
 ### 4.6 Check dates
 
@@ -1646,6 +1684,16 @@ def drafts_to_finish(T):          # a separate short list, never mixed into the 
 - **Reserved [Later 3, DEC-22]:** `expectation_missed` (a dated expectation passed with no fact) and
   `contradiction` (a new fact or reading crosses an active assumption). In the slice an assumption with a
   by-date already becomes `check_due` on that date ("expected by D: did it happen?").
+- **The return date [I2] (the field accepted in I2, D-055; the rule proposed).** Every command that
+  records or activates a decision, adds an assumption or records a commitment returns `returns_on`: the
+  first day on or after today on which `waiting(T)` would list the item, computed by the same functions
+  (`check_due`, the review reason, `next_check_after`), or `None` with the text "no nearer date" when that
+  day is more than `dec.return_horizon_days` (30) away; for a commitment it is its due date or "no date".
+  The answer promises only the waiting list ("returns on 12 Nov"), never a message, so the budget of the
+  stage-2 gate (BOT-13) cannot break the promise.
+- **Proposals expire [I2] (proposed, D-055).** A proposal unanswered for `dec.proposal_expiry_hours` (72)
+  becomes `expired`, leaves the list and counts as a soft rejection in the approval rate of its origin;
+  its payload may be proposed again only with a new fact.
 
 ### 4.9 Question context and likely actions (no model)
 
@@ -1689,6 +1737,17 @@ Acceptance: on a stale fixture (review 31 days overdue, last fact 45 days old, a
 days ago, two commitments overdue) the card shows all of it, and the owner can answer without opening
 anything else (AT-N23). Every date shown in an action equals what the write would store (AT-N11).
 
+**The compact card "why did we decide this?" [I2] (proposed, D-055).** `decision_context(ref,
+detail='why')` returns at most 8 lines, built by rules: the one-line decision, the question, the chosen
+option and its strongest ground, the exit rule if one exists (§4.17), what the decision waits for and when
+it returns (§4.8), and the share line. Confidence, probabilities, sealed values and the stake appear only
+in the `owner` audience, never in `agent` or any other projection. Wording rules for every card and
+question (DEC-20): the subject is the bet, never the person; a review lays out "expected (edition 1) /
+seen / not known then / your rule"; a stop-list with word forms in CI refuses "mistake", "failure",
+"overdue" and the like in the texts of questions and cards, and the owner's quoted words are exempt. `dec_waiting(subject)`
+filters the waiting list to items whose `about` or `serves` targets, or whose title tokens, match the
+subject, so an AI client can read the decisions that bear on the work at hand (MCP-3).
+
 ### 4.10 Reviews, revisions, corrections, completion
 
 **Accepted (D-043):** revise keeps the number and seals a new edition, and needs a trigger fact, a stated
@@ -1704,7 +1763,7 @@ is true when at least one of them changes the basis.
 ```python
 def review_decision(ref, action, *, verdict=None, notes=None, next_review_due=None, trigger=None, trigger_ref=None,
                     revision=None, revise_basis=None, is_correction=False, outcome=None, learning=None,
-                    successor_ref=None, occurred_at=None, expected_version=None, ctx):
+                    successor_ref=None, occurred_at=None, cancel_kind=None, expected_version=None, ctx):
     d = load(ref); guard_mirror(d, op='review'); check_version(d, expected_version); T = ctx.now; basis = None
     if d.status in ('superseded', 'withdrawn'): raise Refused('TERMINAL_DECISION', allowed=[])
     if d.status in ('closed', 'cancelled') and action != 'close': raise Refused('TERMINAL_DECISION', allowed=['close'])
@@ -1728,6 +1787,8 @@ def review_decision(ref, action, *, verdict=None, notes=None, next_review_due=No
         if d.status != 'closed' and not (learning and (learning.confirmed or learning.refuted)):
             raise Refused('LEARNING_REQUIRED')
     if action == 'cancel' and not (verdict or notes): raise Refused('REASON_REQUIRED')
+    if action == 'cancel' and d.status != 'draft' and cancel_kind not in ('moot', 'abandoned'):   # I2, proposed (§4.11)
+        raise Refused('CANCEL_KIND_REQUIRED', allowed=['moot', 'abandoned'])
     if action == 'supersede':
         s = load(successor_ref)
         if not s or s.id == d.id or s.status not in ('draft', 'active', 'closed'): raise Refused('SUCCESSOR_INVALID')
@@ -1739,7 +1800,7 @@ def review_decision(ref, action, *, verdict=None, notes=None, next_review_due=No
         r = insert_review(d, action, verdict, notes, trigger, trigger_ref, trigger_at(trigger, trigger_ref, d),
                           occurred_at or live(T), next_review_due, before, shown, summary,
                           revise_basis=basis if action == 'revise' else None, is_correction=is_correction,
-                          successor_ref=successor_ref)
+                          successor_ref=successor_ref, cancel_kind=cancel_kind if action == 'cancel' else None)
         if action in ('keep', 'adjust'): set_head(d, review_due=next_review_due)
         if action == 'revise':
             apply_revision(d, revision)             # basis fields set; changed items voided and appended; assumptions superseded
@@ -1812,6 +1873,27 @@ def validate_outcome(d, o):
   (`sys_tx_log.owner_channel = 1`); and nothing in the chain is voided. Imported (`resolved_by = import`)
   and MCP-recorded resolutions are never eligible.
 
+**Honest closing [I2] (the kind of closing accepted in I2, D-055; the rules proposed):**
+- **Cancel kinds.** `cancel` takes `cancel_kind`: `moot` (the bet stopped mattering) or `abandoned`
+  (given up); a cancel without it is refused (`CANCEL_KIND_REQUIRED`), except the cancel of a draft;
+  imported and reconstructed reviews carry no kind. A learning is offered at a cancel too, and is optional
+  there.
+- **States as of before the outcome.** The closing card shows every assumption's state `as_of` the
+  instant before the outcome is recorded, so the outcome does not recolour what was known.
+- **Checks recorded at closing.** An assumption never assessed before the close may be assessed on the
+  closing card; that check is stored with `at_close = 1` (its `observed_basis` stays `live`), is excluded
+  from scoring eligibility and from "answered on the due day / within 7 days" (§4.16), and is shown as
+  such (P-16).
+- **A foreseeability line instead of a self-rating.** For each assumption the card shows, computed from
+  the seal and the check log: critical or not, the recorded probability if any, whether an exit rule
+  existed before the first evidence (§4.17), and the date of the first DRIFTING or VIOLATED assessment.
+  The owner is never asked to rate their own grounds.
+- **No audience for checks.** "Not holding", a failure, mixed or `abandoned` closing and the learning
+  reach no public projection without an owner action (PRV-10); the decisions of the project's public log
+  are the stated exception.
+- **Related learnings at a fork** [I3]: `open_fork` also returns `related_learnings[]` (same rules as
+  above), and a saved "not relevant" lowers that pairing in later lists.
+
 ### 4.12 Forks and proposals
 
 ```
@@ -1869,6 +1951,43 @@ def approve_proposal(pid, edits=None, *, ctx):         # owner channel only: the
   the CMT-2 rule applied to decisions (DEC-17).
 - Classifying a match as new, update, retelling or contradiction is [Later 3], when extraction from
   conversations exists.
+
+**Capture where decisions are born [I2] (the move into I2 accepted, D-055; the rules below proposed).**
+Proposals and their approval move from I3 into I2, together with two capture paths that both end in
+`propose_decision` or in an owner draft:
+- **In the session (MCP-6).** A coding client holding the `capture` scope may call `dec_create` (a draft
+  with the owner's quote, `origin_kind = 'agent_session'`) and `dec_propose`; on its own drafts
+  `add_assumption` and `add_fact` execute and can be undone; activate, seal, approve and set public are
+  refused with `SCOPE_NOT_GRANTED`. The tool description asks the agent to offer "record this?" right after
+  a portfolio decision, to mark the ground "[proposed by the agent]", and, when the quote points to the
+  past, to ask "when did you decide?" instead of guessing, so the record does not escape the retroactive
+  flag of DEC-13.
+- **The daily review of sessions (SIG-19).** An adapter outside the core reads the coding client's local
+  transcripts and keeps only the owner's typed turns. It calls no model itself: the owner's coding client
+  finds the candidates in a scheduled session of its own, which the adapter skips as input. A candidate carries `origin.quotes[]` with roles: the
+  owner's turn (`acceptance`) and, when that turn is shorter than 40 characters, the agent's paragraph it
+  answers (`proposal`). The session reference is the client's own claim: it is stored as `quote_attested
+  = 1`, an attestation by the client, not a check (`EvidenceResolver` cannot resolve it, §5.2). It shows
+  only what the in-session offer missed, with no quota.
+- **The decided time** is the time of the first quote that states the decision; when it points to the past
+  the card asks "when did you decide?". Latency metrics use only decided times taken from a quote.
+- **Matching without embeddings.** `match_candidates` stays as above: a named label first, then the same
+  goal or subject with token overlap, the top three. On the card, "this is D-…" turns a retelling into a
+  fact on that decision, never a duplicate. No embeddings are added to the core (SRC-5 stays Later).
+- **The card** shows the owner's quote, the fact that prompted it, the decision in one line, the default
+  review date and the matches, with the actions record · this is D-… · a fork · not a decision (with a
+  class) · private (to the journal). There is no batch approval, except facts on a decision the owner
+  named.
+- **Suppression and early stop.** A rejection also stores a meaning key (the served goals plus the
+  normalised statement), so the same item does not come back in other words; a new origin stops early when
+  fewer than 3 of its first 10 proposals are approved; drafts older than 14 days above 3 mean the
+  activation gate is too heavy (§12.3).
+- **One budget.** From stage 2 every proposal question shares the one daily budget for questions about
+  decisions, at most 3 with review questions first (BOT-13, DEC-7); before the bot, proposals are pulled
+  in the CLI and MCP, and the waiting-list pull carries one veto line, "yesterday from sessions: N drafts".
+- **Until the adoption gate** the owner's real decisions are recorded in v1 (D-039): in v2 the capture
+  paths run on synthetic and project-log data, and at adoption the adapter switches its target to v2 and
+  its answers move to an owner channel (`OWNER_CHANNEL_REQUIRED`).
 
 ### 4.13 Goal and occasion propagation
 
@@ -1940,6 +2059,11 @@ reason stores `explicit_none`. "New decision" creates a draft and links it. Givi
 `unanswered`. A record created by a path that never offered (an import, an app before INT) stores
 `not_offered`. Every spoke stores its own bucket: CMT now; WRK, MTG, FIN and RHY later. There is never a
 background queue (DEC-19, WRK-8).
+
+Proposed (D-055) [Later 1]: when the entry text has an explicit fork form ("X or Y", "whether…", "choose
+between"), matched by the locale pack's patterns and nothing looser, the offer adds "or is it a fork?",
+which opens a fork (§4.12) with the text as its question and the record linked to it; the share of
+non-decisions among the fork offers shown is a usage signal with a ceiling of 15 %.
 
 ```python
 def unlinked_report(period):      # a DEC query over every registered probe; no copies
@@ -2022,9 +2146,53 @@ after its decided date is flagged retroactive (DEC-13).
 | Proposals | proposed, approved, rejected, waiting over 7 days, per origin | origin |
 | Link buckets | linked, explicit none, unanswered, not offered, per spoke kind | kind |
 | Shadow | unexpected differences per run; runs since the last unexpected one | run |
+| Arrived as a proposal (the counting rule accepted, D-055; its use as a v2 loop metric proposed) | new native decisions that anyone but the owner proposed first - the AI client in a session (the ground marked "[proposed by the agent]"), a review card, a meeting-without-decision question (DEC-25) - ÷ new native decisions; retro records from the capture experiment do not count | path |
+| Recorded within a day (proposed, D-055) | new native decisions recorded no later than one day after their decided time, by any path, shown next to the row above so a working in-session path does not read as a failure | path |
 
 `coflow dec metrics --store` writes the day's values into `sys_usage_signals`; from 0B the supervisor
 runs it daily. The same data gives the same numbers (AT-H2).
+
+### 4.17 Exit rules outside the seal [I2] (the field accepted in I2, D-055; the design proposed)
+
+An exit rule is written when the decision is made: what the owner will do when a condition comes. It lives
+in its own append-only table beside the sealed basis, so CFJ-1, the seal and every edition already sealed
+(mirrors included) are unchanged, and adding a rule never cuts an edition.
+
+```sql
+-- 18. Exit rules. AO; SO(voided_at, voided_reason). [E] Outside the seal. Migration 0002 (proposed, D-055)
+CREATE TABLE dec_exit_rules (
+  id INTEGER PRIMARY KEY,
+  decision_id   INTEGER NOT NULL REFERENCES dec_decisions(id),
+  assumption_id INTEGER REFERENCES dec_assumptions(id),   -- NULL = the decision as a whole
+  action        TEXT NOT NULL CHECK (action IN ('stop','narrow','review','continue')),
+  text          TEXT NOT NULL,                             -- the owner's words; erasable
+  authored_by   TEXT NOT NULL CHECK (authored_by IN ('owner','model_proposed_owner_accepted')),
+  origin        TEXT NOT NULL CHECK (origin IN ('entry','threshold_text','import','review')),
+  voided_at TEXT, voided_reason TEXT
+);
+```
+
+```python
+def in_advance(rule, T):                  # computed, never stored
+    first = first_evidence_K(rule.decision_id, rule.assumption_id, T)   # facts, checks, readings bearing on it
+    return first is None or K(rule) < first
+
+def met_rules(d, T):                      # shown on the card of a VIOLATED assumption
+    return [r for r in live_exit_rules(d)      # non-voided rules of d, in record order
+            if (r.assumption_id and effective_state(assumption(r.assumption_id), T) == 'VIOLATED')
+            or (r.assumption_id is None and any(effective_state(a, T) == 'VIOLATED' for a in pool(d)))]
+```
+
+- At entry and at import, the text after " — " or " - " in a threshold is offered as a rule with `origin =
+  'threshold_text'`; it becomes a rule only when the owner accepts it.
+- When a rule is met, the card says "the condition you wrote on <date> has come" with three actions: follow
+  the rule (the review action it names), continue (what changed? - a revise or a keep with a reason), and
+  can't judge (UNKNOWN). A rule never changes a state or a review by itself.
+- A rule recorded after the first evidence is shown "written after evidence" and is excluded from any
+  score; a rule from a model counts only after the owner accepts it.
+- Usage signals: the share of full-depth decisions with a rule (reported); postponements and UNKNOWN on
+  assumptions with and without a rule, so that a rule does not deepen avoidance; met rules listed one by
+  one while fewer than 10.
 
 ---
 
@@ -2108,7 +2276,8 @@ before the unit of work. The rules:
 - an unresolvable ref → stored with `quote_verified = 0` and counted as "source not resolvable".
 
 Built-ins in the slice: `owner_statement` (no ref, always valid); `agent_session` (a client name plus a
-session label as text; never resolvable, quote unverified); `foreign` (V1 refs, unresolvable until SIG
+session label as text; never resolvable, quote unverified; proposed with D-055: stored with
+`quote_attested = 1`, an attestation by the client, not a check); `foreign` (V1 refs, unresolvable until SIG
 imports them). SIG implements segments, messages and sessions at stage 1; MTG outcomes at stage 5; GOL
 centre spans at stage 3; FIN entries at 8.1a.
 
@@ -2260,18 +2429,21 @@ CLI and later the bot and INT endpoints are thin adapters over them (D-041).
 - cases and adoption: `CASE_ROLE`, `ADOPTION_GATE`, `NATIVE_IN_VALIDATION`;
 - commitments: `DONE_NEEDS_TIME`, `SHIFT_NEEDS_REASON`, `EXPLICIT_NONE_NEEDS_REASON`,
   `SUGGESTED_DONE_FROM_PROPOSAL_ONLY`;
-- store (programming errors): `STORE_STAMPED_FIELD` (a caller passed `tx` or `recorded_at`).
+- store (programming errors): `STORE_STAMPED_FIELD` (a caller passed `tx` or `recorded_at`);
+- proposed with D-055 [I2]: `CANCEL_KIND_REQUIRED` (closing); `SCOPE_NOT_GRANTED` (a capture-scope token
+  calls activate, seal, approve or set public) and `TERMINAL_REQUIRED` (the CLI's approve or activate
+  without an interactive terminal).
 
 ### 7.2 DEC commands
 
 | Command | Key arguments | Result | Errors (besides NotFound, Conflict, MIRRORED) | Incr. |
 |---|---|---|---|---|
-| `create_decision` | `title`; optional `question`, `statement`, `kind`, `decider`, `decider_ref`, `depth`, `reversibility`, `context`, `known`, `unknowns[]`, `would_help`, `success_criterion`, `expected{metric,target,unit,by,text}`, `confidence`, `stakes[]`, `not_doing`, `review_due`, `decided_at` (a date, `today` or `unknown`), `origin{kind,ref,quote}`, `options[]` (one may be `chosen`), `grounds[]`, `assumptions[]`, `links[]`, `publishability`, `third_party_sensitive`, `activate=false` | `public_id`, `status`, `missing_for_activation[]`, `advisory[]`, `proposed_depth`, `related_learnings[]`, `follows_candidates[]` | `ACTIVATION_GATE` when `activate=true`; `Ambiguous` for person or company refs; `NATIVE_OTHER_DECIDER`; over MCP, an empty `origin.quote` → `OWNER_QUOTE_REQUIRED` ("quote the owner's words, or use dec_propose"); `NATIVE_IN_VALIDATION` in the validation role (§10.1) | I2 |
+| `create_decision` | `title`; optional `question`, `statement`, `kind`, `decider`, `decider_ref`, `depth`, `reversibility`, `context`, `known`, `unknowns[]`, `would_help`, `success_criterion`, `expected{metric,target,unit,by,text}`, `confidence`, `stakes[]`, `not_doing`, `review_due`, `decided_at` (a date, `today` or `unknown`), `origin{kind,ref,quote}`, `options[]` (one may be `chosen`), `grounds[]`, `assumptions[]`, `links[]`, `publishability`, `third_party_sensitive`, `activate=false` | `public_id`, `status`, `missing_for_activation[]`, `advisory[]`, `proposed_depth`, `related_learnings[]`, `follows_candidates[]`, `returns_on` (I2, proposed, §4.8) | `ACTIVATION_GATE` when `activate=true`; `Ambiguous` for person or company refs; `NATIVE_OTHER_DECIDER`; over MCP, an empty `origin.quote` → `OWNER_QUOTE_REQUIRED` ("quote the owner's words, or use dec_propose"); `NATIVE_IN_VALIDATION` in the validation role (§10.1) | I2 |
 | `update_decision` | `ref`, `fields{}`, `add_stakes[]?`, `reason?` | `changed[]`, `completion_pending` | `SEALED_USE_REVISE` for basis fields of an active native decision (and for a non-empty basis field of a reconstructed one); `USE_A_REVIEW` for `review_due` | I2 |
-| `activate_decision` | `ref`, `chosen_option?`, `decided_at?` | `edition`, `seal` (12 hex characters), `health`, `related_learnings[]` | `ACTIVATION_GATE` | I2 |
+| `activate_decision` | `ref`, `chosen_option?`, `decided_at?` | `edition`, `seal` (12 hex characters), `health`, `related_learnings[]`, `returns_on` and the early-signal offer (I2, proposed, §4.2, §4.8) | `ACTIVATION_GATE` | I2 |
 | `complete_decision` | `ref` | `edition` (reason `completion`) | `COMPLETION_NOT_PENDING` | I2 |
 | `add_option` | `decision_ref` or `fork_ref`, `text`, `chosen?`, `why_rejected?` | `code` | `chosen` on an active decision → `SEALED_USE_REVISE`; on an active decision the option is allowed, flagged `recorded_before_choice = no` and outside the edition | I2 |
-| `add_assumption` | `ref`, `statement`, `metric?`, `threshold{comparator,value,value2,unit,by_date,text}?`, `judge_from?`, `data_source{kind,text,ref}`, `frequency?`, `next_check_at?`, `critical=true`, `scope?`, `check_cost?`, `class_tag?`, `probability?` | `code`, `due`, `due_source`, `added_after_seal`, `completion_pending` | `DATA_SOURCE_KIND_REQUIRED` ("use `none` to record that nothing can check it"); `PROBABILITY_NOT_OWNER` when the call is not in an owner channel and does not carry the owner's quoted words; `PROBABILITY_OUT_OF_RANGE` | I2 |
+| `add_assumption` | `ref`, `statement`, `metric?`, `threshold{comparator,value,value2,unit,by_date,text}?`, `judge_from?`, `data_source{kind,text,ref}`, `frequency?`, `next_check_at?`, `critical=true`, `scope?`, `check_cost?`, `class_tag?`, `probability?` | `code`, `due`, `due_source`, `added_after_seal`, `completion_pending`, `returns_on` (I2, proposed, §4.8) | `DATA_SOURCE_KIND_REQUIRED` ("use `none` to record that nothing can check it"); `PROBABILITY_NOT_OWNER` when the call is not in an owner channel and does not carry the owner's quoted words; `PROBABILITY_OUT_OF_RANGE` | I2 |
 | `supersede_assumption` | `assumption_ref`, changed fields, `reason` | the new `code` | `REVISION_EMPTY` if nothing changes | I2 |
 | `drop_assumption` | `assumption_ref`, `reason` | — | `REASON_REQUIRED` | I2 |
 | `record_check` | `assumption_ref`, `state`, `observed_value?`, `observed_text?`, `observed_at?` (default live), `evidence{kind,ref,quote}?`, `note?`, `next_check_at?`, `accept_reading?` | `check_ref`, `next_due`, `due_source`, `decision_state` (+ "review now" when VIOLATED) | `STATE_NOT_ALLOWED`; `TERMINAL_DECISION` ("add a fact instead"); `ASSUMPTION_NOT_ACTIVE`; `JOURNAL_CLASS_INPUT`; `QUOTE_NOT_IN_SOURCE`; `NEXT_CHECK_OUT_OF_RANGE`; `EVENT_TIME_IN_FUTURE` | I2 |
@@ -2279,15 +2451,16 @@ CLI and later the bot and INT endpoints are thin adapters over them (D-041).
 | `postpone_check` | `assumption_ref`, `until`, `reason` | `next_due` | `POSTPONE_OUT_OF_RANGE`, `REASON_REQUIRED` | I2 |
 | `add_fact` | `ref`, `text`, `phase='monitoring'`, `kind='observation'`, `claimed_outcome?`, `occurred_at?`, `evidence{kind,ref,quote}?`, `assumption_refs[]?`, `bearing?` | `fact_ref` | `FOREIGN_ASSUMPTION` in every channel; `JOURNAL_CLASS_INPUT`; `QUOTE_NOT_IN_SOURCE`; `GROUNDS_ARE_BASIS` for `phase='ground'` on an active native decision | I2 |
 | `correct_fact` | `fact_ref`, `text`, `reason` | a new `fact_ref` (the old one voided, the new one pointing at it) | — | I2 |
-| `review_decision` | `ref`, `action`, `verdict?`, `notes?`, `next_review_due?`, `trigger?`, `trigger_ref?`, `revision{…}?`, `revise_basis?`, `is_correction?`, `outcome{kind,basis,evidence_refs[],measured_value,expected_vs_actual,owner_statement}?`, `learning{confirmed,refuted,limits,next_step,same_again}?`, `successor_ref?`, `occurred_at?` | `review_ref`, `status`, `edition`, `health` | §4.10 | I2 |
+| `review_decision` | `ref`, `action`, `cancel_kind?` (`moot`, `abandoned`; proposed, §4.11), `verdict?`, `notes?`, `next_review_due?`, `trigger?`, `trigger_ref?`, `revision{…}?`, `revise_basis?`, `is_correction?`, `outcome{kind,basis,evidence_refs[],measured_value,expected_vs_actual,owner_statement}?`, `learning{confirmed,refuted,limits,next_step,same_again}?`, `successor_ref?`, `occurred_at?` | `review_ref`, `status`, `edition`, `health` | §4.10 | I2 |
 | `set_manual_flag` | `ref`, `flag` or `null`, `reason` | — | `REASON_REQUIRED`; refused unless active | I2 |
 | `set_publishability` | `ref`, `value`, `reason`; or `third_party_sensitive` | — | `PUBLISHABILITY_LOCKED` for `third_party_sensitive = 1`, and for clearing that mark on an active decision; `OWNER_CHANNEL_REQUIRED` for `public` and for clearing the mark | I2 |
 | `link` / `unlink` | `ref`, `role`, `target_ref`, `note?` / `link_id`, `reason` | `link_id`, `resolution` | `LINK_ROLE_UNKNOWN`, `LINK_SELF`, `LINK_CYCLE` (in `part_of`, `supersedes`) | I2 |
 | `open_fork` | `question`, `trigger{text,ref}?`, `opened_at?`, `decider?`, `deadline?`, `options[]?` | `Q-…` | — | I2 |
 | `decide_fork` | `fork_ref`, `chosen_option`, decision fields, `activate?` | `D-…` | `FORK_NOT_OPEN`; `ACTIVATION_GATE` when `activate` | I2 |
 | `dissolve_fork` / `delegate_fork` / `move_fork_deadline` | `fork_ref`, `reason` / `to_ref` / `deadline` | — | `FORK_NOT_OPEN`; `REASON_REQUIRED` | I2 |
-| `propose_decision` | `payload`, `origin{kind,ref,quote}` | `proposal_id`, `match_candidates[]` | `PROPOSAL_REJECTED_BEFORE`, `PROPOSAL_ORIGIN_SWITCHED_OFF` | I3 |
-| `approve_proposal` / `reject_proposal` | `proposal_id`, `edits?` / `class`, `reason` | the result ref | `OWNER_CHANNEL_REQUIRED` (an MCP call can never approve); `NOT_PROPOSED` | I3 |
+| `propose_decision` | `payload`, `origin{kind,ref,quote,quotes[]?}` (two quotes with roles from AI working sessions, proposed) | `proposal_id`, `match_candidates[]` | `PROPOSAL_REJECTED_BEFORE`, `PROPOSAL_ORIGIN_SWITCHED_OFF` | I2 (moved from I3, D-055) |
+| `approve_proposal` / `reject_proposal` | `proposal_id`, `edits?` / `class`, `reason` | the result ref | `OWNER_CHANNEL_REQUIRED` (an MCP call can never approve); `NOT_PROPOSED` | I2 (moved from I3, D-055) |
+| `add_exit_rule` | `ref` (a decision or an assumption), `action` (`stop`, `narrow`, `review`, `continue`), `text` (the owner's words), `authored_by?` | `rule_ref`, `in_advance` | `OWNER_QUOTE_REQUIRED` over MCP; `TERMINAL_DECISION` (proposed, D-055, §4.17) | I2 |
 | `import_snapshot` | `file`, `mode=shadow\|final\|dry_run` | the run report | `IMPORT_ROLE`, `IMPORT_NOT_SYNTHETIC`, `IMPORT_FORMAT_UNSUPPORTED`, `IMPORT_HASH_MISMATCH`, `IMPORT_SOURCE_CONFLICT`, `IMPORT_ADOPTED` | I1 |
 | `import_decision_log` | `file`, `only[]` (the entry ids the owner selects) | the run report | `IMPORT_FORMAT_UNSUPPORTED` | I2 |
 | `run_case` | `case_file` | the case result (§10.7) | `CASE_ROLE` (the role must be `validation`, `production` after the adoption, or `dev` for synthetic cases) | I3 |
@@ -2298,9 +2471,9 @@ CLI and later the bot and INT endpoints are thin adapters over them (D-041).
 
 | Query | Arguments | Returns | Incr. |
 |---|---|---|---|
-| `decision_context` | `ref`, `detail=brief\|full`, `as_of?`, `axis?`, `audience='owner'` | the card, in this order: the integrity line, when not `ok`; the share line; health with ground, timeliness and every reason; the statement; why it waits; `question_context`; assumptions with effective state, due date and source, last check and readings; facts split into ground and monitoring with refs; reviews; the outcome; learnings; editions with integrity; links; the attachment summary from every probe; the mirror status and the instance role | I1 |
+| `decision_context` | `ref`, `detail=brief\|full\|why` (`why` = the compact card of §4.9, I2, proposed), `as_of?`, `axis?`, `audience='owner'` | the card, in this order: the integrity line, when not `ok`; the share line; health with ground, timeliness and every reason; the statement; why it waits; `question_context`; assumptions with effective state, due date and source, last check and readings; facts split into ground and monitoring with refs; reviews; the outcome; learnings; editions with integrity; links; the attachment summary from every probe; the mirror status and the instance role | I1 |
 | `list_decisions` | `status?`, `kind?`, `health?`, `linked_to?`, `mirror?`, `limit` | one line each: id, title, label, share, review date, first reason | I1 |
-| `waiting` | `today?` | §4.8, each item with its `question_context` | I1 |
+| `waiting` | `today?`, `subject?` (I2, proposed, §4.9) | §4.8, each item with its `question_context` | I1 |
 | `drafts_to_finish` | — | §4.8 | I2 |
 | `assumption_due` | `assumption_ref`, `at?` | `(date, source)` and the last assessment | I1 |
 | `health` | `ref`, `as_of?` | label, ground, timeliness, reasons, share, `bet` | I1 |
@@ -2309,7 +2482,7 @@ CLI and later the bot and INT endpoints are thin adapters over them (D-041).
 | `decision_history` | `scope` (a decision, a subject ref, a kind, or `all`), `period` | §4.15 | I3 |
 | `related_learnings` | `kind?`, `subjects[]`, `class_tags[]` | §4.11 | I2 |
 | `forks` | `status?` | open questions with age and deadline | I2 |
-| `proposals` | `status?`, `origin_kind?` | with the approval rate per origin | I3 |
+| `proposals` | `status?`, `origin_kind?` | with the approval rate per origin | I2 (moved from I3, D-055) |
 | `unlinked_report` | `period` | §4.14 | I3 |
 | `loop_metrics` | `period` | §4.16 | I3 |
 | `shadow_report` | `run_id?` | §10.6 | I1 |
@@ -2329,6 +2502,7 @@ CLI and later the bot and INT endpoints are thin adapters over them (D-041).
 
 A commitment entered through MCP or the CLI is offered its likely decisions at entry (`likely_for_entry`,
 §4.14); the answer is stored with it. A commitment without a decision is valid (accepted, D-048).
+Proposed (D-055): `create_commitment` also returns `returns_on`, its due date or "no date" (§4.8).
 
 ### 7.5 Wire format and the local transport (proposed)
 
@@ -2405,14 +2579,14 @@ what the owner said or typed, quote the owner's words in `origin.quote` or the c
 | Tool | R/W | Maps to | Undo handler | Incr. |
 |---|---|---|---|---|
 | `dec_list` | R | `list_decisions` | — | I1 |
-| `dec_context` | R | `decision_context` (audience `agent`, `as_of`) | — | I1 |
-| `dec_waiting` | R | `waiting` with `drafts` (`drafts_to_finish`, empty in I1), in the shape of §7.5; OBS records a "pull" usage signal | — | I1 |
+| `dec_context` | R | `decision_context` (audience `agent`, `as_of`; `detail='why'` from I2, proposed) | — | I1 |
+| `dec_waiting` | R | `waiting` with `drafts` (`drafts_to_finish`, empty in I1), in the shape of §7.5; OBS records a "pull" usage signal; `subject` from I2 (proposed, D-055) | — | I1 |
 | `dec_integrity` | R | `integrity` | — | I1 |
 | `dec_shadow_report` | R | `shadow_report` | — | I1 |
 | `dec_history` | R | `decision_history` | — | I3 |
 | `dec_related_learnings` | R | `related_learnings` | — | I2 |
 | `dec_forks` | R | `forks` | — | I2 |
-| `dec_proposals` | R | `proposals` | — | I3 |
+| `dec_proposals` | R | `proposals` | — | I2 (moved from I3, D-055) |
 | `dec_link_report` | R | `unlinked_report` | — | I3 |
 | `dec_metrics` | R | `loop_metrics` | — | I3 |
 | `cmt_list` | R | `open_commitments` | — | I3 |
@@ -2431,7 +2605,8 @@ what the owner said or typed, quote the owner's words in `origin.quote` or the c
 | `dec_link` | W | `link` / `unlink` | the inverse | I2 |
 | `dec_open_fork`, `dec_decide_fork`, `dec_settle_fork` | W | `open_fork`; `decide_fork`; `dissolve_fork`, `delegate_fork`, `move_fork_deadline` | a fork with no decision and no later writes → `withdrawn`; `decide_fork` is not undoable once the decision is active | I2 |
 | `dec_set_flag` | W | `set_manual_flag` | restore the previous flag | I2 |
-| `dec_propose` | W | `propose_decision` | withdraw the proposal | I3 |
+| `dec_propose` | W | `propose_decision` | withdraw the proposal | I2 (moved from I3, D-055) |
+| `dec_add_exit_rule` | W | `add_exit_rule` (§4.17; proposed) | void the rule if no card has shown it | I2 |
 | `cmt_create`, `cmt_set_status`, `cmt_shift_due`, `cmt_link` | W | the CMT commands | a commitment with no history → `withdrawn` / restore the previous status, due date or link | I3 |
 
 **Not exposed over MCP**: `approve_proposal`, `reject_proposal`, `import_snapshot`,
@@ -2441,6 +2616,22 @@ third-party mark is an owner-channel action). These are owner-channel or
 admin actions. A read-only token sees only the R tools. Decisions and checks created over MCP are real
 writes (MCP-4), and the metrics count them separately (§4.16), so whether the owner's own words or an
 agent's inference produced them stays visible.
+
+**The capture scope [I2] (proposed, D-055; MCP-6).** A coding-capable client is read-only on production
+by default (MCP-1). With the `capture` scope it sees the R tools plus `dec_create` (a draft with the
+owner's quote), `dec_propose`, and `dec_add_assumption` and `dec_add_fact` on its own drafts; everything
+else is refused with `SCOPE_NOT_GRANTED`. The generated descriptions of `dec_create` and `dec_propose`
+carry the rule of §4.12: offer "record this?" right after a portfolio decision (money, clients, hours,
+starting or stopping a direction), take the decided time from the quote, ask when the quote points to the
+past, mark the ground "[proposed by the agent]".
+
+**Decisions as context for the agent's work [I2 read; the budget from stage 2] (proposed, D-055;
+MCP-3).** `dec_waiting(subject)` and a server prompt "decisions on this subject" let an agent read the
+decisions that bear on the work in front of it. The rule in the description: at most one check-in per
+session, and only about an item that waits or does not hold and belongs to the subject; cite the reading
+and never phrase a verdict; ask the owner, and record a check only with the owner's quote. From stage 2 the
+hint counts inside the attention gate (BOT-13). Until the adoption gate, reading the shadow in a session is
+an intervention the forecast pilot records (D-039).
 
 **Cloud AI clients** (stage-8 module 0, MCP-5, accepted as a later step in D-052) receive the R tools
 only, through the cloud view of §5.4: `untrusted_external` text withheld by default (PRV-14), no journal
@@ -3298,6 +3489,16 @@ All tests are synthetic, offline and use temp data roots, on Windows and Linux. 
 | AT-N23 | a stale fixture: review 31 days overdue, last fact 45 days old, a served goal dropped 20 days ago, two commitments overdue (through the fake probe) | the card shows the one-line decision, the share line, the last fact with its age, "review date passed", the goal as dropped with its date, "2 overdue", and likely actions led by keep and adjust with their dates, then close and cancel | DEC-20 |
 | AT-N24 | `add_option(chosen=true)` on an active decision; a revise with `--choose O-03`; a revise that replaces the reason of O-02 | `SEALED_USE_REVISE`; the next edition with `chosen_option = 3`, every earlier edition still `ok`; O-02 voided, O-04 appended with `copied_from` O-02, every earlier edition still `ok` | DEC-12 |
 | AT-N25 | `create_decision` without `decided_at`, then `activate`; with `decided_at = unknown`; with `decided_at = today` | `ACTIVATION_GATE(missing=[decided_at])`; activates with precision and basis `unknown`; activates with basis `live` | DEC-1, DEC-13 |
+| AT-P1 | `dec_propose` over MCP naming D-1003 in its text; `approve_proposal` over MCP; over the CLI; a rejected payload proposed again; 30 proposals from one origin with 5 approved | `match_candidates` lists D-1003 as "named"; `OWNER_CHANNEL_REQUIRED`; a decision with `origin_kind = proposal`; `PROPOSAL_REJECTED_BEFORE`; the origin switches itself off (`PROPOSAL_ORIGIN_SWITCHED_OFF`) and says so | DEC-17 (moved from I3 to I2, D-055) |
+| AT-P2 | a `capture` token: `dec_create` with an empty quote; with the owner's quote; `dec_add_assumption` on that draft, then undo; `dec_activate`, `approve_proposal`, `set_publishability(public)`; the CLI `approve` and `activate` with no interactive terminal (proposed, D-055) | `OWNER_QUOTE_REQUIRED`; a draft with `origin_kind = agent_session` and the session reference; executed, then withdrawn; `SCOPE_NOT_GRANTED` for each; `TERMINAL_REQUIRED` | MCP-6 |
+| AT-P3 | a proposal from a synthetic session with two quotes (an owner turn of 12 characters and the agent paragraph it answers) and a quote dated three days earlier; the same item rejected, then proposed again in other words; a proposal left 73 hours; 10 proposals from a new origin with 2 approved (proposed, D-055) | both quotes stored with their roles and `quote_attested = 1`; the card asks "when did you decide?" instead of a guessed date; `PROPOSAL_REJECTED_BEFORE` through the meaning key; `expired`, counted as a soft rejection; the origin stops early and says so | DEC-17, SIG-19 |
+| AT-N26 | cancel the active `D-1004` without a kind; with `moot`; cancel a draft without a kind; close `D-1003` assessing A-02 on the closing card when it was never assessed before (proposed, D-055) | `CANCEL_KIND_REQUIRED`; cancelled with `cancel_kind = moot` and a learning offered; the draft cancelled with no kind; the A-02 check has `at_close = 1` and `observed_basis = live`, is absent from "answered on the due day" and from scoring eligibility, and the card shows the foreseeability line | DEC-15 |
+| AT-N27 | `create_decision` with an assumption due 2026-11-22, activated on 2026-11-15; one with nothing due for 45 days; `waiting` on 2026-11-22 (proposed, D-055) | `returns_on = 2026-11-22`; "no nearer date"; the first decision is listed on 2026-11-22 | DEC-4, DEC-6 |
+| AT-E1 | `add_exit_rule(D-1002_A-01, stop, "if fewer than 3 sign-ups by the 20th, stop")` before any evidence; a second rule after a fact; a check VIOLATED on A-01; integrity of E-01 (proposed, D-055) | the first `in_advance`, the second "written after evidence"; the card shows "the condition you wrote on 15 Nov has come" with follow, continue and can't judge; E-01 still `ok`, no new edition | DEC-26 |
+| AT-N28 | activate a full-depth decision whose first check is 30 days away; one whose first check is 7 days away; accept the offered early signal over MCP without the owner's quote (proposed, D-055) | "next check in 30 days" and the early-signal offer; "next check in 7 days" and no offer; `OWNER_QUOTE_REQUIRED`, nothing added | DEC-6 |
+| AT-N29 | `decision_context(D-1003, detail='why')` in the `owner` and the `agent` audience; a card template with a planted stop-list word; the same word inside the owner's quoted words (proposed, D-055) | at most 8 lines; the `agent` card carries no confidence, probability, sealed value or stake; CI fails on the template; the quote passes | DEC-20 |
+| AT-N30 | four HOLDING checks: one accepting a reading, one with a fact as evidence, one with `owner_statement`, one with no evidence (proposed, D-055) | kinds `reading`, `fact`, `owner_statement` and `none`; only the last is flagged | DEC-13 |
+| AT-M2 | `dec_waiting(subject='V1_G902')` and `dec_waiting(subject='bookkeeper')` on the I2 fixture; a second check-in hint asked for in the same session (proposed, D-055) | only items that serve `V1_G902`, or whose title holds the token; the second hint is not given | MCP-3 |
 
 **Increment I3: execution and evidence**
 
@@ -3305,11 +3506,10 @@ All tests are synthetic, offline and use temp data roots, on Windows and Linux. 
 |---|---|---|---|
 | AT-C1 | `create_commitment(self → V1_P901, "send the draft", due 2026-11-20, decision D-1002)`; another with `no_decision_reason=routine`; a third with neither | `F-10001` linked; `F-10002` explicit none; `F-10003` unanswered; `unlinked_report` shows 1/1/1 with refs | CMT-1, DEC-19 |
 | AT-C2 | shift F-10001's due date with a reason; then review `D-1002` keep | `execution_summary_json` says total 1, open 1, shifted 1; DEC holds no CMT data beyond those counts and ids | DEC-7, DEC-11 |
-| AT-C3 | cancel `D-1002` | `open_commitments` annotates F-10001 "decision ended: keep, drop or move?"; F-10001's status is unchanged | DEC-11 |
+| AT-C3 | cancel `D-1002` as `moot` | `open_commitments` annotates F-10001 "decision ended: keep, drop or move?"; F-10001's status is unchanged | DEC-11 |
 | AT-C4 | `create_commitment(decision=D-1001)` after D-1001 closed; `create_commitment(decision=D-0907)` (a V1 mirror) | `DECISION_ENDED` with the successor hint; `MIRRORED` ("record it in its system of record until adoption") | DEC-11 |
 | AT-C5 | `done` without `--at`; `--at unknown`; a `suggested_done` from the CLI | `DONE_NEEDS_TIME`; accepted with `done_basis = unknown`; `SUGGESTED_DONE_FROM_PROPOSAL_ONLY` | CMT-1 |
 | AT-C6 | a commitment created through MCP whose text names `D-1003`; one for `V1_P901` while an active decision is about `V1_P901` | the first is offered D-1003 preselected ("named"); the second is offered that decision ("same person or company"); at most three offers; the same data gives the same offers | DEC-19, P-15 |
-| AT-P1 | `dec_propose` over MCP naming D-1003 in its text; `approve_proposal` over MCP; over the CLI; a rejected payload proposed again; 30 proposals from one origin with 5 approved | `match_candidates` lists D-1003 as "named"; `OWNER_CHANNEL_REQUIRED`; a decision with `origin_kind = proposal`; `PROPOSAL_REJECTED_BEFORE`; the origin switches itself off (`PROPOSAL_ORIGIN_SWITCHED_OFF`) and says so | DEC-17 |
 | AT-H1 | `decision_history(D-1003, October to November)` on a fixture where A-01 goes HOLDING → VIOLATED after a fact, then a commitment is done and a review follows | one change, with its preceding fact ref, the following commitment `done` event (through the probe) and the review ref, all with refs and transaction provenance; a coverage line; on an empty period, "no data in stored history" | DEC-18 |
 | AT-H2 | `loop_metrics` on a fixture month | checks on the due day and within 7 days, violation → review latency, closed with outcome and learning by basis, MCP-origin writes counted apart, pulls per channel; the same data gives the same numbers | DEC-18 |
 | AT-R1 | `coflow dec case run RC-1.yaml` against S1 in a dev instance (it adds a fact, an adjust and a commitment on the mirror D-0907) | the expectations pass; a `dec_cases` row `pass`; apart from that row, the source database is byte-identical before and after | OPS-16 |
@@ -3369,13 +3569,21 @@ the `internal_query` trigger of §12.4.
 | Shadow report opened | the CLI and MCP call logs | not opened for 14 days → the owner is asked once whether to keep it daily |
 | Integrity failures | `integrity()` | any → an incident |
 | Learnings cited by later decisions | `informed_by` links | below 1 a quarter → the related-learnings surface is redesigned |
+| **Leading headline (proposed, D-055):** checks answered within 7 days | `dec_checks.due_answered` | it leads, and closed decisions with a learning become the lagging headline; 6 weeks after adoption still below 30 % → the payoff mechanisms are removed one at a time, the noisiest first, and none is added (P-13) |
+| Arrived as a proposal, and recorded within a day by any path (§4.16; the counting rule accepted, D-055; its use as a v2 loop metric proposed) | `dec_decisions.origin_kind`, the agent's mark, `dec_proposals` | reported side by side; retro records from the capture experiment never count |
+| Captured drafts and proposals (proposed, D-055) | `origin_kind = agent_session` with a session reference; drafts activated within 7 days | origin with a session reference below 50 % of new decisions → the in-session offer is reviewed; captured drafts activated within 7 days below 50 % → the activation gate is too heavy |
+| Non-decisions among shown proposals (proposed, D-055) | `dec_proposals.reject_class` | above 15 % over the last 30 shown → the source stops showing (OPS-13); fewer than 3 approved of the first 10 → early stop |
+| Expired proposal cards (proposed, D-055) | `dec_proposals.status = expired` | above 30 % → the card moves to another moment of the day |
+| Offered "record this?" in the session (proposed, D-055) | the agent's mark on grounds; the daily review's misses | fewer than 50 % of the last 20 offers accepted → the offer is narrowed; portfolio decisions from sessions not recorded within 24 hours trend to zero |
+| Exit rules (proposed, D-055) | `dec_exit_rules` | the share of full-depth decisions with a rule is reported; postponements and UNKNOWN on assumptions with a rule above those without → the rule wording is reviewed |
+| The compact card (proposed, D-055) | `decision_context(detail='why')` calls | below 1 a week for 4 weeks → the owner is asked once; the full context opened within 10 minutes after the card above 30 % → the card lacks content |
 
 ### 12.4 Deferred mechanisms and the signal that brings each one in
 
 | Mechanism | Not in the slice because | Brought in when |
 |---|---|---|
-| Bot questions, approval cards, the asked log | the bot is stage 2 | stage 2 (planned) |
-| Automatic checks from stored queries over CoFlow data or app metrics | no source module yet | at least 5 active assumptions carry `data_source_kind = internal_query`, or the owner records the same reading by hand at least 3 times |
+| Bot questions, approval cards, the asked log | the bot is stage 2 | stage 2 (planned), behind the attention gate that ships with the first proactive message: one door and one budget, the outcome log, the switch-off automaton, "not now" apart from "postpone", the weekly package (BOT-13…16, RHY-6; proposed, D-055) |
+| Automatic checks from stored queries over CoFlow data or app metrics | no source module yet | at least 5 active assumptions carry `data_source_kind = internal_query`, or the owner records the same reading by hand at least 3 times; proposed (D-055): also switched on per entry of a catalogue of readings (hours against a budget, record counts, a commitment by its date), each declaring `undercounts`, so a short count yields a coverage line, never VIOLATED; accepted as is in 60–95 % of cases, and above 95 % over at least 20 → a card "check the definition" |
 | The contradiction detector ("this fact changes decision X") and non-occurrence items | needs conversations and a capped card | stage 3 (DEC-22) |
 | Separate forecast records, model probabilities, scoring | the forecast pilot reports on 1 December 2026 | the pilot's report recommends it, or at least 30 owner probabilities exist on resolved checkpoints |
 | Occasion fields and the event brief | an `attendance` kind is enough until the first event case | stage 3 (DEC-21), or earlier if an occasion becomes a named real case |
@@ -3383,12 +3591,15 @@ the `internal_query` trigger of §12.4.
 | Decision-graph views (follows, depends on, part of) | links exist; views do not | at least 10 decision↔decision links in use |
 | A cap on business hypotheses and an opportunity-filter form | the `test` kind and its assumptions carry it; the wording is the owner's content (CFG-4) | at least 3 active `test` decisions, or the owner asks for the cap check |
 | Per-unit entry for scoped assumptions | no measured need | an assumption about several sites or people recorded at least 3 times |
-| A trace detector ("an action happened, no decision recorded") | needs WRK, FIN and CAL data | stage-1 data and a pre-registered rule set |
+| A trace detector ("an action happened, no decision recorded") | needs WRK, FIN and CAL data | stage-1 data and a pre-registered rule set; proposed (D-055): two rules are brought in by DEC-25 - "a meeting was held, nothing was decided" at stage 2 on the mirrored sessions, and "an event appears in the calendar for the first time" at stage 4 - and the other trace rules wait here |
+| Windows of a recording around the owner's markers | needs the recorder and a real marker | after the first real marker: the window starts at the previous topic boundary, at least 5 minutes back; markers are the stop and the pad, never the record button (proposed, D-055) |
+| A draft reminder to a counterpart about their commitment | the query of CMT-6 comes first | at least 5 confirmed overdue commitments of counterparts a month, two months in a row; a template only (proposed, D-055) |
+| Calibration shown to the owner | needs 30 resolved points | only through the decision on DEC-10 after 1 December 2026: private, by consent, from 30 points, under the rules of §4.11 (proposed, D-055) |
 | Monthly, quarterly and annual review slots | the weekly review (RHY-4) comes first | two weekly reviews that produced decision reviews |
 | Projections for team tools and publication tooling | publishability is a column; no export yet | the first episode or team share that needs a decision |
 | Importing v1 task-kind "decision" items as proposals | small value, noisy | the owner asks |
 | The erasure command (PRV-7) | arrives in 0B or stage 1 | the hashing already supports it |
-| A checkpoint's failure action (what is done when a gate fails) | the review records it in words | the owner writes a failure action in words on at least 3 checkpoints |
+| A checkpoint's failure action (what is done when a gate fails) | the review records it in words | the owner writes a failure action in words on at least 3 checkpoints; proposed (D-055): the condition is met - the owner already writes exit rules in their own words after a dash in at least 7 thresholds - so it is brought in as the exit-rule log of §4.17 (DEC-26) in I2 |
 | Observations → a decision proposal with "what is missing to say for sure", capped and extinguished on dismissal | needs capture from conversations | stage 3 (DEC-17, DEC-22) |
 | Decision classes, assumption templates, playbooks, a premortem sentence | no measured need | at least 3 decisions of one class recorded with the same assumptions |
 
@@ -3404,7 +3615,7 @@ increment closes with its tests green on Windows and Linux before the next start
 `src/coflow/`, except those that start with `tests/`, `tools/`, `contracts/` or `.github/`, which are
 relative to the repository root.
 
-### 13.0 Preconditions, before the first code pull request
+### 13.0 Preconditions, before the first code pull request (P0.7 and P0.8: before I2)
 
 | # | Item | Who |
 |---|---|---|
@@ -3414,6 +3625,8 @@ relative to the repository root.
 | P0.4 | Repository protection (a protected `main`, a DCO check, secret scanning, pinned actions, a read-only default token) is on before the first code pull request (DEP-7, DEP-8) | **the owner** (settings), an agent (workflows) |
 | P0.5 | The commit identity for the public history | **the owner** |
 | P0.6 | Before the first real snapshot enters the validation instance: the agents' operating-system account cannot read the validation data root, and the development disk is encrypted (PRV-15; proposed) | **the owner** |
+| P0.7 | The one-off offline capture experiment on the owner's own AI working sessions of 1–18 October 2026: read-only, thresholds written before the run, results outside the repository, nothing shown in the daily flow before a separate decision, not before 2 November 2026 (accepted, D-055). Proposed: it precedes the extraction track of I2 (the SIG-19 adapter shows nothing before its offline thresholds hold), not the capture scope | an agent runs it; **the owner** labels the candidates |
+| P0.8 | The I2 gate on 1 November 2026: two weekly readings of the owner's own answer-on-the-due-day rate decide how I2 starts (accepted, D-055; §1.4) | **the owner** |
 
 ### 13.1 Shared skeleton (one agent, first; small)
 
@@ -3444,22 +3657,28 @@ relative to the repository root.
 **I1 is done when** the owner can import a real snapshot into a validation instance, see equal counts,
 and ask "what is waiting and why" over MCP and the CLI with the shadow report beside it.
 
-### 13.3 Increment I2: native loop (4 tracks)
+### 13.3 Increment I2: native loop and capture (5 tracks: D, S, K, X and the AI-session adapter A)
+
+Capture and the fields that are costly to add later move into I2 (accepted, D-055); the items marked
+"capture" below are proposed. The order inside I2 follows the gate of §1.4: with both readings at or above
+50 % the tracks run as listed; with mixed readings the capture items go first; with both below, the capture
+items and the specification of the stage-2 attention gate go first and the native-loop items wait.
 
 | Track | Owns (files) | Delivers | Tests |
 |---|---|---|---|
-| **D** | `modules/dec/domain/{seal,activation,review_rules,readings,learnings}.py` | `seal`, `integrity` (full), `missing_for_activation`, `proposed_depth`, the review validation of §4.10, `proposed_state_from_reading`, `related_learnings` | AT-N4 (domain part), AT-N12, AT-N13, AT-N16, AT-N17, AT-N24 (domain part), AT-N25 |
-| **S** | `modules/dec/commands/{decisions,assumptions,checks,readings,facts,reviews,forks,links,flags}.py`; `modules/dec/undo.py` | every DEC command of §7.2 marked I2, with versions, events, idempotency keys and the mirror guard (both scopes) | AT-N1, AT-N2, AT-N3, AT-N5 to AT-N10, AT-N14, AT-N15, AT-N18, AT-N19, AT-N21, AT-N24 |
-| **K** | `modules/dec/importer/project_log.py`; `modules/dec/evidence.py` (the `EvidenceResolver` built-ins); `kernel/policy/erasure_hook.py` (a test-only erasure hook) | `import_decision_log` with `--only`; completion handling with S's review command; the built-in resolvers; the journal-class refusal | AT-N4 (erasure part), AT-N10 (resolver part), AT-N20 |
-| **X** | `interfaces/mcp/tools_dec.py` (write tools), `interfaces/admin/cli.py` (write commands), `interfaces/views/card.py` (question context, drafts to finish) | the MCP write tools of §8 marked I2, with undo registration; the CLI write commands of §9; the `dec_` namespace | AT-N11, AT-N22, AT-N23, the MCP parts of AT-N7 and AT-N9 |
+| **D** | `modules/dec/domain/{seal,activation,review_rules,readings,learnings}.py`; capture: `modules/dec/domain/{matching,closing,return_date,exit_rules}.py` | `seal`, `integrity` (full), `missing_for_activation`, `proposed_depth`, the review validation of §4.10, `proposed_state_from_reading`, `related_learnings`; capture: the match candidates and meaning keys of §4.12, cancel kinds, `at_close` and the foreseeability line (§4.11), `returns_on` (§4.8), `in_advance` and `met_rules` (§4.17), the kind of evidence on "holds" (§4.5, DEC-13), the early signal (§4.2) | AT-N4 (domain part), AT-N12, AT-N13, AT-N16, AT-N17, AT-N24 (domain part), AT-N25; capture: AT-N26, AT-N27, AT-N30, the domain parts of AT-N28, AT-P3 and AT-E1 |
+| **S** | `modules/dec/commands/{decisions,assumptions,checks,readings,facts,reviews,forks,links,flags}.py`; `modules/dec/undo.py`; capture: `modules/dec/commands/{proposals,exit_rules}.py` (proposals moved from I3) and `modules/dec/migrations/0002_dec_capture.sql` (`dec_exit_rules`; the four `dec_proposals` columns; `dec_reviews.cancel_kind`; `dec_checks.at_close`) with its `sys_table_registry` rows (`dec_exit_rules`: append-only, set-once `voided_at` and `voided_reason`, erasable `text`; `dec_proposals`: `quotes_json` erasable) | every DEC command of §7.2 marked I2, with versions, events, idempotency keys and the mirror guard (both scopes); capture: proposals with expiry, early stop and approval in an owner channel; the exit-rule log | AT-N1, AT-N2, AT-N3, AT-N5 to AT-N10, AT-N14, AT-N15, AT-N18, AT-N19, AT-N21, AT-N24; capture: AT-P1, AT-P3, AT-E1, AT-N28 |
+| **K** | `modules/dec/importer/project_log.py`; `modules/dec/evidence.py` (the `EvidenceResolver` built-ins); `kernel/policy/erasure_hook.py` (a test-only erasure hook) | `import_decision_log` with `--only`; completion handling with S's review command; the built-in resolvers, `agent_session` with `quote_attested`; the journal-class refusal | AT-N4 (erasure part), AT-N10 (resolver part), AT-N20 |
+| **X** | `interfaces/mcp/tools_dec.py` (write tools), `interfaces/admin/cli.py` (write commands), `interfaces/views/card.py` (question context, drafts to finish); capture: `interfaces/mcp/auth.py` (the `capture` scope), the compact card, `dec_waiting(subject)` and the generated descriptions | the MCP write tools of §8 marked I2, with undo registration; the CLI write commands of §9; the `dec_` namespace; capture: the scope of MCP-6, `dec_propose`, `dec_proposals`, `dec_add_exit_rule`, the `why` card, the CLI's approve and activate behind an interactive terminal | AT-N11, AT-N22, AT-N23, the MCP parts of AT-N7 and AT-N9; capture: AT-P2, AT-N29, AT-M2 |
+| **A: the AI-session adapter** (capture; outside the core) | `integrations/ai_sessions/` with its own tests and synthetic transcripts; it imports only the public MCP client | the owner-typed filter, the folder allow-list, the scheduled-session skip, the secret scanner, two quotes with roles, the ledger and cursor, calls to `dec_propose` (SIG-19); the adapter calls no model itself: the owner's coding client finds the candidates in a scheduled session of its own, which the adapter skips as input; it shows nothing until the offline rule of OPS-13 holds | the acceptance of SIG-19 on synthetic transcripts |
 
 ### 13.4 Increment I3: execution and evidence (3–4 tracks)
 
 | Track | Owns (files) | Delivers | Tests |
 |---|---|---|---|
-| **C: commitments** (K's agent) | `modules/cmt/{api,commands,queries,probe}.py`; `modules/cmt/migrations/0001_cmt.sql`; `modules/dec/directory.py` (`accepts_attachment`, `likely_for_entry`) | §3.5, §7.4; the probe; the entry-time offers | AT-C1 to AT-C6 |
-| **D** | `modules/dec/domain/{history,metrics}.py`; `modules/dec/queries_reports.py` (`unlinked_report`, `loop_metrics`) | the report of §4.14, the history of §4.15, the metrics of §4.16 | AT-H1, AT-H2 |
-| **S** | `modules/dec/commands/proposals.py`; `modules/dec/shadow/cases.py`; `modules/dec/importer/adopt.py`; `kernel/obs/jobs.py` (`dec metrics --store`) | proposals and their approval in an owner channel; the case runner; the adoption gate | AT-P1, AT-R1, AT-R2 |
+| **C: commitments** (K's agent) | `modules/cmt/{api,commands,queries,probe}.py`; `modules/cmt/migrations/0001_cmt.sql`; `modules/dec/directory.py` (`accepts_attachment`, `likely_for_entry`) | §3.5, §7.4; the probe; the entry-time offers; commitments by decision with their quotes (CMT-6, proposed) and `returns_on` for a commitment | AT-C1 to AT-C6 |
+| **D** | `modules/dec/domain/{history,metrics}.py`; `modules/dec/queries_reports.py` (`unlinked_report`, `loop_metrics`) | the report of §4.14, the history of §4.15, the metrics of §4.16 with the "arrived as a proposal" rule; related learnings when a fork opens (§4.11, proposed) | AT-H1, AT-H2 |
+| **S** | `modules/dec/shadow/cases.py`; `modules/dec/importer/adopt.py`; `kernel/obs/jobs.py` (`dec metrics --store`) | the case runner; the adoption gate, with the clean-start card of OPS-16 (proposed); proposals moved to I2 (D-055) | AT-R1, AT-R2 |
 | **X** | `interfaces/mcp/tools_cmt.py`, the remaining `tools_dec.py` entries, `interfaces/admin/cli.py` (cmt, proposals, history, metrics, links-report, case, adopt); `tests/interfaces/test_catalogue.py` | the remaining MCP and CLI surface; the catalogue test | AT-X1, AT-X2, AT-X3 |
 
 ### 13.5 Conventions every track follows
@@ -3482,22 +3701,23 @@ and ask "what is waiting and why" over MCP and the CLI with the shadow report be
 
 | Part | Agent tokens | Workflow hours | Owner hours |
 |---|---|---|---|
-| P0 and the skeleton | 0.5–1M | 1–2 | 0.5 (P0.2, P0.4, P0.5, P0.6) |
+| P0 and the skeleton | 0.5–1M | 1–2 | 1–1.5 (P0.2, P0.4, P0.5, P0.6; labelling the candidates of the P0.7 experiment, about 45 minutes) |
 | I1: read-only shadow | 4–6M | 8–12 | 1 (the first real snapshot, reading the first report) |
-| I2: native loop | 4–6M | 8–12 | 1 (selecting and completing project-log decisions) |
-| I3: execution and evidence | 3–4M | 6–9 | 1–2 (scripting the four named cases) |
-| **Stage 0A** | **11.5–17M** | **23–35** | **3.5–4.5** |
+| I2: native loop and capture (D-055; the estimate proposed: +1.5–3M, part of it moved from I3) | 5.5–9M | 11–18 | 1 (selecting and completing project-log decisions) |
+| I3: execution and evidence | 3.5–4.5M | 7–10 | 1–2 (scripting the four named cases) |
+| **Stage 0A** | **13.5–20.5M** | **27–42** | **4–5.5** |
 
 ### 13.7 Where the rest of the core lands
 
 | Stage | What of the decision core it builds |
 |---|---|
 | 0A | this document's slice |
-| 0B | the daily snapshot import and the daily usage-signal job in the supervisor; backups with a tested restore (a condition of the adoption gate) |
-| 1 | tasks store `decision_ref` and the link answer (WRK-3, WRK-8); SIG uses `DecisionDirectory` and implements `EvidenceResolver`; WRK implements the probe and `GoalDirectory`; a quick log "D-0042: …" becomes a fact proposal; the `untrusted_external` sub-class (PRV-14) |
-| 2 | the decision loop in the chat (DEC-5, DEC-7, DEC-9) behind approval cards; the waiting list heads the morning plan (RHY-1); the asked log |
-| Adoption gate | not before 1 December 2026 (§10.10) |
-| 3 | proposals from conversations behind the evaluation gate (DEC-17, OPS-13); occasions (DEC-21); silence and contradiction questions (DEC-22); the decision parts of the brief and the envelope (EXT-5) |
+| 0B | the daily snapshot import and the daily usage-signal job in the supervisor; backups with a tested restore (a condition of the adoption gate); proposed (D-055): the trust minimum - privacy promises as tests (P-17), the content tripwire over sealed decisions and the journal (PRV-17), the "what went where" view (PRV-18) |
+| 1 | tasks store `decision_ref` and the link answer (WRK-3, WRK-8); SIG uses `DecisionDirectory` and implements `EvidenceResolver`; WRK implements the probe and `GoalDirectory`; a quick log "D-0042: …" becomes a fact proposal; the `untrusted_external` sub-class (PRV-14); proposed (D-055): commitments by person (CMT-6) and the fork option at entry (WRK-8, §4.14) |
+| 2 | the decision loop in the chat (DEC-5, DEC-7, DEC-9) behind approval cards; the waiting list heads the morning plan (RHY-1); the asked log; proposed (D-055): the attention gate shipped with the first proactive message - one door and one budget for decision questions, the outcome log, the switch-off automaton, "not now" apart from "postpone" (BOT-13…16) - the weekly package (RHY-6), the meeting trace (DEC-25), `/why` |
+| Adoption gate | not before 1 December 2026 (§10.10); proposed (D-055): the clean start and one sender per message type (OPS-16); the capture adapter switches its target to v2 |
+| 3 | proposals from conversations behind the evaluation gate (DEC-17, OPS-13); occasions (DEC-21); silence and contradiction questions (DEC-22); the decision parts of the brief and the envelope (EXT-5); proposed (D-055): readings from a catalogue of sources (§12.4) |
+| 4 | (proposed, D-055) the calendar trace of DEC-25 with the calendar copy |
 | 5 | meetings that prepare or review decisions, and outcomes that propose decision items first (MTG-1, MTG-2, MTG-4) |
 | 6 | external decision references (DEC-23); delegated commitments by reference (CMT-5); the decision anchors in the integration contract (EXT-4) |
 | 8.0 | the cloud view for cloud AI clients, read-only first (MCP-5) |
@@ -3515,6 +3735,9 @@ and ask "what is waiting and why" over MCP and the CLI with the shadow report be
 | How are decisions, forks and commitments numbered? | v1 numbers kept in four digits; new decisions from `D-1001`; `Q` for forks; `F` for commitments, new ones from `F-10001`; numbers permanent | D-045 |
 | Is the decision link at entry mandatory? | No: offered (up to three likely decisions) and counted in four buckets; "no decision" is a valid answer; a commitment may exist without a decision | D-048 |
 | How does reading the shadow interact with the forecast pilot? | The pilot's change journal records the start of the v2 shadow; the owner reads the shadow daily; every intervention is recorded and taken into account in the pilot's analysis | D-039 |
+| Does capture of decisions where they are born wait for I3? | No: capture of decisions where they are born, plus the fields that are costly to add later (an exit rule written at decision time, the kind of closing, the return date shown when a record is made), move into increment I2; the start of I2 is decided on 1 November 2026 from two weekly readings of the owner's own answer-on-the-due-day rate (both ≥ 50 % → I2 as re-scoped; both below → capture and the attention budget first, and the native loop waits; mixed → the capture tracks first) | D-055 |
+| Is capture tested on the owner's material first? | Yes: a one-off offline capture experiment on the owner's own AI working sessions of 1–18 October 2026 runs this week, read-only, with thresholds written before the run; results stay outside the repository; nothing is shown in the daily flow before a separate decision, not before 2 November | D-055 |
+| What counts as a decision that arrived as a proposal? | One that anyone but the owner proposed first (the AI client in a session, a review card, a meeting-without-decision question); retro records from the experiment do not count | D-055 |
 
 ### 14.2 Still proposed and waiting for the owner
 
@@ -3528,6 +3751,7 @@ named parts.
 | 3 | Where adopted decisions live: restored onto the production host once it has passed its gate, which retires its staging instance and runs production with decisions only (DEP-23, DEP-27) | as §10.10; if stage 2 and the 30 gate days are not done by 1 December 2026, adoption waits | an interim production host, recorded by the owner |
 | 4 | The 14 clean shadow runs and the 7-day freshness of the case results (D-039) | as §10.10 | the gate's conditions 2 and 3 |
 | 5 | The cases in their scripted form at the 0A exit, the chat form of the context-change case at stage 2, and readings entered by the owner (§12.2) | as §12.2 | the 0A and stage-2 exit criteria |
+| 6 | What capture contains and the countermeasures against non-use: the capture scope, the AI-session adapter and its two quotes, proposals with expiry and early stop, the exit-rule log outside the seal, cancel kinds and `at_close`, the return date, the compact card, decisions as context for the agent, the attention gate of stage 2 (D-055) | as §4.8, §4.9, §4.11, §4.12, §4.17, §8 and §13.3 | the I2 tracks and tests named "capture"; the stage-2 gate |
 
 ### 14.3 Decided by default, not asked (each reversible, each proposed in its D-entry)
 
@@ -3576,6 +3800,10 @@ named parts.
 | Composite health | DRAFT, ZOMBIE, OFF_TRACK, REVIEW_REQUIRED, STALE, INSUFFICIENT_DATA, WATCH, ON_TRACK, AWAITING_CHECKS, CLOSED (+ outcome badge), CANCELLED, SUPERSEDED, WITHDRAWN |
 | Waiting reasons | violated (critical flag), review_overdue, review_today, goal_changed, check_due, incomplete, fork_due, proposal_waiting; reserved: expectation_missed, contradiction |
 | Review actions / revise basis | keep, adjust, revise, close, cancel, supersede / trigger_fact, change_of_mind, correction |
+| Cancel kind (proposed, D-055) | moot, abandoned |
+| Check at close (proposed, D-055) | 0 (default), 1 |
+| Exit-rule action / author / origin (proposed, D-055) | stop, narrow, review, continue / owner, model_proposed_owner_accepted / entry, threshold_text, import, review |
+| Kind of evidence on a "holds" (computed, not stored; proposed, D-055, §4.5) | reading, fact, owner_statement, none |
 | Review triggers | scheduled, violated_assumption, outside_fact, non_occurrence, goal_change, fork, owner_initiative, import |
 | Outcome kind / basis / resolved by | success, failure, mixed, unknown / resolved, reported, not_confirmed / owner, import |
 | Same again | yes, no, unsure |

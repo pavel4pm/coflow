@@ -7,6 +7,85 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-055 · Capture where decisions are born moves into I2, and the owner's own use gates I2 — accepted (18 October 2026) for (a)–(d); the countermeasures are proposed
+
+- **Context:** a study of 18 October 2026 looked for the reasons people would not use CoFlow 2.0 and found
+  six: input, the discomfort of checking one's own bets, a payoff that comes months after the effort, noise,
+  the entry threshold, and trust. Each got a design and an independent red-team review, and only what survived
+  the review is carried forward. v1's aggregates behind them: in 17 days, 23 real decisions were found in
+  conversation summaries that never reached the register; none of 91 assumptions was checked before
+  17 October; one decision was closed in v1's whole history, and a review date sat on average about two
+  months after its decision; of 195 proactive bot messages in 26 days (a median of 7 a day, all with sound)
+  about 4 % (8) got a direct answer; background suggestion queues were almost never reviewed (10 of 1,785,
+  2 of 383, 0 of 364); 37 % of the turns marked as the owner's in AI working sessions were not typed by the
+  owner; and the largest outward flow was model calls (3,702 in 30 days, against 1,464 MCP calls), where a
+  journal path nobody had enabled was found only by an agent's audit, not on a screen. The entry threshold
+  does not apply to the owner, who already works through the bot and MCP, but it does to others. The common
+  thread: without records, checking and payoff have nothing to work on, and without one attention budget
+  capture itself becomes noise.
+- **Decision (accepted, 18 October 2026):** the owner decided:
+  - **(a)** Capture of decisions where they are born, plus the fields that are costly to add later (an exit
+    rule written at decision time, the kind of closing, the return date shown when a record is made), move
+    into increment I2. The start of I2 is decided on 1 November 2026 from two weekly readings of the owner's
+    own answer-on-the-due-day rate: both readings ≥ 50 % → I2 as re-scoped; both below → capture and the
+    attention budget first, and the native loop waits; mixed → the capture tracks first.
+  - **(b)** A one-off offline capture experiment on the owner's own AI working sessions of 1–18 October 2026
+    runs this week, read-only, with thresholds written before the run; results stay outside the repository;
+    nothing is shown in the daily flow before a separate decision, not before 2 November 2026.
+  - **(c)** Counting rule for the owner's own usage signal: a decision "arrived as a proposal" when anyone but
+    the owner proposed it first (the AI client in a session, a review card, a meeting-without-decision
+    question); retro records from the experiment do not count.
+  - **(d)** One more exception to the private v1's feature freeze from 1 November 2026: its notification
+    noise outside the decision module is reduced (quiet hours for sound, merged failure messages, a balance
+    alert at most daily, the evening reminder off). This amends the exception of D-006 and D-037.
+- **Alternatives:** keep the ROADMAP order (proposals from AI clients in I3, capture from conversations at
+  stage 3; the native loop of I2 then has almost nothing of the owner's own to check, and the costly
+  fields arrive after the first native records); start I2 now without the readings (the native loop is
+  built before it is known whether the owner answers on the due day at all); no experiment (a capture
+  path would ship unmeasured on material where over a third of the "owner's" turns were not the owner's).
+- **Consequences (proposed):** the mechanisms per cause, the new requirement rows, one door and one budget
+  for attention, trust as tests, the install ladder by signal only, and the residuals named honestly
+  (REQUIREMENTS 0.8):
+  - **stage 0A, increment I2:** a capture scope for coding clients (MCP-6); AI working sessions as a source,
+    owner-typed text only (SIG-19); exit rules outside the seal (DEC-26); edits to DEC-4 and CMT-1 (the
+    return date), DEC-6 (an early signal on activation), DEC-13 (the kind of evidence on every "holds"),
+    DEC-15 (closing kinds), DEC-17 (proposals move from I3 to I2, with one budget, expiry and the decided
+    time taken from the quote), DEC-20 (a compact "why we decided" card), MCP-1 and MCP-3 (decisions as
+    context for the AI client), PRV-10 (no audience for checks; confidence and probabilities reach only the
+    owner); the two non-decision rules, first for AI working sessions (OPS-13);
+  - **increment I3:** commitments by decision (CMT-6), and by person at stage 1; the loop metrics also show
+    decisions that arrived as a proposal and decisions recorded within a day (DEC-18);
+  - **stage 0B, the trust minimum:** privacy promises as tests (P-17), a content tripwire for the journal and
+    sealed decisions (PRV-17), a "what went where" view (PRV-18); edits to OPS-7, PRV-12, NFR-6 and DEP-7
+    (no telemetry, verifiably);
+  - **stage 1:** edits to WRK-8 (an "or is it a fork?" option), PRV-14 (a card when an AI client is
+    connected) and OPS-15 (tombstones blank derived records);
+  - **stage 2, the attention gate, shipped with the first proactive message:** one door and one budget
+    (BOT-13), an outcome log (BOT-14), one switch-off automaton (BOT-15), "not now" apart from "postpone"
+    (BOT-16), one weekly package (RHY-6), the trace "a meeting was held, nothing was decided" (DEC-25); edits
+    to P-13, DEC-7, BOT-4, BOT-5, BOT-9 and OPS-14;
+  - **stage 3 and later:** the same two rules for chats and recordings (OPS-13), consent with a basis
+    (PRV-6); a clean start and one sender per message type at the adoption gate (OPS-16);
+  - **Later, by trigger:** a decisions file for a first day (DEC-27), a `personal` install profile (DEP-29),
+    a drill for moving between install tiers (DEP-30), a first session with prospective checks (OPS-18), an
+    outsider's session (NFR-14). DEP-30 is deferred by trigger in this pass; the proposal had it after
+    1 December 2026;
+  - about +7–12M agent tokens net across R1, and the path to 1 December 2026 about a week longer at one stage
+    a week;
+  - not written into the documents in this pass: SBOM and provenance moved into R1 (a split of DEP-20);
+    masking structured identifiers before a cloud model (ARCHITECTURE §6.4, stage 3); PRV-5's acceptance
+    (the idle network test is written into PRV-12 instead); a "we found a leak" procedure and a quarterly
+    agent audit over content-free reports (SECURITY.md); the review-gate criterion "reported installations
+    after R1" in BUILD_IN_PUBLIC, marked not measurable on 10 November 2026 and followed after R1 by
+    reported use over 4 weeks; the place of `integrations/` (the AI-session adapter outside the core) in
+    ARCHITECTURE and the import-linter contracts;
+  - **residuals no mechanism removes:** decisions made in the head or in conversations nobody records;
+    full capture only where a coding client keeps local transcripts; the loss of a bet tied to one's
+    identity; people who do not want to know; a muted bot that cannot be told from absence; the lesson of a
+    closed decision, which arrives months later by nature, and calibration, which needs about 30 resolved
+    points; text already sent to a model provider or an AI client; counterparts who chose nothing;
+    non-technical and mobile-only users (deliberately out of scope, REQUIREMENTS §2).
+
 ## D-054 · Decisions are sliced by direction everywhere they are listed — accepted (17 October 2026); placement proposed
 
 - **Context:** after a first look at v1's new decisions screen the author found it fine as it is ("nothing to
@@ -992,6 +1071,9 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 - **Changed 17 October 2026 (accepted):** one exception — the decision loop is built in v1 now (check dates
   and the "waiting" list, a decisions screen, review questions in the chat written only after approval), and
   the same part is specified for 2.0 (D-037). The forecast pilot of the same day runs outside v1's code.
+- **Changed 18 October 2026 (accepted, D-055):** a second exception from 1 November 2026 — v1's
+  notification noise outside the decision module is reduced (quiet hours for sound, merged failure
+  messages, a balance alert at most daily, the evening reminder off).
 
 ## D-005 · The core is a personal decision system — accepted (4 Oct 2026)
 

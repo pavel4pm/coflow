@@ -1,8 +1,8 @@
 # CoFlow 2.0 — Roadmap
 
-Version 0.7 · 18 October 2026 · **status: draft for owner review** (the decision core moves to stage 0A,
-D-038 to D-049; the home laptop, its gate and the internet entry, D-050 to D-053;
-[REQUIREMENTS.md](REQUIREMENTS.md) 0.7)
+Version 0.8 · 18 October 2026 · **status: draft for owner review** (the decision core moves to stage 0A,
+D-038 to D-049; the home laptop, its gate and the internet entry, D-050 to D-053; capture moves into
+increment I2 and the owner's own use gates its start, D-055; [REQUIREMENTS.md](REQUIREMENTS.md) 0.8)
 
 The roadmap turns [REQUIREMENTS.md](REQUIREMENTS.md) into stages. Each stage ends with something that works
 end to end, a tagged pre-release deployed through CI/CD (from stage 0B, when the delivery pipeline exists)
@@ -15,13 +15,16 @@ core in [SPEC_DECISION_CORE.md](SPEC_DECISION_CORE.md).
 
 | When | What |
 |---|---|
-| October 2026 | Requirements and the decision-core design (this package). The private v1 runs under acceptance testing; its features are frozen, except the decision loop (D-037) |
+| October 2026 | Requirements and the decision-core design (this package). The private v1 runs under acceptance testing; its features are frozen, except the decision loop (D-037) and, from 1 November 2026, less notification noise outside the decision module (D-055) |
 | 17 October 2026 | Stage 0A starts: the kernel and the decision core, in three increments (D-038, D-040); v1 acceptance continues in parallel and no longer gates code |
+| The week of 19 October 2026 | A one-off offline capture experiment on the owner's own AI working sessions of 1–18 October 2026: read-only, thresholds written before the run, results outside the repository (D-055) |
+| 1 November 2026 | The start of increment I2 is decided from two weekly readings of the owner's own answer-on-the-due-day rate (D-055) |
+| Not before 2 November 2026 | Nothing from the capture experiment is shown in the daily flow before a separate decision (D-055) |
 | From the first increment of 0A until 1 December 2026 | v2 runs in shadow on daily one-way snapshots of v1's decisions; v1 stays the decision system of record, and the forecast pilot's change journal records that the owner reads the shadow daily (D-039) |
 | Not before 1 December 2026 | Decisions move to v2 for good at the adoption gate, onto a host that passed its gate, where the restored instance becomes production (D-039, OPS-16, DEP-27) |
 | One stage per week where possible | A sustainable pace that matches the weekly episode |
 | Stage 2 | The home production laptop is set up, runs CoFlow in the staging role, and its 30-day gate starts (D-050); the owner's relay comes up as a second remote administration path, with no public name yet (D-053) |
-| Target: end of December 2026 | **R1** — stages 0A–5, tag `v2.0.0` (re-planned after the first increment of stage 0A with measured speed) |
+| Target: end of December 2026 | **R1** — stages 0A–5, tag `v2.0.0` (re-planned after the first increment of stage 0A with measured speed; proposed, D-055: the re-scoped I2 makes the path to 1 December 2026 about a week longer at one stage a week) |
 | January 2027 | Stages 6–7: the rest of the author's data moves into the production instance on the home laptop (whose gate has passed); learning loop |
 | 2027 | Stage 8 modules one by one: first internet-facing MCP for cloud clients, read-only first (D-052); then, in the confirmed order, money, centre and goals, inconsistency findings, send material, negotiation, the whole archive, statement import, week plan and the rest; research after that |
 
@@ -71,6 +74,14 @@ Scope:
   from AI clients approved only in an owner channel (DEC-1…4, DEC-6, DEC-11…20); minimal commitments that
   name the decision they execute or say "none" with a reason (CMT-1); publishability per decision
   (PRV-10); independence from every external app (EXT-6).
+- **Capture where decisions are born, and the fields that are costly to add later** (moved into increment
+  I2, accepted, D-055; what they contain is proposed): a capture scope that lets a coding client draft the
+  owner's decisions with the owner's quoted words and propose more (MCP-6); AI working sessions as a source
+  that passes on only the owner's typed text, through an adapter outside the core (SIG-19); proposals with
+  deterministic matches, one budget, expiry and the decided time taken from the quote (DEC-17); exit rules
+  written at decision time, outside the seal (DEC-26); the kind of closing and checks recorded at closing
+  (DEC-15); the return date named when a record is made (DEC-4, CMT-1); a compact "why we decided" card and
+  decisions as context for the AI client's work (DEC-20, MCP-3); commitments by decision, in I3 (CMT-6).
 - **Shadow, cases and adoption:** the daily one-way snapshot of v1's decisions imported into the validation
   instance as read-only mirrors that keep their numbers; the shadow report that classifies every
   difference; the case runner on throw-away copies; the selected entries of the project's own decision log
@@ -91,12 +102,33 @@ and Linux before the next starts:
 
 | Increment | What the owner can do when it closes | Agent tokens | Workflow hours | Owner hours |
 |---|---|---|---|---|
-| Skeleton | Nothing yet: shared contracts, ports with fakes, CI | 0.5–1M | 1–2 | 0.5 |
+| Skeleton | Nothing yet: shared contracts, ports with fakes, CI; the owner also labels the candidates of the capture experiment (about 45 minutes) | 0.5–1M | 1–2 | 1–1.5 |
 | I1 · read-only shadow | Ask v2 "what is waiting and why" about the real v1 decisions, through MCP or the CLI, with the shadow report beside it | 4–6M | 8–12 | 1 |
-| I2 · native loop | Record, activate, check, review, close and learn on the selected project-log decisions and on synthetic decisions; the owner's own new decisions are recorded in v1 until the adoption gate (D-039) | 4–6M | 8–12 | 1 |
-| I3 · execution and evidence | Attach commitments to decisions, see execution in reviews, ask "what changed and why" over a period, run the real cases | 3–4M | 6–9 | 1–2 |
+| I2 · native loop and capture | Record, activate, check, review, close and learn on the selected project-log decisions and on synthetic decisions; capture drafts and proposals from AI working sessions and approve them in an owner channel; exit rules, the kind of closing and the return date from the first native record; the owner's own new decisions are recorded in v1 until the adoption gate (D-039) | 5.5–9M | 11–18 | 1 |
+| I3 · execution and evidence | Attach commitments to decisions, ask what was promised per decision, see execution in reviews, ask "what changed and why" over a period, run the real cases | 3.5–4.5M | 7–10 | 1–2 |
 
-The slice is model-free and offline. Stage 0A is accepted natively and in the validation instance; the
+**The I2 gate (accepted, D-055).** The start of I2 is decided on 1 November 2026 from two weekly readings
+of the owner's own answer-on-the-due-day rate:
+
+- both readings ≥ 50 % → I2 as re-scoped above;
+- both below → capture and the attention budget first, and the native loop waits;
+- mixed → the capture tracks first.
+
+**The experiment (accepted, D-055).** A one-off offline capture experiment on the owner's own AI working
+sessions of 1–18 October 2026 runs this week, read-only, with thresholds written before the run; its
+results stay outside the repository; nothing is shown in the daily flow before a separate decision, not
+before 2 November 2026. The owner's usage signal counts a decision as one that arrived as a proposal when
+anyone but the owner proposed it first (the AI client in a session, a review card, a
+meeting-without-decision question); retro records from the experiment do not count (accepted, D-055).
+
+Proposed with them (D-055): the experiment is the precondition of the extraction track - the adapter of
+SIG-19 shows nothing until the offline non-decision rule of OPS-13 holds on the owner's own sessions -
+while the capture scope (MCP-6) is built either way, since it does not depend on extraction; in the "both
+below" branch, the attention budget is the specification of the stage-2 gate, built with that stage; the
+re-scoped I2 adds about 1.5–3M agent tokens, part of them moved from I3.
+
+The slice is model-free and offline; the AI-session adapter lives outside it, calls no model itself (the
+owner's coding client finds the candidates) and reaches it only as proposals. Stage 0A is accepted natively and in the validation instance; the
 first image and the CD path arrive with stage 0B.
 
 Exit criteria:
@@ -110,6 +142,9 @@ Exit criteria:
 - The four real cases named by the owner on 17 October 2026 run with the case runner on throw-away copies
   of the validation database and pass, in their scripted form (proposed); a further case named the same
   day waits for stage 5.
+- Proposed (D-055): a draft captured from a synthetic AI session reaches an owner-channel approval with its
+  two quotes and none typed by anyone else; a violated assumption with an exit rule shows the rule's words
+  and date; every return date an answer promised appears on its day.
 
 ### Stage 0B — Delivery and operations
 
@@ -132,6 +167,11 @@ Scope (the rest of the former stage 0):
   DEP-6); a tag builds one image pushed by digest, and security-sensitive paths need a human code owner's
   review (DEP-8); a minimal `coflow update <digest>` run by hand over SSH against any Linux Docker host — a
   virtual machine is enough, so the stage does not wait for hardware (DEP-9).
+- **The trust minimum** (proposed, D-055), cheaper than screens the owner would not open: every privacy
+  promise names its test (P-17); a content tripwire for the journal and sealed decisions in the model
+  gateway's outgoing text (PRV-17); a "what went where" view over the model-call log, with a card only on
+  a deviation (PRV-18); a model function nobody uses pauses (OPS-7); no telemetry, checked in the lock and
+  by an idle test (PRV-12); the canaries also run after a change of a switch or a grant (NFR-6).
 
 Exit criteria:
 
@@ -142,6 +182,8 @@ Exit criteria:
 - A tagged pre-release reaches a Linux test host by digest through the manual updater.
 - The literal gate, the canaries (both journal settings) and the ownership check run in CI.
 - The supervisor imports the daily snapshot and records the daily usage signals.
+- Proposed (D-055): a planted wrong route of journal text is caught by the tripwire; the documentation
+  check finds no privacy statement without a test; a telemetry package in the lock fails CI.
 - Estimates for stages 1–5 are recalculated with the measured speed.
 
 ### Stage 1 — Memory core with decision anchors
@@ -154,12 +196,16 @@ Scope:
   SIG-14); quick log and notes (SIG-15); research-ready signals (REL-6).
 - Work registry: directions with ranks and envelopes, goals with their R1 fields, tasks, status log, ball
   holder, goals resolved through `goal_ref`, tasks that store the decision they execute, the decision or
-  goal link at entry (WRK-1…3, WRK-8).
+  goal link at entry, which offers "or is it a fork?" when the text has an explicit fork form (WRK-1…3,
+  WRK-8; the fork option proposed, D-055).
 - Decision anchors, the spoke side of the ports built in stage 0A (DEC-11, DEC-19): SIG uses
   `DecisionDirectory` for quick logs naming a decision and implements `EvidenceResolver`; WRK implements
   `GoalDirectory` and the attachment probe.
+- What was promised, by whom and to whom, asked per person: the stage-1 half of the commitment query built
+  in I3 (proposed, D-055).
 - Text not written by the owner carries the `untrusted_external` sub-class, and items from satellites wait
-  in a quarantine as proposals (PRV-14).
+  in a quarantine as proposals (PRV-14); connecting an AI client shows one card on where its model runs,
+  its terms and its outside tools, with no preselected answer about that text (proposed, D-055).
 - Journal storage with the local command (PRV-1).
 - Search: full text with deterministic row ids, rule-based entities, script variants for Latin and
   Cyrillic, honest coverage (SRC-1…4, P-9).
@@ -168,7 +214,8 @@ Scope:
   layer; it grows as later stages add layers (TML-1).
 - Connector contract and the first adapter, Telegram Desktop export (SIG-5, SIG-6).
 - The one-way snapshot extended from decisions (stage 0A) to people, sessions, commitments and tasks,
-  imported into the validation instance as mirrors and never written back (OPS-15).
+  imported into the validation instance as mirrors and never written back (OPS-15); a person deleted in
+  v1 arrives as a tombstone that also blanks the records derived from them (proposed, D-055).
 - MCP across machines: the SSH bridge and the network listener for the owner's devices, with the tools
   growing to people, sessions, tasks and search (MCP-1).
 
@@ -210,6 +257,15 @@ Scope:
   routing (BOT-7); `coflow bench stt`, on the GPU where there is one (NFR-11).
 - Morning plan with a deterministic ranking, headed by the decision waiting list, evening plan vs. fact,
   close the day (RHY-1…3); the control view (WRK-6); notifications with caps and quiet hours (BOT-5).
+- **The attention gate, shipped with the first proactive message, not after it** (proposed, D-055): one
+  door for every message, with classes, budgets, quiet hours for sound and one daily budget for questions
+  about decisions, which sound only for news (BOT-13, DEC-7); an outcome log with one definition of
+  "acted" (BOT-14); one switch-off automaton for message types, its fast rule now and its slow rule after
+  4–6 weeks of the log (BOT-15); "not now" apart from "postpone", and a quiet command (BOT-16); one weekly
+  package inside the Monday plan (RHY-6); the trace "a meeting was held, nothing was decided" on the
+  mirrored sessions (DEC-25); a "record as a decision?" button under answers that use decision words
+  (BOT-9); `/why` for the compact card. Without the gate the stage-2 bot would repeat v1: 7 messages with
+  sound a day and about 4 % answered.
 - **The home production laptop:** Linux and Docker Engine under the laptop profile of the baseline
   (DEP-14), full-disk encryption (PRV-11), the GPU image variant (DEP-25), platform updates only by owner
   command and travel mode (DEP-26); per-purpose SSH keys, the phone's operations key and the relay tunnel
@@ -240,6 +296,9 @@ Exit criteria:
 - The owner's context-change case passes as one sentence → one card (DEC-9).
 - On the snapshot, every list of decisions groups by direction with the source shown, and the decisions
   without one are named (DEC-24).
+- Proposed (D-055): a contract test finds no message sent outside the gate; nothing below class A sounds
+  in quiet hours; 12 failures within 30 minutes produce one message; "not now" changes no date; on a
+  synthetic month the daily median of messages with sound is at most 4.
 - `doctor --host` passes with the laptop profile; the gate's measurement log runs; unplugging the home
   host's network raises an alert on the phone within 30 minutes; status, logs and a restore run from the
   dev machine with no physical access to the host; the lost-host runbook dry run lists every secret.
@@ -263,6 +322,12 @@ Proposed: if stage 2 and the 30 gate days are not done by 1 December 2026, adopt
 instead record an interim production host. Adopting with a pull-only loop (CLI and MCP, without the chat
 loop) would need a separate owner decision.
 
+Proposed (D-055): the gate's checklist adds a clean start - one card that offers to cancel decisions whose
+goal was dropped, spreads the remaining postponed checks over weekdays and never redates a review - and one
+sender per message type while two bots run, v1 keeping plans, briefs and recordings and no longer asking
+about decisions (OPS-16). At adoption the capture adapter switches its target from synthetic and
+project-log data to v2, and its answers move to the bot, the owner channel.
+
 ### Stage 3 — Capture, commitment proposals and the centre slice
 
 Scope:
@@ -270,7 +335,11 @@ Scope:
 - Inline, capped commitment proposals from conversations, with the decision rate measured per proposal
   type; a type below its threshold switches itself off (CMT-2, P-13).
 - Decision proposals extended from AI clients (stage 0A) to conversations, extracted from segments and
-  never from summaries, behind the evaluation gate (DEC-17).
+  never from summaries, behind the evaluation gate (DEC-17); the two non-decision rules, offline and live,
+  hold before chats or recordings propose anything (OPS-13; proposed, D-055).
+- Readings computed from a catalogue of sources (hours against a budget, record counts, a commitment by its
+  date), each source declaring whether it undercounts, so a short count yields a coverage line, never a
+  violation (DEC-13; proposed, D-055).
 - Occasions as attendance decisions with a brief file for an event app (DEC-21).
 - Silence and contradiction as questions: an expectation with no fact by its date, and a new fact that
   contradicts an active assumption, each become one capped item (DEC-22).
@@ -304,10 +373,13 @@ Scope:
   after complete arrival, transcription into segments in the worker with its own limits, summaries,
   resilience, recorder profile, archive budget (SIG-2…4, SIG-11, SIG-14); import of an external
   transcript, preferred for attribution when it carries speaker labels (SIG-16).
-- Calendar copy, read-only, with freshness flags, per-purpose tokens and a headless login (SIG-9, EXT-3).
+- Calendar copy, read-only, with freshness flags, per-purpose tokens and a headless login (SIG-9, EXT-3);
+  with it, the stage-2 trace rules gain the calendar trace: a trip or an event that appears for the first
+  time proposes an attendance decision (proposed, D-055).
 - Host plugins, off by default: Telegram user-session collector with voice notes (SIG-7, SIG-8), Gmail
   read (SIG-10) (EXT-1).
-- Contact proposals from conversations (PPL-3); recording consent (PRV-6).
+- Contact proposals from conversations (PPL-3); recording consent with its basis and an "off the record"
+  button (PRV-6; the basis and the button proposed, D-055).
 - Health and the status page — the only web screen in R1 (OPS-6, UI-1); disk-space policy (DEP-13);
   outage behaviour, with missed briefs collapsed into one summary after recovery and expired cards named
   (DEP-15).
@@ -463,21 +535,28 @@ again after stage 0B.
 
 | Stage | Size | Agent tokens | Workflow hours | Owner hours |
 |---|---|---|---|---|
-| 0A Kernel and decision core | L | 11.5–17M | 23–35 | 3.5–4.5 |
-| 0B Delivery and operations | M | 4–6M | 8–12 | 1–2 |
-| 1 Memory core with decision anchors | L | 9–14M | 18–27 | 1–2 |
-| 2 Bot, rhythm, the decision loop in chat, and the home laptop | L (re-estimated at the stage start: the chat loop from stage 3, D-040; the host security items, D-050 to D-053) | 7–10M | 13–20 | 22–38 (incl. moving the laptop to Linux with the laptop profile and disk encryption, ≈ 8–16 h, and the relay as the second remote path, ≈ 3–5 h; estimates) |
-| 3 Capture, commitment proposals, centre slice | M | 3–5M | 6–10 | 1 |
+| 0A Kernel and decision core | L (capture and the costly-later fields in I2, D-055) | 13.5–20.5M | 27–42 | 4–5.5 |
+| 0B Delivery and operations | M (the trust minimum, D-055) | 6–10M | 12–20 | 1–2 |
+| 1 Memory core with decision anchors | L | 9.5–15M | 19–29 | 1–2 |
+| 2 Bot, rhythm, the decision loop in chat, and the home laptop | L (re-estimated at the stage start: the chat loop from stage 3, D-040; the host security items, D-050 to D-053; the attention gate, D-055) | 8.2–12M | 15–24 | 23–39 (incl. moving the laptop to Linux with the laptop profile and disk encryption, ≈ 8–16 h, and the relay as the second remote path, ≈ 3–5 h; estimates) |
+| 3 Capture, commitment proposals, centre slice | M | 4.3–6.5M | 9–13 | 1 |
 | 4 Sources | L | 6–9M | 12–18 | 2–3 |
 | 5 Meetings, reliable execution, rollback | L, 2 rounds | 7–11M | 14–22 | 2–4 |
-| **R1 (stages 0A–5)** | | **47.5–72M** | **94–144** | **32.5–54.5** |
+| **R1 (stages 0A–5)** | | **54.5–84M** | **108–168** | **34–56.5** |
 | 6 Import, switch-over, device agents, rebuild drill | L | 8–12M | 15–23 | 4–6 |
 | 7 Learning loop | L | 5–7M | 10–14 | 1–2 |
 | **Stages 6–7** | | **13–19M** | **25–37** | **5–8** |
 | 8 Modules 0, 1a–5, 7, 8 (incl. 1b, 2b) | per module | 45–67M | 93–135 | 1–3 per module |
 | Research R-a, R-c, R-d, R-e | indicative | 9–16M | 18–32 | per protocol |
 
-The R1 totals are before the stage-2 re-estimate. Model API cost while developing (evaluation runs with a
+The R1 totals are before the stage-2 re-estimate. Proposed (D-055), from the estimates of the
+adoption-barrier designs and their reviews: capture in I2, the trust minimum in 0B and the attention gate in
+stage 2 add about 9–15M agent tokens gross, of which about 2–3M were already budgeted (BOT-5, DEC-7,
+`dec_propose`), so about 7–12M net, 10–25 % of the earlier R1 total (47.5–72M): I2 +1.5–3M, 0B +2–4M,
+stage 2 +1.2–2M, and the rest across I3 and stages 1 and 3. At one stage a week the path to 1 December 2026
+becomes about a week longer, which the weekly episode names. Model cost of capture from every source stays
+under $15 a month; the owner's time on the decision layer after it starts is about 15–25 minutes a week,
+against about none in v1. Model API cost while developing (evaluation runs with a
 live model, behind an explicit flag): on the order of $30–60 for R1; stage 0A makes no model call. Running
 costs of the home host (electricity, the relay, object storage for backups, the dead-man service) are
 measured after stage 2 and published in [DEPLOYMENT.md](DEPLOYMENT.md) §4 together with the hardware
@@ -512,7 +591,11 @@ choice (§14).
   code.
 - **The private v1 is frozen** since 4 October 2026: acceptance fixes and dangerous bugs only. Everything
   else becomes a v2 issue. One exception since 17 October 2026: the decision loop (D-006, D-037) and, from
-  17 October 2026, a read-only exporter of v1's decisions in the private repository (D-039).
+  17 October 2026, a read-only exporter of v1's decisions in the private repository (D-039). A second
+  exception from 1 November 2026: v1's notification noise outside the decision module is reduced (D-055).
+- **The capture experiment stays outside the daily flow** (D-055): it is read-only, its results stay outside
+  every repository, and nothing from it is shown in the daily flow before a separate decision, not before
+  2 November 2026.
 - **Never two writers.** Until the adoption gate every real decision is written in v1; v2 holds read-only
   mirrors in the validation instance and computes, never writes back. The v2 MCP tools use their own
   namespace, so v1's tools stay the forecast pilot's only write path. Reading the shadow daily is part of
@@ -521,6 +604,9 @@ choice (§14).
   validation instance on the owner's machine (DEP-23), and from the decision adoption in the production
   instance on the gated host.
 - **Nothing for growth.** A requirement without a usage signal or an explicit decision of the author waits.
+  The install ladder and the first-day items wait for their named triggers: a decisions file, the
+  `personal` profile, the drill between install tiers, the first session with prospective checks and the
+  outsider's session (DEC-27, DEP-29, DEP-30, OPS-18, NFR-14; proposed, D-055).
 - **Synthetic data only** in the repository, issues, screenshots and episodes; no identifiers of the
   author's infrastructure (host names, addresses, domains, VPN or tunnel ids, SSH users). The real
   snapshot, the case scripts and their reports live only in the validation data root (after the
@@ -534,7 +620,8 @@ choice (§14).
 | The second-system trap: the rewrite grows beyond R1 | R1 scope is fixed by requirement IDs; additions need a usage signal and an owner decision; deployment extras are R2 or Later |
 | Stage 0B's delivery work delays the decision core | The decision core is stage 0A, before the delivery pipeline; stage 0B builds only a skeleton against any Linux host; the physical host comes in stage 2, rollback in stage 5 |
 | The shadow disturbs the forecast pilot or becomes a second writer | One-way snapshots, read-only mirrors, the mirror guard on every command, its own MCP namespace; daily reading recorded in the pilot's change journal (D-039) |
-| v1 needs change during the rewrite | Feature freeze; acceptance fixes only (one exception, the decision loop, D-037); v2 issues instead |
+| v1 needs change during the rewrite | Feature freeze; acceptance fixes only (two exceptions: the decision loop, D-037, and from 1 November 2026 less notification noise outside it, D-055); v2 issues instead |
+| Nobody uses it: decisions never reach the record, checks feel unpleasant, the payoff comes late, messages become noise | Capture where decisions are born moves into I2 and the owner's own answer rate gates I2 (D-055); proposed: owner-typed text only, two non-decision rules, one door and one budget for attention, exit rules in the owner's words (SIG-19, OPS-13, BOT-13, DEC-26) |
 | Development competes with paid work | One stage per week at most; a stage can slip, the scope cannot grow |
 | The production host is unreachable while the owner is away | Remote administration is a precondition; an off-host heartbeat; a tested power-on method after power loss; a second remote path through the relay; the laptop profile, travel mode and up to 7 days of accepted downtime (DEP-14, DEP-26); a travel runbook |
 | The host decision changes again | The 30-day gate with recorded measurements; the same image on any fallback host (DEP-27) |
