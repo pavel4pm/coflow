@@ -7,6 +7,26 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-054 · Decisions are sliced by direction everywhere they are listed — accepted (17 October 2026); placement proposed
+
+- **Context:** after a first look at v1's new decisions screen the author found it fine as it is ("nothing to
+  redo for now") and expects something similar in 2.0 — with one gap: all decisions sat in one list. In the
+  author's words, decisions must be linked to directions and it must be possible to filter and sort by them,
+  for the screen and for the forecasting research alike. In v1 most decisions already reach a direction through
+  their goal, a few are linked directly, and a few have no link at all.
+- **Decision:** a decision's direction is resolved, not stored a second time: its own `serves` link to a
+  direction first (DEC-11), else the direction of the goal it serves or tests, else of its task, and the source
+  is shown; one direct link per decision. Every list of decisions — the waiting list, the view, the bot's list
+  and MCP — can be filtered and grouped by it; decisions without one are listed as such and counted in the
+  unlinked report (DEC-19); forecasting scores are reported per direction (DEC-10, DEC-24).
+- **Alternatives:** a direction field stored on each decision (it duplicates the goal's direction and drifts when
+  a goal moves); free tags (no hierarchy, nothing to check against GOL-14); several direct directions per
+  decision (a decision then hides in every grouping but one).
+- **Consequences:** DEC-24 joins stage 2 with the decision loop in the chat (proposed: R1). The author's verdict
+  on the v1 screen is recorded here; its use is measured for one to two weeks before DEC-8's priority is
+  revisited. v1 has the same slicing since 17 October 2026. Written on 17 October as D-038 and renumbered when
+  the decision-core package took D-038…D-053 the next day.
+
 ## D-053 · The public entry is an owner relay that never decrypts, on a separate domain outside the edge platform's DNS — accepted (18 October 2026); the relay recipe details and the opt-in edge-tunnel recipe are proposed
 
 - **Context:**

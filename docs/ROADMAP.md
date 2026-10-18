@@ -198,7 +198,8 @@ Scope:
   approvals need a second factor, so a hijacked messenger session alone cannot approve (BOT-11).
 - **The decision loop in the chat:** morning surfacing, the review asked one question at a time with every
   write behind one approval card, and a context change recorded on one card (DEC-5, DEC-7, DEC-9),
-  measured against the owner's private evaluation set (OPS-13).
+  measured against the owner's private evaluation set (OPS-13); every list of decisions filtered and grouped
+  by direction (DEC-24, D-054; placement proposed).
 - Behaviour written down as owner-readable scenario files with their own tests, prompts and tool
   descriptions checked against them (BOT-9); one question per turn and only about what is missing
   (BOT-10); provider errors, including an exhausted balance, explained to the owner once a day instead of
@@ -237,6 +238,8 @@ Exit criteria:
   approval, on native and project-log decisions; a card taken from a stale fixture decision is answerable
   without opening anything else.
 - The owner's context-change case passes as one sentence → one card (DEC-9).
+- On the snapshot, every list of decisions groups by direction with the source shown, and the decisions
+  without one are named (DEC-24).
 - `doctor --host` passes with the laptop profile; the gate's measurement log runs; unplugging the home
   host's network raises an alert on the phone within 30 minutes; status, logs and a restore run from the
   dev machine with no physical access to the host; the lost-host runbook dry run lists every secret.
