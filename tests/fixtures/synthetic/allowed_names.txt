@@ -1,0 +1,5 @@
+# Names that synthetic fixtures may contain (read by tools/literal_gate.py).
+# One name per line; a line starting with # is a comment. Append only; every name here is invented.
+# Conventions: people are "Person A", "Person B", ...; the owner is "Owner"; companies are
+# "Example ... Ltd" or "Company A"; places are "City A". Sentence case for titles avoids most entries.
+Example Landlord Ltd

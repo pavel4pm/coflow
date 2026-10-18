@@ -1,0 +1,37 @@
+{
+  "about": "Synthetic sealed records in the forecast pilot's form: canonical = json.dumps(record, sort_keys=True, ensure_ascii=False, separators=(',', ':')); sha256 = sha256((salt + canonical).encode('utf-8')). Computed once with the standard library, independently of coflow.modules.dec.domain.cfj (AT-K8).",
+  "records": [
+    {
+      "name": "two questions",
+      "record": {
+        "q1": 70,
+        "q2": 20
+      },
+      "salt": "5f0c3a9e1b7d4c2a8e6f0b1d3c5a7e9f",
+      "canonical": "{\"q1\":70,\"q2\":20}",
+      "sha256": "26c04d4f5dbcc7d2ee20a1bfe37dd502422f1a443f28260bc85bf7a3aba36ed4"
+    },
+    {
+      "name": "keys in lexical order",
+      "record": {
+        "q2": 20,
+        "q10": 3,
+        "q1": 70
+      },
+      "salt": "0123456789abcdef0123456789abcdef",
+      "canonical": "{\"q1\":70,\"q10\":3,\"q2\":20}",
+      "sha256": "94efc93842d307dcc6e376fe5150658bd57077fd4fcfa6bd5c08d578df685d7d"
+    },
+    {
+      "name": "zero and a negative",
+      "record": {
+        "q1": 0,
+        "q2": -5,
+        "q3": 100
+      },
+      "salt": "fedcba9876543210fedcba9876543210",
+      "canonical": "{\"q1\":0,\"q2\":-5,\"q3\":100}",
+      "sha256": "a8e4cabc8873a6d38448600c35ee162c4e5761abf6b1c40cd28d6486dcf06522"
+    }
+  ]
+}

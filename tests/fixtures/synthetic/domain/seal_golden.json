@@ -1,0 +1,147 @@
+{
+  "about": "A seal computed from the text of spec section 3.3 alone (json.dumps with sort_keys, compact separators and ensure_ascii off, NFC strings, sha256), with fixed salts, so the module's seal can be checked byte for byte. Synthetic content; the statement holds a decomposed accent to exercise NFC.",
+  "public_id": "D-0042",
+  "n": 1,
+  "sealed_at": "2026-11-02T18:30:00.000Z",
+  "sealed_by": "owner",
+  "decision": {
+    "public_id": "D-0042",
+    "kind": "choice",
+    "decider": "self",
+    "decider_ref": null,
+    "depth": "full",
+    "reversibility": "two_way",
+    "question": "Where does the workshop meet this winter?",
+    "statement": "Rent the small room above the cafe\u0301 for one quarter",
+    "context": "The large room costs more than the workshop earns in winter",
+    "known": "The small room is free from December",
+    "unknowns_json": "[\"whether the kiln fits\", \"the cafe\\u0301 opening hours\"]",
+    "would_help": "A test run of the kiln",
+    "success_criterion": "rent down by a third",
+    "expected_metric": "monthly rent",
+    "expected_target": "800",
+    "expected_unit": "EUR",
+    "expected_by": "2027-02-28",
+    "expected_text": null,
+    "confidence": 70,
+    "not_doing": "Moving the equipment out",
+    "review_due_initial": "2026-12-15",
+    "decided_at": "2026-11-02",
+    "decided_precision": "day",
+    "decided_basis": "stated",
+    "reconstructed": 0
+  },
+  "field_salts": {
+    "kind": "2e4e4e12eb29784e1aff1f0ad2e9597b",
+    "decider": "72c78c89ec4ee19bdbed46244a61b128",
+    "decider_ref": "5029067e1e7b9ef3f4dc023c1054e7bb",
+    "depth": "46e0e94572559bfd73dafb7aec298b1a",
+    "reversibility": "983d2e0ffb3f4c49b947004ca7adeda0",
+    "question": "d476317d10accffeebd5035d79f77f04",
+    "statement": "1a4f909d0a69193e534902ca5885d5db",
+    "context": "ca8d92f62670d56e842394aa084cae1c",
+    "known": "b7fe3813f3955acdf66a7d831bb98b35",
+    "unknowns": "8636b49f4673905dd9dfe747a57012ab",
+    "would_help": "beede1a0697526af05298742c3f3adc1",
+    "success_criterion": "d805e0bb526dfde335c34771090fef1f",
+    "expected_metric": "2864eff9d2f749b25753bea78e482ebd",
+    "expected_target": "2bae6e2288f664619236d452c82fe4de",
+    "expected_unit": "d4d91c4300a564b29e6b45b7a4ea1a08",
+    "expected_by": "1bd0d6549114a739601c88ee6f469e3c",
+    "expected_text": "e5ca3d1fec8d8f90ffac45ae46bd9f7a",
+    "confidence": "cb888fcf485893610e7561fcb3c23274",
+    "not_doing": "c67fa964cabbfa7aa963516cc75c41b8",
+    "review_due_initial": "ef0331133df66e2be82a00aafba2c411",
+    "decided_at": "e3417a75e18be575d59b4e70f23f9ab3",
+    "decided_precision": "cc7fab020fbf23773101faefb1af42a6",
+    "decided_basis": "62bec3d69f2e769608d83d4e60f43f79",
+    "reconstructed": "2b31fe88b526363f3916e81119f8e139"
+  },
+  "items": [
+    {
+      "kind": "stake",
+      "code": "7",
+      "salt": "12e954a4c35f26e8b125f60de6efe6a8",
+      "row": {
+        "id": 7,
+        "type": "money",
+        "amount": "1200.50",
+        "currency": "EUR",
+        "period": "month",
+        "count_periods": 3,
+        "direction": "out",
+        "note": "rent, cafe\u0301 side"
+      }
+    },
+    {
+      "kind": "option",
+      "code": "O-02",
+      "salt": "e7b2d81d544d78be726d8a09d4b9114c",
+      "row": {
+        "text": "Keep the large room",
+        "chosen": 0,
+        "why_rejected": "cost",
+        "recorded_before_choice": "yes",
+        "origin": "owner"
+      }
+    },
+    {
+      "kind": "assumption",
+      "code": "A-01",
+      "salt": "adf016c6b4668f9eea5b5537f036b708",
+      "row": {
+        "statement": "The landlord confirms the small room by 10.11",
+        "metric": "confirmation",
+        "comparator": null,
+        "threshold_value": null,
+        "threshold_value2": null,
+        "unit": null,
+        "threshold_text": "written confirmation",
+        "by_date": "2026-11-10",
+        "judge_from": null,
+        "data_source_kind": "manual",
+        "data_source_text": "mail",
+        "check_frequency": "weekly",
+        "is_critical": 1,
+        "scope": null,
+        "class_tag": "timeline",
+        "probability": 80,
+        "probability_by": "owner"
+      }
+    },
+    {
+      "kind": "ground",
+      "code": "FT-001",
+      "salt": "887680422c43e6dd28c8c9b87c091924",
+      "row": {
+        "text": "The landlord offered the small room",
+        "occurred_at": "2026-10-28",
+        "occurred_precision": "day",
+        "occurred_basis": "stated",
+        "evidence_kind": "none",
+        "evidence_ref": null,
+        "evidence_quote": null
+      }
+    },
+    {
+      "kind": "option",
+      "code": "O-01",
+      "salt": "34486eea6dc5280ba2f226fe15e23db3",
+      "row": {
+        "text": "Rent the small room above the cafe\u0301",
+        "chosen": 1,
+        "why_rejected": null,
+        "recorded_before_choice": "yes",
+        "origin": "owner"
+      }
+    }
+  ],
+  "expected": {
+    "fields_json": "{\"confidence\":70,\"context\":\"The large room costs more than the workshop earns in winter\",\"decided_at\":\"2026-11-02\",\"decided_basis\":\"stated\",\"decided_precision\":\"day\",\"decider\":\"self\",\"decider_ref\":null,\"depth\":\"full\",\"expected_by\":\"2027-02-28\",\"expected_metric\":\"monthly rent\",\"expected_target\":\"800\",\"expected_text\":null,\"expected_unit\":\"EUR\",\"kind\":\"choice\",\"known\":\"The small room is free from December\",\"not_doing\":\"Moving the equipment out\",\"question\":\"Where does the workshop meet this winter?\",\"reconstructed\":0,\"reversibility\":\"two_way\",\"review_due_initial\":\"2026-12-15\",\"statement\":\"Rent the small room above the caf\u00e9 for one quarter\",\"success_criterion\":\"rent down by a third\",\"unknowns\":[\"whether the kiln fits\",\"the caf\u00e9 opening hours\"],\"would_help\":\"A test run of the kiln\"}",
+    "field_salts_json": "{\"confidence\":\"cb888fcf485893610e7561fcb3c23274\",\"context\":\"ca8d92f62670d56e842394aa084cae1c\",\"decided_at\":\"e3417a75e18be575d59b4e70f23f9ab3\",\"decided_basis\":\"62bec3d69f2e769608d83d4e60f43f79\",\"decided_precision\":\"cc7fab020fbf23773101faefb1af42a6\",\"decider\":\"72c78c89ec4ee19bdbed46244a61b128\",\"decider_ref\":\"5029067e1e7b9ef3f4dc023c1054e7bb\",\"depth\":\"46e0e94572559bfd73dafb7aec298b1a\",\"expected_by\":\"1bd0d6549114a739601c88ee6f469e3c\",\"expected_metric\":\"2864eff9d2f749b25753bea78e482ebd\",\"expected_target\":\"2bae6e2288f664619236d452c82fe4de\",\"expected_text\":\"e5ca3d1fec8d8f90ffac45ae46bd9f7a\",\"expected_unit\":\"d4d91c4300a564b29e6b45b7a4ea1a08\",\"kind\":\"2e4e4e12eb29784e1aff1f0ad2e9597b\",\"known\":\"b7fe3813f3955acdf66a7d831bb98b35\",\"not_doing\":\"c67fa964cabbfa7aa963516cc75c41b8\",\"question\":\"d476317d10accffeebd5035d79f77f04\",\"reconstructed\":\"2b31fe88b526363f3916e81119f8e139\",\"reversibility\":\"983d2e0ffb3f4c49b947004ca7adeda0\",\"review_due_initial\":\"ef0331133df66e2be82a00aafba2c411\",\"statement\":\"1a4f909d0a69193e534902ca5885d5db\",\"success_criterion\":\"d805e0bb526dfde335c34771090fef1f\",\"unknowns\":\"8636b49f4673905dd9dfe747a57012ab\",\"would_help\":\"beede1a0697526af05298742c3f3adc1\"}",
+    "field_hashes_json": "{\"confidence\":\"c3db4144d5199f58582210a8de00284a5c832cf29a1f04f852de9b40e1c70966\",\"context\":\"56355a6352e5e3b96828fa00e03638dba6f76c7b37d9da2e7854f59f29f31e19\",\"decided_at\":\"84550347656887dbbd00c94abe03c318e8d2e5c616ad53d2f49cb5a8961e162c\",\"decided_basis\":\"71757b37b7dd58027ef658a88d34fbc90e2501558aeb963a4f537da436068f54\",\"decided_precision\":\"8f349007c8b011a6737d6fbd2dfa1d35958508962697a6d778b7e56fd10a7995\",\"decider\":\"9c70c3768297f1a255576a19adb779595185928a1a9dd886db4e02943ae21a5d\",\"decider_ref\":\"4160239c15cd9d5a02990eb7aca4d437bc49193cfb0ab9c4aab86300f1c88b57\",\"depth\":\"24be7f80e80635b7128b0eb888253341d514dd6f26cbb23f72d68685ebfabccb\",\"expected_by\":\"86f8a4ca967b7463799e254fabc6e597f2858840d4d49bb4a20b0bc69e759ad6\",\"expected_metric\":\"264f4a3d3ef8f0ec835da129c39b6c7206cc077d41e262305a32d5e8ab4ed064\",\"expected_target\":\"bb90a5f548c95852dfb1beea85efc49d2d37594a6aa8dff4cbbee82642868295\",\"expected_text\":\"a05c5e4ca509663fb6be80da2eeff74287e332f4809d314b560e228102af4424\",\"expected_unit\":\"5ff54ac046e85f14e2c3366365666e83022836e5e95779a2d7d0aacfe7b37413\",\"kind\":\"ceb0386d41a71a77a05deed117318c51f57e9113109ca7adbd4ffd6c94e0fd5f\",\"known\":\"a78149759b92e2fa1111d94dc8c593021edf5e9c25bef9a69247ddb0266e6bf0\",\"not_doing\":\"0a52aefecf32d97ddcfc681cdd315e09ed4da70cfbcb8f7f9f1701865421f32d\",\"question\":\"43d0487320e5d9c92ee7d3dfb6c9cbd279b27f0feb445021ee50c96f095d0f0d\",\"reconstructed\":\"0525921d1b3b5d924e8b402ca131b79ed6fe3c60dde999f8b81e5463f0441630\",\"reversibility\":\"2217e4bbae9ba9cf64a8497bf8def1c125da2ec14f169a919479070cddad5349\",\"review_due_initial\":\"82273a5f6f54fd744b84f6a13b6c04599f2f0a3f49bdebfc217485a5af4c0a2a\",\"statement\":\"bec5793bd211676f5808ddd68ec70ab09dd063a6a1cd60b6961e13b75088e574\",\"success_criterion\":\"da05db3465fcf8a176ad670e52d6605e26d5d953ce7c3adffaaf102c57354fe7\",\"unknowns\":\"93eb8cfc59036f12f79dcc080ffe389b9cb84a5d95cae145a021869818435b01\",\"would_help\":\"eb81adb7dee0cbb5cf96f2cf6dbbe8d802434dacb6672de355b96fab82d102cd\"}",
+    "items_json": "[[\"assumption\",\"A-01\",\"fc68b83177cc7e9fca9342191f80a143f82558e4af43a688f30158021dad7727\"],[\"ground\",\"FT-001\",\"2ca1db1c533166f578c794edb3a75a6531e21c8fe5abd42ddddd8cf87a702ab1\"],[\"option\",\"O-01\",\"4e3a98374e3ec879fb34a5a17d2f6df9882cc3c3ab64770a34db6b310aca24b0\"],[\"option\",\"O-02\",\"f1b6a91831b46f5b3dc387b4fa5602229f85cb17fe43908d3df58e3d40cdfbb5\"],[\"stake\",\"7\",\"a952f4bf60134bdc1a0ec19f6625b9f7fdd617c168d2f0c83bcd097e1b0cc6a6\"]]",
+    "envelope": "{\"cv\":1,\"decision\":\"D-0042\",\"edition\":1,\"field_hashes\":{\"confidence\":\"c3db4144d5199f58582210a8de00284a5c832cf29a1f04f852de9b40e1c70966\",\"context\":\"56355a6352e5e3b96828fa00e03638dba6f76c7b37d9da2e7854f59f29f31e19\",\"decided_at\":\"84550347656887dbbd00c94abe03c318e8d2e5c616ad53d2f49cb5a8961e162c\",\"decided_basis\":\"71757b37b7dd58027ef658a88d34fbc90e2501558aeb963a4f537da436068f54\",\"decided_precision\":\"8f349007c8b011a6737d6fbd2dfa1d35958508962697a6d778b7e56fd10a7995\",\"decider\":\"9c70c3768297f1a255576a19adb779595185928a1a9dd886db4e02943ae21a5d\",\"decider_ref\":\"4160239c15cd9d5a02990eb7aca4d437bc49193cfb0ab9c4aab86300f1c88b57\",\"depth\":\"24be7f80e80635b7128b0eb888253341d514dd6f26cbb23f72d68685ebfabccb\",\"expected_by\":\"86f8a4ca967b7463799e254fabc6e597f2858840d4d49bb4a20b0bc69e759ad6\",\"expected_metric\":\"264f4a3d3ef8f0ec835da129c39b6c7206cc077d41e262305a32d5e8ab4ed064\",\"expected_target\":\"bb90a5f548c95852dfb1beea85efc49d2d37594a6aa8dff4cbbee82642868295\",\"expected_text\":\"a05c5e4ca509663fb6be80da2eeff74287e332f4809d314b560e228102af4424\",\"expected_unit\":\"5ff54ac046e85f14e2c3366365666e83022836e5e95779a2d7d0aacfe7b37413\",\"kind\":\"ceb0386d41a71a77a05deed117318c51f57e9113109ca7adbd4ffd6c94e0fd5f\",\"known\":\"a78149759b92e2fa1111d94dc8c593021edf5e9c25bef9a69247ddb0266e6bf0\",\"not_doing\":\"0a52aefecf32d97ddcfc681cdd315e09ed4da70cfbcb8f7f9f1701865421f32d\",\"question\":\"43d0487320e5d9c92ee7d3dfb6c9cbd279b27f0feb445021ee50c96f095d0f0d\",\"reconstructed\":\"0525921d1b3b5d924e8b402ca131b79ed6fe3c60dde999f8b81e5463f0441630\",\"reversibility\":\"2217e4bbae9ba9cf64a8497bf8def1c125da2ec14f169a919479070cddad5349\",\"review_due_initial\":\"82273a5f6f54fd744b84f6a13b6c04599f2f0a3f49bdebfc217485a5af4c0a2a\",\"statement\":\"bec5793bd211676f5808ddd68ec70ab09dd063a6a1cd60b6961e13b75088e574\",\"success_criterion\":\"da05db3465fcf8a176ad670e52d6605e26d5d953ce7c3adffaaf102c57354fe7\",\"unknowns\":\"93eb8cfc59036f12f79dcc080ffe389b9cb84a5d95cae145a021869818435b01\",\"would_help\":\"eb81adb7dee0cbb5cf96f2cf6dbbe8d802434dacb6672de355b96fab82d102cd\"},\"items\":[[\"assumption\",\"A-01\",\"fc68b83177cc7e9fca9342191f80a143f82558e4af43a688f30158021dad7727\"],[\"ground\",\"FT-001\",\"2ca1db1c533166f578c794edb3a75a6531e21c8fe5abd42ddddd8cf87a702ab1\"],[\"option\",\"O-01\",\"4e3a98374e3ec879fb34a5a17d2f6df9882cc3c3ab64770a34db6b310aca24b0\"],[\"option\",\"O-02\",\"f1b6a91831b46f5b3dc387b4fa5602229f85cb17fe43908d3df58e3d40cdfbb5\"],[\"stake\",\"7\",\"a952f4bf60134bdc1a0ec19f6625b9f7fdd617c168d2f0c83bcd097e1b0cc6a6\"]],\"sealed_at\":\"2026-11-02T18:30:00.000Z\",\"sealed_by\":\"owner\"}",
+    "seal_hash": "4e70109677358c21c16b68c67ae79df527179d3b75fb8b8e80593959538dce01"
+  }
+}

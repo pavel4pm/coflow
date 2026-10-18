@@ -40,6 +40,8 @@ client_secret*.json
 
 # --- models downloaded at runtime ---
 models/
+# ...but the kernel's model-gateway package (MDL, stage 0B) is code
+!src/coflow/kernel/models/
 
 # --- Python ---
 __pycache__/
@@ -49,6 +51,11 @@ venv/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
+.import_linter_cache/
+.grimp_cache/
+.coverage
+htmlcov/
 *.egg-info/
 build/
 dist/
@@ -65,3 +72,32 @@ Thumbs.db
 
 # --- dropped-in material that must never be published ---
 Inbox/
+
+# --- agent and tool state (P0.3) ---
+# Everything under .claude/ stays local; a file committed on purpose is re-included explicitly,
+# one line each, e.g. !.claude/commands/
+.claude/*
+.wrangler/
+node_modules/
+
+# --- archives and exported chats (P0.3) ---
+*.zip
+*.7z
+*.tar*
+*.tgz
+result.json
+messages*.html
+
+# --- data roots (P0.3): the real snapshot, case scripts and reports live outside the repository ---
+validation*/
+coflow-data*/
+
+# --- data-root files and exporter output, wherever a data root lands (review finding) ---
+instance.lock
+instance.holder.json
+volume.id
+**/run/core.json
+**/inbox/snapshots/
+reports/
+v1_snapshot*.json
+*.export_summary.json

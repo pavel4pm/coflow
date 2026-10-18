@@ -1,0 +1,573 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "coflow.import.decisions, format version 1",
+  "description": "A one-way snapshot of a predecessor system's decisions for CoFlow 2.0's shadow import (decision-core design §6.2-§6.6). JSON, UTF-8, one file per run. Every object is closed: an unknown field is an error, so schema drift is visible. Every key is present; empty values are null. Numbers are integers only (CFJ-1 refuses floats). Instants are UTC with Z; dates are as the source stored them; text is verbatim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "format_version",
+    "synthetic",
+    "exported_at",
+    "as_of",
+    "as_of_date",
+    "source",
+    "id_space",
+    "context",
+    "decisions",
+    "v1_computed",
+    "counts",
+    "content_hash"
+  ],
+  "properties": {
+    "format": {"const": "coflow.import.decisions"},
+    "format_version": {"const": 1},
+    "synthetic": {
+      "type": "boolean",
+      "description": "Mandatory. A dev instance accepts only snapshots with true (IMPORT_NOT_SYNTHETIC otherwise)."
+    },
+    "exported_at": {
+      "$ref": "#/$defs/utc_instant",
+      "description": "When the exporter wrote the file."
+    },
+    "as_of": {
+      "$ref": "#/$defs/utc_instant",
+      "description": "The instant the snapshot describes; the shadow compares at this instant."
+    },
+    "as_of_date": {
+      "$ref": "#/$defs/iso_date",
+      "description": "The as-of date in the source's time zone; v1_computed.today equals it."
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuer", "schema_revision", "exporter_version", "timezone"],
+      "properties": {
+        "issuer": {
+          "$ref": "#/$defs/issuer",
+          "description": "The source system's issuer code, e.g. V1. Every reference is stored as <issuer>_<ref>."
+        },
+        "schema_revision": {"type": "string", "minLength": 1},
+        "exporter_version": {"type": "string", "minLength": 1},
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The IANA zone in which the source's dates were recorded."
+        }
+      }
+    },
+    "id_space": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision"],
+      "properties": {
+        "decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["highest_issued", "deleted_without_trace"],
+          "properties": {
+            "highest_issued": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Must stay below the native block start (1001), else IMPORT_SOURCE_CONFLICT."
+            },
+            "deleted_without_trace": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "integer", "minimum": 1},
+              "description": "Numbers the source issued and deleted; burned, never issued again."
+            }
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goals", "tasks", "topics", "sessions", "people", "companies"],
+      "description": "Foreign records the decisions refer to: titles and states only, for links and the goal_changed question.",
+      "properties": {
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "title", "status", "status_changed_at"],
+            "properties": {
+              "ref": {"$ref": "#/$defs/source_ref"},
+              "title": {"$ref": "#/$defs/text"},
+              "status": {"type": "string", "minLength": 1},
+              "status_changed_at": {
+                "$ref": "#/$defs/source_date",
+                "description": "When the current status was set; null when the source does not know."
+              }
+            }
+          }
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "title", "status"],
+            "properties": {
+              "ref": {"$ref": "#/$defs/source_ref"},
+              "title": {"$ref": "#/$defs/text"},
+              "status": {"$ref": "#/$defs/text"}
+            }
+          }
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "title", "status"],
+            "properties": {
+              "ref": {"$ref": "#/$defs/source_ref"},
+              "title": {"$ref": "#/$defs/text"},
+              "status": {"$ref": "#/$defs/text"}
+            }
+          }
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "communication_type", "started_at"],
+            "properties": {
+              "ref": {"$ref": "#/$defs/source_ref"},
+              "communication_type": {
+                "$ref": "#/$defs/text",
+                "description": "Decides origin_kind 'session' or 'chat' for a decision born in it."
+              },
+              "started_at": {"$ref": "#/$defs/nullable_instant"}
+            }
+          }
+        },
+        "people": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "display_name", "is_self"],
+            "properties": {
+              "ref": {"$ref": "#/$defs/source_ref"},
+              "display_name": {"$ref": "#/$defs/text"},
+              "is_self": {"type": "boolean"}
+            }
+          }
+        },
+        "companies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "name"],
+            "properties": {
+              "ref": {"$ref": "#/$defs/source_ref"},
+              "name": {"$ref": "#/$defs/text"}
+            }
+          }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/decision"}
+    },
+    "v1_computed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["today", "health", "waiting", "assumption_due"],
+      "description": "What the source system itself computed at export time, by calling its own functions: the shadow compares v2 against this, and v2 never runs the source's code.",
+      "properties": {
+        "today": {"$ref": "#/$defs/iso_date"},
+        "health": {
+          "type": "object",
+          "description": "Keyed by the decision's v1_id as a string.",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[1-9][0-9]*$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "reasons"],
+              "properties": {
+                "label": {"$ref": "#/$defs/v1_health_label"},
+                "reasons": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          }
+        },
+        "waiting": {
+          "type": "array",
+          "description": "The source's waiting list, in the source's order (the order is compared).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["v1_id", "reasons"],
+            "properties": {
+              "v1_id": {"$ref": "#/$defs/v1_id"},
+              "reasons": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["kind", "due"],
+                  "properties": {
+                    "kind": {"enum": ["violated", "review_overdue", "review_today", "check_due"]},
+                    "due": {"$ref": "#/$defs/nullable_iso_date"},
+                    "assumption_v1_id": {"anyOf": [{"$ref": "#/$defs/v1_id"}, {"type": "null"}]},
+                    "critical": {"type": ["boolean", "null"]}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "assumption_due": {
+          "type": "object",
+          "description": "Keyed by the assumption's v1_id as a string; 'next_check' is the source's name for 'explicit'.",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[1-9][0-9]*$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["due", "source"],
+              "properties": {
+                "due": {"$ref": "#/$defs/nullable_iso_date"},
+                "source": {"enum": ["next_check", "explicit", "by_date", "text", "review", null]}
+              }
+            }
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decisions", "assumptions", "facts", "reviews", "links", "versions"],
+      "description": "Row counts of this file; the import report must show the same numbers.",
+      "properties": {
+        "decisions": {"type": "integer", "minimum": 0},
+        "assumptions": {"type": "integer", "minimum": 0},
+        "facts": {"type": "integer", "minimum": 0},
+        "reviews": {"type": "integer", "minimum": 0},
+        "links": {"type": "integer", "minimum": 0},
+        "versions": {"type": "integer", "minimum": 0}
+      }
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "sha256 of the CFJ-1 form of this document without the content_hash key; verified before anything else (IMPORT_HASH_MISMATCH)."
+    }
+  },
+  "$defs": {
+    "utc_instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+    },
+    "nullable_instant": {
+      "anyOf": [{"$ref": "#/$defs/utc_instant"}, {"type": "null"}]
+    },
+    "iso_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "nullable_iso_date": {
+      "anyOf": [{"$ref": "#/$defs/iso_date"}, {"type": "null"}]
+    },
+    "source_date": {
+      "description": "A date (or date and time) exactly as the source stored it; null when empty.",
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\\.[0-9]{1,6})?)?(Z|[+-][0-9]{2}:?[0-9]{2})?)?$"
+        },
+        {"type": "null"}
+      ]
+    },
+    "text": {
+      "description": "Verbatim text; null when empty.",
+      "type": ["string", "null"]
+    },
+    "issuer": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]{0,9}$"
+    },
+    "source_ref": {
+      "description": "A record reference in the source's own form (G901, K9001, T901, S90001, P901, C-901).",
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$"
+    },
+    "nullable_source_ref": {
+      "anyOf": [{"$ref": "#/$defs/source_ref"}, {"type": "null"}]
+    },
+    "v1_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "v1_health_label": {
+      "type": "string",
+      "pattern": "^(ON_TRACK|WATCH|REVIEW_REQUIRED|STALE|INSUFFICIENT_DATA|ZOMBIE|OFF_TRACK|DRAFT|CANCELLED|SUPERSEDED|WITHDRAWN|CLOSED(_[A-Z]+)?)$"
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v1_id",
+        "v1_ref",
+        "kind",
+        "decider_mapping",
+        "title",
+        "statement",
+        "context",
+        "alternatives",
+        "investment",
+        "expected_result",
+        "confidence",
+        "decided_at",
+        "review_due",
+        "owner_person",
+        "executor_person",
+        "about_person",
+        "about_company",
+        "context_known",
+        "context_unknown",
+        "context_would_help",
+        "status",
+        "manual_health",
+        "outcome",
+        "learning",
+        "process_type",
+        "folder_path",
+        "source_session",
+        "created_at",
+        "closed_at",
+        "assumptions",
+        "facts",
+        "reviews",
+        "links",
+        "versions"
+      ],
+      "properties": {
+        "v1_id": {
+          "$ref": "#/$defs/v1_id",
+          "description": "The source's decision number: D907 becomes D-0907."
+        },
+        "v1_ref": {
+          "type": "string",
+          "pattern": "^D[1-9][0-9]*$",
+          "description": "The source's label, D followed by v1_id."
+        },
+        "kind": {
+          "enum": ["choice", "test", "pursue", "attendance", "advisee", "forecast_container"],
+          "description": "From the owner's explicit mapping file; 'choice' when unmapped. Never inferred from names."
+        },
+        "decider_mapping": {
+          "enum": ["self", "joint", "other", null],
+          "description": "From the mapping file; null means 'self', basis 'assumed'. Never a name lookup."
+        },
+        "title": {"type": "string", "minLength": 1},
+        "statement": {"$ref": "#/$defs/text"},
+        "context": {"$ref": "#/$defs/text"},
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["option", "why_rejected"],
+            "properties": {
+              "option": {"type": "string"},
+              "why_rejected": {"$ref": "#/$defs/text"}
+            }
+          }
+        },
+        "investment": {
+          "$ref": "#/$defs/text",
+          "description": "Kept verbatim as legacy; money is never parsed from text."
+        },
+        "expected_result": {"$ref": "#/$defs/text"},
+        "confidence": {
+          "anyOf": [{"type": "integer", "minimum": 0, "maximum": 100}, {"type": "null"}],
+          "description": "Owner-stated; never turned into a forecast."
+        },
+        "decided_at": {"$ref": "#/$defs/source_date"},
+        "review_due": {"$ref": "#/$defs/source_date"},
+        "owner_person": {"$ref": "#/$defs/nullable_source_ref"},
+        "executor_person": {"$ref": "#/$defs/nullable_source_ref"},
+        "about_person": {"$ref": "#/$defs/nullable_source_ref"},
+        "about_company": {"$ref": "#/$defs/nullable_source_ref"},
+        "context_known": {"$ref": "#/$defs/text"},
+        "context_unknown": {
+          "$ref": "#/$defs/text",
+          "description": "Becomes one unknown; never split by guessing."
+        },
+        "context_would_help": {"$ref": "#/$defs/text"},
+        "status": {
+          "enum": ["draft", "active", "closed", "cancelled", "superseded", "withdrawn"]
+        },
+        "manual_health": {"enum": ["ZOMBIE", "OFF_TRACK", null]},
+        "outcome": {
+          "enum": ["success", "failure", "mixed", null],
+          "description": "Imported as a resolution with basis 'reported', resolved by 'import', reconstructed."
+        },
+        "learning": {
+          "$ref": "#/$defs/text",
+          "description": "Imported whole as a legacy learning text."
+        },
+        "process_type": {"$ref": "#/$defs/text"},
+        "folder_path": {"$ref": "#/$defs/text"},
+        "source_session": {"$ref": "#/$defs/nullable_source_ref"},
+        "created_at": {
+          "$ref": "#/$defs/utc_instant",
+          "description": "When the source first recorded the decision: its knowledge time in v2."
+        },
+        "closed_at": {"$ref": "#/$defs/nullable_instant"},
+        "assumptions": {"type": "array", "items": {"$ref": "#/$defs/assumption"}},
+        "facts": {"type": "array", "items": {"$ref": "#/$defs/fact"}},
+        "reviews": {"type": "array", "items": {"$ref": "#/$defs/review"}},
+        "links": {"type": "array", "items": {"$ref": "#/$defs/link"}},
+        "versions": {
+          "type": "array",
+          "description": "The full field history of the decision and its assumptions, oldest first.",
+          "items": {"$ref": "#/$defs/version"}
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v1_id",
+        "code",
+        "statement",
+        "metric",
+        "threshold",
+        "data_source",
+        "check_frequency",
+        "is_critical",
+        "state",
+        "next_check_at",
+        "last_checked_at",
+        "position",
+        "notes",
+        "created_at"
+      ],
+      "properties": {
+        "v1_id": {"$ref": "#/$defs/v1_id"},
+        "code": {
+          "anyOf": [{"type": "string", "pattern": "^A[1-9][0-9]*$"}, {"type": "null"}],
+          "description": "A3 becomes A-03."
+        },
+        "statement": {"type": "string", "minLength": 1},
+        "metric": {"$ref": "#/$defs/text"},
+        "threshold": {
+          "$ref": "#/$defs/text",
+          "description": "Imported as the text threshold; the due date still comes from the text."
+        },
+        "data_source": {
+          "$ref": "#/$defs/text",
+          "description": "Empty means data source kind 'none'; anything else 'manual'."
+        },
+        "check_frequency": {"enum": ["weekly", "monthly", "quarterly", "ad-hoc", "ad_hoc", null]},
+        "is_critical": {"enum": [0, 1]},
+        "state": {"enum": ["HOLDING", "DRIFTING", "VIOLATED", "UNVERIFIABLE", "NOT_YET_DUE"]},
+        "next_check_at": {"$ref": "#/$defs/source_date"},
+        "last_checked_at": {"$ref": "#/$defs/source_date"},
+        "position": {"type": "integer"},
+        "notes": {"$ref": "#/$defs/text"},
+        "created_at": {"$ref": "#/$defs/utc_instant"}
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v1_id",
+        "assumption_v1_id",
+        "phase",
+        "occurred_at",
+        "fact",
+        "source",
+        "session",
+        "created_at"
+      ],
+      "properties": {
+        "v1_id": {"$ref": "#/$defs/v1_id"},
+        "assumption_v1_id": {"anyOf": [{"$ref": "#/$defs/v1_id"}, {"type": "null"}]},
+        "phase": {"enum": ["grounding", "monitoring"]},
+        "occurred_at": {"$ref": "#/$defs/source_date"},
+        "fact": {"type": "string", "minLength": 1},
+        "source": {"$ref": "#/$defs/text"},
+        "session": {"$ref": "#/$defs/nullable_source_ref"},
+        "created_at": {"$ref": "#/$defs/utc_instant"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v1_id",
+        "reviewed_at",
+        "verdict",
+        "action",
+        "health_at_review",
+        "next_review_due",
+        "notes",
+        "created_at"
+      ],
+      "properties": {
+        "v1_id": {"$ref": "#/$defs/v1_id"},
+        "reviewed_at": {"$ref": "#/$defs/source_date"},
+        "verdict": {"$ref": "#/$defs/text"},
+        "action": {"enum": ["keep", "adjust", "revise", "close", "cancel", "supersede", null]},
+        "health_at_review": {"$ref": "#/$defs/text"},
+        "next_review_due": {"$ref": "#/$defs/source_date"},
+        "notes": {"$ref": "#/$defs/text"},
+        "created_at": {"$ref": "#/$defs/utc_instant"}
+      }
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref", "source", "created_at"],
+      "description": "A goal, task or topic link whose item is this decision.",
+      "properties": {
+        "kind": {"enum": ["goal", "task", "topic"]},
+        "ref": {"$ref": "#/$defs/source_ref"},
+        "source": {"$ref": "#/$defs/text"},
+        "created_at": {"$ref": "#/$defs/utc_instant"}
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "v1_id",
+        "entity",
+        "entity_v1_id",
+        "field",
+        "old_value",
+        "new_value",
+        "source",
+        "changed_by",
+        "changed_at"
+      ],
+      "properties": {
+        "v1_id": {"$ref": "#/$defs/v1_id"},
+        "entity": {"enum": ["decision", "assumption"]},
+        "entity_v1_id": {"$ref": "#/$defs/v1_id"},
+        "field": {"type": "string", "minLength": 1},
+        "old_value": {"$ref": "#/$defs/text"},
+        "new_value": {"$ref": "#/$defs/text"},
+        "source": {"$ref": "#/$defs/text"},
+        "changed_by": {"$ref": "#/$defs/text"},
+        "changed_at": {"$ref": "#/$defs/utc_instant"}
+      }
+    }
+  }
+}

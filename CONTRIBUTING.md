@@ -16,18 +16,34 @@ useful contributions right now are about what the system should do and why.
 Code contributions open with stage 0 of the [roadmap](docs/ROADMAP.md), when the repository gets its
 skeleton, test runner and CI. Until then, please do not send code pull requests.
 
-From stage 0 the toolchain is [uv](https://docs.astral.sh/uv/) for dependencies and environments and
-[ruff](https://docs.astral.sh/ruff/) for linting and formatting (D-035), so the whole setup is two
-commands:
+The toolchain is [uv](https://docs.astral.sh/uv/) for Python, dependencies and environments and
+[ruff](https://docs.astral.sh/ruff/) for linting and formatting (D-035). With uv installed, the whole
+setup is two commands, the same on Windows and Linux:
 
 ```
 uv sync --frozen
-uv run pytest
+uv run pytest -q
 ```
 
-Before you open a pull request, `uv run ruff check` and `uv run ruff format --check` must pass; CI runs
-both on Windows and Linux. Dependency changes go in `pyproject.toml` with `uv.lock` committed in the
-same commit.
+`uv sync --frozen` installs Python 3.12 (from `.python-version`) and every dependency at the version
+in `uv.lock`; `uv run pytest -q` runs the offline suite (temp data roots, a fake clock, fake ports,
+no network).
+
+Before you open a pull request, run the checks CI runs on Windows and Linux:
+
+```
+uv run ruff check
+uv run ruff format --check
+uv run lint-imports
+uv run pytest -q
+uv run python tools/literal_gate.py
+uv run python tools/check_docs.py
+```
+
+`lint-imports` enforces the module tiers of [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md);
+`tools/literal_gate.py` refuses personal literals and infrastructure identifiers. Dependency changes
+go in `pyproject.toml` with `uv.lock` updated (`uv lock`) in the same commit; CI fails on a lock that
+does not match.
 
 ## Rules for every contribution
 
