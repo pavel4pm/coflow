@@ -1,13 +1,13 @@
 # CoFlow 2.0 — Modules
 
-Version 0.2 · 18 October 2026 · **draft — the STO, IDS, DEC and CMT cards are being built in stage 0A
+Version 0.3 · 18 October 2026 · **draft — the STO, IDS, DEC and CMT cards are being built in stage 0A
 since 17 October 2026; every other card is not implemented yet**
 
 One card per module: what it owns, what it offers, what it needs, and the numbers it must meet to be
 accepted (P-14, NFR-10). How the modules fit together — layers, contracts, data classes, process view,
 the quality gate and the build order — is in [ARCHITECTURE.md](ARCHITECTURE.md); the decision core in
 detail is in [SPEC_DECISION_CORE.md](SPEC_DECISION_CORE.md). Requirement IDs refer to
-[REQUIREMENTS.md](REQUIREMENTS.md) v0.7 and [DEPLOYMENT.md](DEPLOYMENT.md).
+[REQUIREMENTS.md](REQUIREMENTS.md) v0.8 and [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
 
@@ -230,14 +230,14 @@ literal gate and the canary framework.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0A (classes, the canary fixture, the minimal literal gate); 0B (switches, the full literal gate); 1 (derivations, erasure, the `untrusted_external` sub-class); 2 (the egress allow-list); R2 · 6 (forget a person) |
+| Release · stage | R1 · 0A (classes, the canary fixture, the minimal literal gate); 0B (switches, the full literal gate; P-17, PRV-17, PRV-18, proposed); 1 (derivations, erasure, the `untrusted_external` sub-class); 2 (the egress allow-list); R2 · 6 (forget a person) |
 | Runs in | `core` |
 | Owns | `sys_dataflow_switches` (class × destination × purpose → off / on), `sys_derivations` (output ref → input refs), `sys_tombstones`, `sys_deletion_log` (ids and hashes, no content), `sys_retention_runs`, `sys_secrets_inventory` (names only) |
 | Commands | `set_flow_switch` (owner channel only), `record_derivation` (inside a unit of work), `erase_source`, `blank_as_journal`, `forget_person`, `run_retention` |
 | Queries | `flow_allowed(class, destination, purpose)`, `data_flows_report` (generates `DATA_FLOWS.md`), `derivations_of`, `deletion_log`, `retention_state` |
 | Emits · consumes | `coflow.pol.erasure.completed`, `coflow.pol.flow.changed` · journal-class events (bookkeeping only) |
 | Depends on | STO, EVT; `Eraser` implementations registered by every module that stores derived data |
-| Requirements | P-2, P-10, P-11, P-12, PRV-1, PRV-2, PRV-4, PRV-7, PRV-9, PRV-10 (public projections), PRV-12 (egress allow-list), PRV-14 (the `untrusted_external` sub-class), BOT-3 (mechanism), PPL-6 (mechanism), NFR-6, NFR-9 |
+| Requirements | P-2, P-10, P-11, P-12, P-17 (every privacy promise names its test; proposed), PRV-1, PRV-2, PRV-4, PRV-7, PRV-9, PRV-10 (public projections), PRV-12 (egress allow-list; no telemetry, proposed), PRV-14 (the `untrusted_external` sub-class), PRV-17 (the content tripwire, with MDL, MCP and BOT; proposed), PRV-18 (the "what went where" view; proposed), BOT-3 (mechanism), PPL-6 (mechanism), NFR-6, NFR-9 |
 | Data classes · DATA_FLOWS | system · generates the whole document from code declarations; every switch change is logged |
 | Acceptance suite | The canary suite, run twice (journal switch off and on) over every channel, table, index, plan, event table, log, trace and the worker directory; erasure fixtures over every registered eraser |
 | Usage signal | Erasures and switch changes per month (counts only) |
@@ -390,7 +390,7 @@ and import. The CLI reaches it through ADM; the updater (UPD) runs outside the s
 | Queries | `instance_state`, `backup_age`, `doctor_report`, `deploy_history`, `gate_state` (every missing measurement named), `revocation_list` (from the secrets inventory) |
 | Emits · consumes | `coflow.ops.backup.completed`, `coflow.ops.instance.fenced`, `coflow.ops.role.changed` · `coflow.obs.health.degraded` |
 | Depends on | STO, EVT, POL, OBS, ACT (implements the deploy-approval `OperationHandler`) |
-| Requirements | OPS-1, OPS-2, OPS-5, OPS-15 (import mechanics, with DEC), OPS-16 (the adoption gate's host and backup conditions, with DEC), OPS-17 (with OBS), PRV-4 (inventory check), PRV-5, PRV-8, PRV-11 (the host check), PRV-15 (the owner-side checks in `doctor`), NFR-1, NFR-2, NFR-5, DEP-1…7, DEP-12…15, DEP-18…20, DEP-22 (toolchain checks in CI), DEP-23, DEP-24, DEP-26, DEP-27 |
+| Requirements | OPS-1, OPS-2, OPS-5, OPS-15 (import mechanics, with DEC), OPS-16 (the adoption gate's host and backup conditions, with DEC), OPS-17 (with OBS), PRV-4 (inventory check), PRV-5, PRV-8, PRV-11 (the host check), PRV-15 (the owner-side checks in `doctor`), NFR-1, NFR-2, NFR-5, DEP-1…7, DEP-12…15, DEP-18…20, DEP-22 (toolchain checks in CI), DEP-23, DEP-24, DEP-26, DEP-27; Later DEP-29, DEP-30, OPS-18, NFR-14 (the install ladder and first sessions, by trigger) |
 | Data classes · DATA_FLOWS | system · `backup` (ciphertext, off-host), `export` (owner's files) |
 | Acceptance suite | CI restore test; Compose smoke with egress blocked; exposure test; upgrade test; fencing drill with a copied database; the role matrix (validation and dev refusals); the host-gate refusal matrix; the lost-host runbook dry run; DEPLOYMENT §10.3 drills |
 | Usage signal | Kernel: backup age and drill results on the status page; gate measurements recorded per day during the 30-day gate |
@@ -451,15 +451,15 @@ proposals extracted from conversations.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 1 (sessions, messages, segments, quick log, connector contract, messenger export); 4 (recorder pipeline, contact proposals) |
-| Runs in | `core`; transcription in `stt` through jobs |
+| Release · stage | R1 · 0A I2 (SIG-19: the proposal contract; the adapter is an integration kit outside `core`, proposed); 1 (sessions, messages, segments, quick log, connector contract, messenger export); 4 (recorder pipeline, contact proposals) |
+| Runs in | `core`; transcription in `stt` through jobs; the AI-session adapter of SIG-19 outside `core`, reaching DEC only through MCP (proposed) |
 | Owns | `sig_sources` (content hash, consent), `sig_sessions` (initiator), `sig_messages` (direction, sender, timestamp to the second), `sig_participants`, `sig_segments` (offset, absolute and original time), `sig_summaries`, `sig_connector_cursors`, `sig_recorder_profiles`, `sig_notes`, `sig_contact_proposals`, `sig_rejected_values` |
 | Commands | `register_file`, `import_connector_batch`, `log_quick` (a quick log naming a decision, "D-0042: …", becomes a fact proposal on it), `set_participant`, `request_summary`, `retry_recording`, `decide_contact_proposal`, `delete_source` (through POL) |
 | Queries | `session`, `messages(session)`, `segment(ref)` with a playable offset, `recording_queue` (why it waits), `recent_sessions`, `contact_proposals`, projection queries for SRC and TML |
 | Emits · consumes | `coflow.sig.source.registered`, `coflow.sig.transcript.ready`, `coflow.sig.session.created` / `updated`, `coflow.sig.message.added`, `coflow.sig.summary.computed`, `coflow.sig.contact.proposed` · job completions, `coflow.pol.erasure.completed` |
 | Depends on | PPL (resolve only; never creates people from pipelines); `GoalDirectory`; `DecisionDirectory` (resolving decision labels in quick logs); MDL, POL |
 | Implements | `EvidenceResolver` for segments, messages and sessions (stage 1): the quote check is an exact substring after normalisation; journal-class refs are refused |
-| Requirements | SIG-1…6, SIG-11, SIG-14, SIG-15, SIG-16, PPL-3 (extraction, rejected values), PRV-6, PRV-14 (inbound messages and other people's speech marked `untrusted_external`), REL-6 (direction, initiators, timestamps, original times); SIG-12, SIG-13 Later |
+| Requirements | SIG-1…6, SIG-11, SIG-14, SIG-15, SIG-16, SIG-19 (AI working sessions: the source contract and the owner-typed filter; the adapter is an integration kit outside the core; proposed), PPL-3 (extraction, rejected values), PRV-6, PRV-14 (inbound messages and other people's speech marked `untrusted_external`), REL-6 (direction, initiators, timestamps, original times); SIG-12, SIG-13 Later |
 | Data classes · DATA_FLOWS | work · transcripts and messages to `provider` (summaries); audio never leaves the host |
 | Acceptance suite | Synthetic exports and audio fixtures; fake STT worker; out-of-memory and transient-error injection; inbox JSON contract tests |
 | Usage signal | Sessions per source per week; contact-proposal decision rate (a type below 20 % over its last 30 switches itself off) |
@@ -549,15 +549,15 @@ system as read-only mirrors, the shadow report, the case runner and the adoption
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0A (core, import, shadow, cases, adoption gate); 2 (the chat loop: DEC-5, DEC-7, DEC-9; lists by direction: DEC-24, proposed); 3 (capture from conversations, occasions, silence and contradiction: DEC-17, DEC-21, DEC-22); R2 · 6 (external references, DEC-23); Later: DEC-8 (view), DEC-10 (research, after 1 December 2026) |
+| Release · stage | R1 · 0A (core, import, shadow, cases, adoption gate; in I2, proposed with D-055: DEC-26 and proposals from AI clients and AI working sessions); 2 (the chat loop: DEC-5, DEC-7, DEC-9; lists by direction: DEC-24, proposed; the meeting trace of DEC-25, proposed); 3 (capture from conversations, occasions, silence and contradiction: DEC-17, DEC-21, DEC-22); 4 (the calendar trace of DEC-25, proposed); R2 · 6 (external references, DEC-23); Later: DEC-8 (view), DEC-10 (research, after 1 December 2026), DEC-27 (a decisions file, by trigger) |
 | Runs in | `core` |
-| Owns | `dec_decisions`, `dec_editions` (sealed bases), `dec_options`, `dec_forks`, `dec_assumptions`, `dec_checks` (append-only), `dec_readings`, `dec_facts`, `dec_fact_assumptions`, `dec_reviews`, `dec_outcomes`, `dec_learnings`, `dec_stakes` (financial), `dec_links`, `dec_foreign_context`, `dec_proposals`, `dec_versions`; bookkeeping (system class, kept in the validation data root): `dec_import_runs`, `dec_mirror_state`, `dec_shadow_items`, `dec_cases`; later `dec_occasions` (3), `dec_external_decisions` (6), `dec_questions_asked` (2) |
-| Commands | `create_decision`, `update_decision`, `activate_decision` (seals edition 1), `complete_decision`, `add_option`, `add_assumption`, `supersede_assumption`, `drop_assumption`, `record_check`, `record_reading`, `postpone_check`, `add_fact`, `correct_fact`, `review_decision` (keep, adjust, revise with a reason, close with an outcome and a learning, cancel, supersede), `set_manual_flag`, `set_publishability`, `link`, `unlink`, `open_fork`, `decide_fork`, `dissolve_fork`, `delegate_fork`, `move_fork_deadline`, `propose_decision`, `approve_proposal` (owner channel only), `reject_proposal`, `import_snapshot`, `import_decision_log`, `run_case`, `adopt_mirrors`, `undo` |
-| Queries | `decision_context`, `list_decisions`, `waiting`, `drafts_to_finish`, `assumption_due`, `direction` (DEC-24), `health`, `integrity`, `as_of`, `decision_history`, `related_learnings`, `forks`, `proposals`, `unlinked_report`, `loop_metrics`, `shadow_report`, `cases` |
+| Owns | `dec_decisions`, `dec_editions` (sealed bases), `dec_options`, `dec_forks`, `dec_assumptions`, `dec_checks` (append-only), `dec_readings`, `dec_facts`, `dec_fact_assumptions`, `dec_reviews`, `dec_outcomes`, `dec_learnings`, `dec_stakes` (financial), `dec_links`, `dec_foreign_context`, `dec_proposals`, `dec_versions`, `dec_exit_rules` (I2, proposed); bookkeeping (system class, kept in the validation data root): `dec_import_runs`, `dec_mirror_state`, `dec_shadow_items`, `dec_cases`; later `dec_occasions` (3), `dec_external_decisions` (6), `dec_questions_asked` (2) |
+| Commands | `create_decision`, `update_decision`, `activate_decision` (seals edition 1), `complete_decision`, `add_option`, `add_assumption`, `supersede_assumption`, `drop_assumption`, `record_check`, `record_reading`, `postpone_check`, `add_fact`, `correct_fact`, `review_decision` (keep, adjust, revise with a reason, close with an outcome and a learning, cancel, supersede), `set_manual_flag`, `set_publishability`, `link`, `unlink`, `open_fork`, `decide_fork`, `dissolve_fork`, `delegate_fork`, `move_fork_deadline`, `propose_decision`, `approve_proposal` (owner channel only), `reject_proposal`, `add_exit_rule` (I2, proposed), `import_snapshot`, `import_decision_log`, `run_case`, `adopt_mirrors`, `undo` |
+| Queries | `decision_context` (with `detail=why` from I2, proposed), `list_decisions`, `waiting`, `drafts_to_finish`, `assumption_due`, `direction` (DEC-24), `health`, `integrity`, `as_of`, `decision_history`, `related_learnings`, `forks`, `proposals`, `unlinked_report`, `loop_metrics`, `shadow_report`, `cases` |
 | Emits · consumes | `coflow.dec.decision.{created,updated,activated,reviewed,closed,cancelled,superseded,withdrawn,imported,adopted}`, `coflow.dec.edition.sealed`, `coflow.dec.assumption.{added,superseded,dropped,checked,state_changed,postponed,check_due}`, `coflow.dec.reading.recorded`, `coflow.dec.fact.{added,voided}`, `coflow.dec.link.{added,removed}`, `coflow.dec.fork.{opened,decided,dissolved,delegated}`, `coflow.dec.proposal.{proposed,approved,rejected}`, `coflow.dec.import.completed`, `coflow.dec.integrity.mismatch` · none: goal changes are read through `GoalDirectory`, attachments through the probes |
 | Depends on | Kernel (STO, IDS, EVT, POL, CFG); ports `GoalDirectory`, `DecisionAttachmentProbe`, `EvidenceResolver`; from stage 2 ACT (cards) and MDL (splitting an answer). **Not** WRK, CMT, SIG or MTG |
 | Implements | `DecisionDirectory`; `UndoHandler`; `Projector` sources for SRC and TML (stage 1) |
-| Requirements | DEC-1…7, DEC-9, DEC-11…22, DEC-24, OPS-15 (decisions), OPS-16, IDN-10 (with IDS), PRV-10, EXT-5 (decision parts), EXT-6, P-15, P-16; R2 DEC-23; Later DEC-8, DEC-10 |
+| Requirements | DEC-1…7, DEC-9, DEC-11…22, DEC-24, DEC-25 (traces of a decision nobody recorded; proposed), DEC-26 (exit rules outside the seal; proposed), OPS-15 (decisions), OPS-16, IDN-10 (with IDS), PRV-10, EXT-5 (decision parts), EXT-6, P-15, P-16; R2 DEC-23; Later DEC-8, DEC-10, DEC-27 |
 | Data classes · DATA_FLOWS | work (stakes financial; import and shadow bookkeeping system) · `mcp:<client>` (agent projection; money withheld unless the client's financial flag is on), `messenger` (stage 2), `provider` (stage 2: splitting the owner's answer with the decision's context), `app:<client>` (stage 3 and 6 projections); public projections only from decisions marked public (PRV-10) |
 | Acceptance suite | The named health vectors and the agreement with an independent oracle written from the specification; the date table; the synthetic month of checks; seal and integrity fault injection, including erasure; the import fixture family (synthetic snapshots shaped like the owner's existing system); the shadow's expected-difference rules SR-1 to SR-10; the case runner; the link registry and tier tests; the canaries |
 | Usage signal | Headline: closed decisions with an outcome and a learning per month — below 1 a month for two months after adoption, the close card is redesigned. Also: checks answered within 7 days of their due date (below 50 % over 4 weeks, the question rhythm is re-examined); days from a violation to a review (a median above 7 checks the "violated asks at once" rule); waiting-list pulls per day by channel (no pull for 7 days before the bot exists: the owner is asked once whether the pull loop serves them); the share of new commitments and tasks linked at entry, in four buckets (`not offered` above 0 for owner-channel entries is a defect; `unanswered` above 50 % redesigns the offer); unexpected shadow differences per run (each is fixed or becomes a numbered rule before the next run); proposals approved per origin (below 20 % over the last 30, the origin switches itself off) |
@@ -593,7 +593,7 @@ through to a result in stage-8 module 3.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0A (CMT-1, minimum); 3 (CMT-2); R2 · 6 (CMT-5), 8.3 (CMT-3); CMT-4 Later |
+| Release · stage | R1 · 0A (CMT-1, minimum; CMT-6 by decision in I3, proposed); 1 (CMT-6 by person, proposed); 3 (CMT-2); R2 · 6 (CMT-5), 8.3 (CMT-3); CMT-4 Later |
 | Runs in | `core` |
 | Owns | `cmt_commitments` (debtor, creditor, initiator, what, success criterion, due date and its basis, status, the done time and its basis, `decision_ref`, `link_answer`, source and quote; `external_ref` from stage 6), `cmt_history` (timestamped status changes and due shifts with reasons); from stage 3 `cmt_proposals`, `cmt_proposal_stats`; from 8.3 `cmt_material_sends` |
 | Commands | `create_commitment`, `change_commitment_status` (dropped and unclear need a reason; done needs an actual time or "unknown"; suggested done only from a proposal), `shift_commitment_due` (needs a reason), `link_commitment`; from stage 3 `propose_inline`, `decide_proposal`; from 8.3 `prepare_material_send`, `confirm_sent` |
@@ -601,7 +601,7 @@ through to a result in stage-8 module 3.
 | Emits · consumes | `coflow.cmt.commitment.created` / `status_changed` / `due_shifted` / `linked` / `due`, `coflow.cmt.proposal.type_switched_off` · `coflow.sig.summary.computed` (3), `coflow.sig.message.added` (finding an outgoing message for "sent", 8.3) |
 | Depends on | PPL, SIG (from stage 3); `DecisionDirectory` (not DEC directly); `GoalDirectory`; ACT (implements `OperationHandler` for material send), MDL (from stage 3) |
 | Implements | `DecisionAttachmentProbe`: the summary, timeline and unlinked counts of commitments per decision, ids and counts only |
-| Requirements | CMT-1…3, CMT-5, REL-6 (both sides, history), DEC-19 (the commitment side of the unlinked report), WRK-8 (the entry-time offer for commitments), P-15; CMT-4 Later |
+| Requirements | CMT-1…3, CMT-5, CMT-6 (commitments by decision and by person; proposed), REL-6 (both sides, history), DEC-19 (the commitment side of the unlinked report), WRK-8 (the entry-time offer for commitments), P-15; CMT-4 Later |
 | Data classes · DATA_FLOWS | work · to `provider` (proposal extraction, drafts; from stage 3), `mcp:<client>`, `messenger` |
 | Acceptance suite | The attachment refusals (an ended decision, a mirror) and the four link buckets against a fake `DecisionDirectory`; the probe contract suite shared with DEC; from stage 3 synthetic conversations and outcomes with planted agreements and the proposal-cap and switch-off rule tests; a recording fake for material sends |
 | Usage signal | New commitments per link bucket per week (`not offered` above 0 for owner-channel entries is a defect); from stage 3 the decision rate per proposal type — below 20 % over the last 30 proposals the type switches itself off and says so |
@@ -684,7 +684,7 @@ classification rules with their labelled-day accuracy gate.
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 2 (RHY-1…3); R2 · 6 (activity spans and rules), 7 (RHY-4 weekly review) |
+| Release · stage | R1 · 2 (RHY-1…3; RHY-6, proposed); R2 · 6 (activity spans and rules), 7 (RHY-4 weekly review) |
 | Runs in | `core` |
 | Owns | `rhy_plans` (snapshots), `rhy_day_reviews`, `rhy_week_reviews` (journal-class sections referenced by id only), `rhy_activity_spans` (start, end, goal or direction ref, decision ref, device, rule version), `rhy_classification_rules` (versioned, gate state), `rhy_labelled_days` |
 | Commands | `build_morning_plan` (scheduled), `refine_plan`, `close_day`, `run_weekly_review`, `record_spans` (from INT), `propose_rules`, `record_labelled_day`, `activate_rules` (only after the gate) |
@@ -692,7 +692,7 @@ classification rules with their labelled-day accuracy gate.
 | Emits · consumes | `coflow.rhy.plan.delivered`, `coflow.rhy.day.closed`, `coflow.rhy.week.reviewed`, `coflow.rhy.spans.recorded` · `coflow.obs.health.degraded` (health line) |
 | Depends on | WRK, CMT, DEC (`waiting`: the decision waiting list heads the plan), CAL, MTG, TAX (reminders); `GoalDirectory`; `ReviewContributor` (WRK, GOL); MDL (phrasing of top lines only) |
 | Implements | `DecisionAttachmentProbe` for time spans (stage 6) |
-| Requirements | RHY-1…5, WRK-8 (spans), DEC-5 (surfacing), FIN-12 (reminders in the plan), GOL-12 (weekly-review pause rule) |
+| Requirements | RHY-1…5, RHY-6 (one weekly package; proposed), WRK-8 (spans), DEC-5 (surfacing), FIN-12 (reminders in the plan), GOL-12 (weekly-review pause rule) |
 | Data classes · DATA_FLOWS | work · plans to `provider` (phrasing), `messenger`, `mcp:<client>`; window titles never reach `core` |
 | Acceptance suite | Golden morning plans; an adversarial fake model; fake clock over 28 days; a labelled synthetic day for rule accuracy |
 | Usage signal | Plans opened per week; weekly review unopened 3 weeks in a row → generation pauses and asks once (GOL-12 default); completion below 50 % over 4 weeks opens a redesign issue |
@@ -952,7 +952,7 @@ and quiet hours, sources and a "wrong" button.
 | Queries | None public (state on the status page) |
 | Emits · consumes | `coflow.bot.message.routed` (journal routes carry no text) · `coflow.act.card.proposed`, `coflow.rhy.plan.delivered`, `coflow.mtg.brief.ready`, `coflow.sig.transcript.ready`, `coflow.cmt.commitment.due`, `coflow.dec.assumption.state_changed` ("violated" asks at once), `coflow.dec.assumption.check_due`, `coflow.dec.proposal.proposed`, `coflow.tax.obligation.due`, `coflow.obs.health.degraded` |
 | Depends on | Module `api`s; ACT, JRN, LRN, POL, MDL, CFG; STT through jobs; messenger port (one reference adapter and a fake) |
-| Requirements | BOT-1…12, DEC-5, DEC-7, DEC-9 (the chat side of the decision loop), LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10; threads follow BOT-2 routing |
+| Requirements | BOT-1…12, BOT-13…16 (the attention gate: one door and one budget, the outcome log, the switch-off automaton, "not now" apart from "postpone"; proposed), DEC-5, DEC-7, DEC-9 (the chat side of the decision loop), RHY-6 (delivery of the weekly package), LRN-7 (gap to scenario change), OPS-14 (provider errors), P-5, P-10; threads follow BOT-2 routing |
 | Data classes · DATA_FLOWS | all classes pass its renderer · `messenger` rows per class; journal outputs only when the journal × messenger row is on (otherwise the local CLI) |
 | Acceptance suite | Fake messenger with text, voice, captions, replies, commands and forwards; double taps and restarts; quiet-hour clock tests |
 | Usage signal | Owner messages per active day; cards decided per week |
@@ -984,14 +984,14 @@ remote MCP for cloud clients in 8.0, served through the separate `edge` containe
 
 | Field | Value |
 |---|---|
-| Release · stage | R1 · 0A (loopback, the local shim, the `dec_` and `cmt_` tools), 1 (the network listener for owner devices, the SSH bridge); R2 · 8.0 (MCP-5, with EDG) |
+| Release · stage | R1 · 0A (loopback, the local shim, the `dec_` and `cmt_` tools; the `capture` scope of MCP-6 in I2, proposed), 1 (the network listener for owner devices, the SSH bridge); R2 · 8.0 (MCP-5, with EDG) |
 | Runs in | `core` |
 | Owns | `mcp_clients` (token hash, scope, tool allow-list, allowed flows, financial flag), `mcp_call_log`; from 8.0 the grants of cloud clients (hashed opaque tokens, pairing state, absolute lifetime) |
 | Commands | Tool calls mapped to `api` commands: internal writes execute, are logged in `act_undo_log` and are undoable; external writes return a preview only. `issue_client`, `revoke_client` (through ADM) |
 | Queries | Tool calls mapped to `api` queries; `catalogue` |
 | Emits · consumes | none · none |
 | Depends on | Module `api`s; ACT, OBS, POL |
-| Requirements | MCP-1…5 (MCP-5 with EDG), DEC-17 (proposals from AI clients), PRV-14 (the cloud view withholds `untrusted_external` text), DEP-11, DEP-12, GOL-5 (drafts only, origin "MCP client") |
+| Requirements | MCP-1…5 (MCP-5 with EDG), MCP-6 (the capture scope for coding clients; proposed), DEC-17 (proposals from AI clients and AI working sessions), PRV-14 (the cloud view withholds `untrusted_external` text), DEP-11, DEP-12, GOL-5 (drafts only, origin "MCP client") |
 | Data classes · DATA_FLOWS | work, financial per client · one `mcp:<client>` row per client; journal never |
 | Acceptance suite | HTTP tests with valid, missing and read-only tokens; response-layer canaries (journal, financial); generated catalogue diff; read-tool latency on the synthetic dataset |
 | Usage signal | Calls per tool per week; tools without a call in 90 days are reviewed for removal |
