@@ -250,13 +250,15 @@ Scope:
 - Behaviour written down as owner-readable scenario files with their own tests, prompts and tool
   descriptions checked against them (BOT-9); one question per turn and only about what is missing
   (BOT-10); provider errors, including an exhausted balance, explained to the owner once a day instead of
-  raw payloads (OPS-14).
+  raw payloads (OPS-14). A task that carries a promise gets "by when?" on its card, and a contact known
+  only by an email or a handle is registered on the same card (BOT-17; proposed, D-056).
 - The owner picks the model tier per function group and sees the monthly cost forecast of each tier next to
   its measured quality (OPS-11).
 - Speech-to-text as a stateless worker with job leases; voice messages transcribed on the host before
   routing (BOT-7); `coflow bench stt`, on the GPU where there is one (NFR-11).
 - Morning plan with a deterministic ranking, headed by the decision waiting list, evening plan vs. fact,
-  close the day (RHY-1…3); the control view (WRK-6); notifications with caps and quiet hours (BOT-5).
+  close the day (RHY-1…3); the control view (WRK-6); notifications with caps and quiet hours (BOT-5); one
+  line for the oldest undated promise, so it does not drown in the ranking (RHY-7; proposed, D-056).
 - **The attention gate, shipped with the first proactive message, not after it** (proposed, D-055): one
   door for every message, with classes, budgets, quiet hours for sound and one daily budget for questions
   about decisions, which sound only for news (BOT-13, DEC-7); an outcome log with one definition of
@@ -333,7 +335,8 @@ project-log data to v2, and its answers move to the bot, the owner channel.
 Scope:
 
 - Inline, capped commitment proposals from conversations, with the decision rate measured per proposal
-  type; a type below its threshold switches itself off (CMT-2, P-13).
+  type; a type below its threshold switches itself off (CMT-2, P-13). Chats and mail propose commitments
+  as recordings do, including a promise to contact a referred person (CMT-7; proposed, D-056).
 - Decision proposals extended from AI clients (stage 0A) to conversations, extracted from segments and
   never from summaries, behind the evaluation gate (DEC-17); the two non-decision rules, offline and live,
   hold before chats or recordings propose anything (OPS-13; proposed, D-055).

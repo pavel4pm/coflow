@@ -7,6 +7,30 @@ The private v1 is referred to as "v1". Its numbers are aggregates; no personal d
 
 ---
 
+## D-056 · A promise made in a chat comes back by itself — accepted (26 October 2026) to add to the plan; the requirements are proposed
+
+- **Context:** on 26 October 2026 a referral that a partner had passed on in a chat 12 days earlier was still
+  not acted on, and the partner asked about it. v1 held everything needed: the chat was collected, its
+  summary said the owner had agreed to contact the lead, and the next day the owner had created a task
+  through the bot with the contact and the context. Nothing brought it back. The task had no date, no goal
+  and no person, so the deterministic ranking gave it 5 points on its second day and 0 later: 118th and then
+  174th of 242 open tasks, never in a morning plan. The bot did not ask for a date when it created a task
+  that carried a promise, and it could not register the new contact without a meeting. Chat sessions
+  proposed no commitments at all: since 1 October recordings gave 130 commitment proposals and 108 new-task
+  proposals, chats gave only "who is this". And "waits for your answer" never fired, because the chat with
+  the partner stayed busy with other topics.
+- **Decision (accepted, 26 October 2026):** the owner decided to add three requirements to the plan:
+  commitments proposed from chats and mail as from recordings (CMT-7), a date asked when a promise becomes a
+  task, with the contact registered on the same card (BOT-17), and one morning-plan line for the oldest
+  undated promise (RHY-7). Their wording and thresholds are proposed.
+- **Alternatives:** the return date of CMT-1 alone, which does not cover a promise entered as a task; the
+  control view of WRK-6, which needs N days without movement and is a list, not a line in the plan; a
+  reminder for every undated task, which is noise against the BOT-13 budget.
+- **Consequences:** CMT-7 joins stage 3 next to CMT-2; BOT-17 and RHY-7 join stage 2 next to BOT-10 and
+  RHY-1…3. The RHY-7 line is a registered message type and can switch itself off (BOT-15).
+
+---
+
 ## D-055 · Capture where decisions are born moves into I2, and the owner's own use gates I2 — accepted (18 October 2026) for (a)–(d); the countermeasures are proposed
 
 - **Context:** a study of 18 October 2026 looked for the reasons people would not use CoFlow 2.0 and found
