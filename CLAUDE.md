@@ -14,7 +14,7 @@ there is no release yet. Development follows [docs/ROADMAP.md](docs/ROADMAP.md).
 
 | Document | Use it for |
 |---|---|
-| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | What to build: principles P-1…P-16 and requirement IDs with priorities (R1 = stages 0A–5) |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | What to build: principles P-1…P-17 and requirement IDs with priorities (R1 = stages 0A–5) |
 | [docs/SPEC_DECISION_CORE.md](docs/SPEC_DECISION_CORE.md) | The decision core in detail: data model, states and computed values, API, import and shadow, acceptance tests — read before touching DEC or CMT |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Which stage builds what, exit criteria, estimates, how a stage runs |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The modular monolith: one writing process, module boundaries, contracts, process view |
